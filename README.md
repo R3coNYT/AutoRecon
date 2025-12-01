@@ -7,7 +7,7 @@
   - sudo apt install hydra
   - sudo apt install sqlmap
 
-## And do not forget to install the requirede libraries too :
+## And do not forget to install the required libraries too :
   - pip install os
   - pip install subprocess
   - pip install re
