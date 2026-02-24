@@ -1,4 +1,4 @@
-# Pentest
+# Pentest V1
 
 ## Do not forget to install all the dependencies required as Nmap, Nikto, Dirb, Hydra, SQLmap :
   - sudo apt install nmap
