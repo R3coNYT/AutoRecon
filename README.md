@@ -1,4 +1,4 @@
-# Pentest
+# AutoRecon
 
 ## ⚡ Automated reconnaissance & lightweight pentest audit tool
 ### Built for fast infrastructure analysis, service fingerprinting and CVE correlation.
