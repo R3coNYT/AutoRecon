@@ -20,12 +20,10 @@ V2 is stable and includes:
 The tool performs a full reconnaissance pipeline on a given target (IP or domain).
 
 1️⃣ Target Detection
-You provide:
+You provide: 
 ```python main.py --target example.com```
-
-or
-
-python main.py --target 1.2.3.4
+or 
+```python main.py --target 1.2.3.4```
 
 The tool automatically detects whether the input is:
 
