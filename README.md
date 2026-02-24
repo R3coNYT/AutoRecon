@@ -1,7 +1,7 @@
 # Pentest
 
 ## ⚡ Automated reconnaissance & lightweight pentest audit tool
-Built for fast infrastructure analysis, service fingerprinting and CVE correlation.
+### Built for fast infrastructure analysis, service fingerprinting and CVE correlation.
 
 ## ⚠️ Version Notice
 ## ✅ Use V2
@@ -14,18 +14,14 @@ V2 is stable and includes:
   - Service detection
   - CVE lookup (NVD)
   - Risk scoring
+  - JSON & PDF reporting
 
-JSON & PDF reporting
-
-🔎 How It Works
-
+## 🔎 How It Works
 The tool performs a full reconnaissance pipeline on a given target (IP or domain).
 
 1️⃣ Target Detection
-
 You provide:
-
-python main.py --target example.com
+```python main.py --target example.com```
 
 or
 
