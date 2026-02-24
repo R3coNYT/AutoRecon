@@ -1,0 +1,17 @@
+# Installer les paquets nécessaires
+sudo apt update && sudo apt install -y nmap python3 python3-venv python3-pip
+
+# Créer l'environement virtuel
+python3 -m venv pentest_env
+
+# Activer l'environement virtuel
+source pentest_env/bin/activate
+
+# Installer les dépendances
+pip install -r requirements.txt
+
+# CLI + JSON + PDF
+python3 main.py -t example.com --threads 16 --crawl-depth 2 --max-pages 150 --pdf
+
+# CLI + Interface Web
+python3 main.py -t example.com --pdf --flask --flask-host 0.0.0.0 --flask-port 5000

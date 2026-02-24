@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <title>Recon Audit</title>
+  <style>
+    body{font-family:Segoe UI,Arial;margin:24px;}
+    .card{border:1px solid #ddd;border-radius:12px;padding:14px;margin:10px 0;}
+    a{color:#2563eb;text-decoration:none;}
+  </style>
+</head>
+<body>
+  <h1>Recon Audit — {{ report.target }}</h1>
+  <p>Generated: {{ report.generated_at }}</p>
+
+  {% for sub, data in subdomains.items() %}
+    <div class="card">
+      <h3><a href="/sub/{{ sub }}">{{ sub }}</a></h3>
+      <div>Scheme: {{ data.scheme }}</div>
+      <div>Pages: {{ data.pages|length }} — Login forms: {{ data.login_forms|length }}</div>
+      <div>CMS/Tech: {{ data.cms|join(", ") }}</div>
+      <div>WAF: {{ data.waf|join(", ") }}</div>
+      <div>CVEs: {{ data.cves|length }}</div>
+    </div>
+  {% endfor %}
+</body>
+</html>

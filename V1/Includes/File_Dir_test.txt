@@ -1,0 +1,6 @@
+images
+css
+LC_MESSAGES
+js
+default.php
+index.php
