@@ -1,0 +1,8 @@
+{
+  "name": "Ping",
+  "description": "Ping a target IP or domain",
+  "author": "R3coN",
+  "version": "1.0",
+  "entry": "ping.py",
+  "class": "Plugin"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "mapping",
+  "description": "Information System Mapping (hosts, services, basic topology)",
+  "author": "R3coN",
+  "version": "1.0",
+  "entry": "mapping.py",
+  "class": "Plugin"
+}

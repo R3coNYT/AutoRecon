@@ -1,0 +1,18 @@
+# AutoRecon
+requests
+beautifulsoup4
+reportlab
+flask
+packaging
+colorlog
+colorama
+yaspin
+tqdm
+rich
+pypdf
+questionary
+
+# Sublist3r
+argparse
+dnspython
+requests

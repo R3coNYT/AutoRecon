@@ -1,0 +1,14 @@
+# Install necessary packages
+sudo apt update && sudo apt install -y nmap python3 python3-venv python3-pip
+
+# Create Virtual Environment
+python3 -m venv autorecon_env
+
+# Activate Virtual Environment
+source autorecon_env/bin/activate
+
+# Install Dependencies
+pip install -r requirements.txt
+
+# Launch the Tool
+python3 AutoRecon.py
