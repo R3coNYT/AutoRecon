@@ -3,12 +3,7 @@
 ## ⚡ Automated reconnaissance & lightweight pentest audit tool
 ### Built for fast infrastructure analysis, service fingerprinting and CVE correlation.
 
-## ⚠️ Version Notice
-## ✅ Use V2
-
-The V1 version is deprecated and not fully functional.
-
-V2 is stable and includes:
+AutoRecon includes:
   - IP & Domain support
   - Subdomain enumeration
   - Service detection
@@ -41,7 +36,7 @@ For domains (or reversed IP domains), the tool uses:
 All discovered subdomains are added to the scan scope.
 
 ### 4️⃣ Per-Subdomain Deep Analysis
-Each subdomain is analyzed in parallel (multi-threaded).
+Each subdomain is analyzed in parallel (multi-threaded).  
 For each target:
 #### 🔹 IP Resolution & Enrichment
   - DNS resolution
@@ -113,7 +108,7 @@ Final classification:
 🟣 POTENTIAL
 
 #### 📁 Output
-Each run generates a timestamped folder:
+Each run generates a timestamped folder:  
 ```results/<target>_<timestamp>/```
 
 Contains:
