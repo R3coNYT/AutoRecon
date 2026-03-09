@@ -103,20 +103,18 @@ def handle_recon():
 
         if choice == "➕ Add a target":
             draw_header()
-            target = questionary.text("Enter target (IP or domain):").ask()
+            target = questionary.text("Enter target (IP / domain / CIDR network e.g. 192.168.1.0/24):").ask()
             if not target:
                 return
         else:
-            # If you store original target in target.txt, use it
             target_file = client_folder / choice / "target.txt"
             if target_file.exists():
                 target = target_file.read_text(encoding="utf-8").strip()
             else:
-                # fallback: folder name (safe target)
                 target = choice
     else:
         draw_header()
-        target = questionary.text("Enter target (IP or domain):").ask()
+        target = questionary.text("Enter target (IP / domain / CIDR network e.g. 192.168.1.0/24):").ask()
         if not target:
             return
     
