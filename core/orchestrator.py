@@ -21,6 +21,7 @@ from yaspin.spinners import Spinners
 from tqdm import tqdm
 from colorama import Fore, Style
 import logging
+import ipaddress
 import re
 
 log = logging.getLogger("recon-audit")
@@ -289,7 +290,30 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
 
     domain = None
 
-    if is_ip(target):
+    if "/" in target:
+        try:
+            network = ipaddress.ip_network(target, strict=False)
+
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            log.info("Target detected as network range: %s", target)
+
+            hosts = []
+
+            for i, ip in enumerate(network.hosts()):
+                if i >= 1024:
+                    log.warning("Network too large. Limiting to first 1024 hosts.")
+                    break
+                hosts.append(str(ip))
+
+            subs = hosts
+
+            log.info("Total IPs in range: %d", len(subs))
+
+        except Exception:
+            log.error("Invalid network range: %s", target)
+            return
+
+    elif is_ip(target):
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         log.info("Target is detected as IP address.")
 
