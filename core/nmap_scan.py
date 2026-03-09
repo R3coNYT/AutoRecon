@@ -25,3 +25,23 @@ def infer_scheme_from_nmap(nmap_text: str) -> str:
         return "http"
     # default safe
     return "https"
+
+def nmap_scan_ports(target, ports):
+    port_str = ",".join(map(str, ports))
+
+    cmd = [
+        "nmap",
+        "-sV",
+        "-sC",
+        "-Pn",
+        "-p", port_str,
+        target
+    ]
+
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True
+    )
+
+    return result.stdout
