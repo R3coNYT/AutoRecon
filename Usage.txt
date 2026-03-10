@@ -1,5 +1,8 @@
-# Update and install necessary packages
+# Install necessary packages
 sudo apt update && sudo apt upgrade -y && sudo apt install -y nmap masscan python3 python3-venv python3-pip
+
+# Move inside the tool directory
+cd ./Autorecon
 
 # Create Virtual Environment
 python3 -m venv autorecon_env
