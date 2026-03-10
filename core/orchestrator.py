@@ -1,8 +1,8 @@
 import os, json
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from core.subdomains import run_sublist3r
-from core.nmap_scan import infer_scheme_from_nmap
+from core.nmap_scan import nmap_service_scan, infer_scheme_from_nmap
 from core.http_probe import probe_base
 from core.crawler import crawl_site
 from core.cms_detect import detect_cms
@@ -17,8 +17,6 @@ from core.risk_score import compute_risk_score
 from core.version_matcher import is_version_affected
 from core.utils_timer import step_timer
 from core.host_discovery import discover_hosts
-from core.masscan_scan import run_masscan
-from core.nmap_scan import nmap_scan_ports
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from tqdm import tqdm
@@ -60,13 +58,9 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         res["resolved_ips"] = resolved_ips
 
         if resolved_ips:
-            target_ip = resolved_ips[0]
             log.info("Resolved IPs for %s → %s", sub, resolved_ips)
         else:
-            target_ip = sub
             log.info("No IP resolved for %s", sub)
-
-        masscan_ports = run_masscan(target_ip)
 
         # === IP ENRICHMENT ===
         ip_enrichment = []
@@ -84,28 +78,14 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         res["ip_enrichment"] = ip_enrichment
 
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        log.info("Enriching IP: %s", ip)
+        if resolved_ips:
+            log.info("Enriching IPs: %s", resolved_ips)
 
         # 1) Nmap (versions)
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")        
         with step_timer(f"Nmap scan ({sub})"):
             with yaspin(Spinners.dots, text=f"Nmap scanning {sub}...") as spinner:
-                # FAST MODE: Masscan → Nmap
-                if hasattr(_analyze_subdomain, "masscan_cache"):
-                    masscan_ports = _analyze_subdomain.masscan_cache
-                else:
-                    masscan_ports = run_masscan(sub)
-
-                if sub in masscan_ports:
-                    ports = masscan_ports[sub]
-
-                    log.info("Masscan found ports on %s: %s", sub, ports)
-
-                    nmap_txt = nmap_scan_ports(sub, ports)
-
-                else:
-                    log.info("Masscan found no open ports on %s", sub)
-                    nmap_txt = ""
+                nmap_txt = nmap_service_scan(sub, full_scan)
                 spinner.ok("✔")
 
         res["nmap_raw"] = nmap_txt
@@ -341,18 +321,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
             log.info("Alive hosts detected: %d", len(alive_hosts))
             log.info("Alive IPs: %s", alive_hosts)
 
-            log.info("Starting Masscan on network...")
-
-            masscan_results = run_masscan(target)
-            _analyze_subdomain.masscan_cache = masscan_results
-
-            if not masscan_results:
-                log.warning("Masscan found no open ports.")
-                return
-
-            subs = list(masscan_results.keys())
-
-            log.info("Hosts with open ports: %d", len(subs))
+            subs = alive_hosts
 
         except Exception:
             log.error("Invalid network range: %s", target)
@@ -411,13 +380,16 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
             for s in subs
         ]
 
-        for sub, fut in zip(subs, tqdm(futures,
+        for sub, fut in zip(
+            subs,
+            tqdm(
+                futures,
                 total=len(futures),
                 desc="Recon Progress",
                 dynamic_ncols=True,
                 bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
-        )):
-            sub = futures[fut]
+            )
+        ):
             try:
                 data = fut.result()
 
