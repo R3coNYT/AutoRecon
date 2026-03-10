@@ -2160,51 +2160,84 @@ class Plugin:
     # ======================================================
     def explore_results(self):
         if not self.results_base.exists():
-            console.print("No results found.")
+            console.print("[yellow]No results directory found.[/yellow]")
+            questionary.press_any_key_to_continue().ask()
+            return
+
+        targets = sorted(os.listdir(self.results_base))
+
+        if not targets:
+            console.print("[yellow]No analyzed targets found.[/yellow]")
+            questionary.press_any_key_to_continue().ask()
             return
 
         while True:
-            draw_header("Exploring MAPPING results")
-            folders = os.listdir(self.results_base)
+            draw_header("Select Mapping Target")
 
-            if not folders:
-                console.print("No previous mappings.")
-                return
+            choices = [f"🎯 {t}" for t in targets]
+            choices.append("⬅ Back")
 
-            selected = safe_ask(
-                questionary.select(
-                    "Select a mapping result:",
-                    choices=folders + ["⬅ Back"],
-                    pointer="➤"
-                )
-            )
+            selected = questionary.select(
+                "Select a target:",
+                choices=choices,
+                pointer="➤"
+            ).ask()
 
             if selected == "⬅ Back":
                 return
 
-            selected_path = self.results_base / selected
-            self.navigate_directory(selected_path)
+            selected_clean = selected.split(" ", 1)[1]
+            target_path = self.results_base / selected_clean
+
+            self.navigate_directory(target_path)
 
     def navigate_directory(self, path):
         while True:
-            draw_header(f"Navigating in {path}")
-            items = os.listdir(path)
+            draw_header(f"Browsing: {path}")
 
-            choices = []
-            for item in items:
-                full_path = path / item
-                if full_path.is_dir():
-                    choices.append(f"[DIR] {item}")
-                else:
-                    choices.append(item)
-
-            selected = safe_ask(
-                questionary.select(
-                    f"Browsing: {path.name}",
-                    choices=choices + ["⬅ Back"],
-                    pointer="➤"
+            items = sorted(
+                os.listdir(path),
+                key=lambda x: (
+                    not (path / x).is_dir(),
+                    x.endswith(".txt"),
+                    x.lower()
                 )
             )
+
+            if not items:
+                console.print("[yellow]Empty directory.[/yellow]")
+                questionary.press_any_key_to_continue().ask()
+                return
+
+            choices = []
+
+            for item in items:
+                full_path = path / item
+
+                if full_path.is_dir():
+                    icon = "📁"
+                else:
+                    ext = full_path.suffix.lower()
+
+                    if ext == ".json":
+                        icon = "📄"
+                    elif ext == ".pdf":
+                        icon = "📑"
+                    elif ext == ".txt":
+                        icon = "🧾"
+                    else:
+                        icon = "📦"
+
+                label = f"{icon} {item}"
+                choices.append(label)
+
+            choices.append("⬅ Back")
+
+            selected = questionary.select(
+                "Select:",
+                choices=choices,
+                pointer="➤"
+            ).ask()
 
             if selected is None:
                 return
@@ -2212,12 +2245,14 @@ class Plugin:
             if selected == "⬅ Back":
                 return
 
-            clean = selected.replace("[DIR] ", "")
-            selected_path = path / clean
+            selected_clean = selected.split(" ", 1)[1]
+            selected_path = path / selected_clean
 
             if selected_path.is_dir():
                 self.navigate_directory(selected_path)
+
             else:
+                console.print(f"\n[bold red]Opening {selected_clean}...[/bold red]")
                 self.open_file(selected_path)
 
     # ======================================================
