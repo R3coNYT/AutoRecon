@@ -84,9 +84,55 @@ class Plugin:
                 )
 
     # ======================================================
+    # HOST DISCOVERY (Ping Sweep)
+    # ======================================================
+    def discover_alive_hosts(self, target):
+        console.print("[*] Discovering alive hosts...")
+
+        try:
+            result = subprocess.run(
+                [
+                    "nmap",
+                    "-sn",
+                    "-n",
+                    "-PE",
+                    "-PP",
+                    "-PM",
+                    "-PS80,443",
+                    "-PA80,443",
+                    target
+                ],
+                capture_output=True,
+                text=True
+            )
+
+            alive = []
+
+            for line in result.stdout.splitlines():
+                if "Nmap scan report for" in line:
+                    ip = line.split()[-1]
+                    alive.append(ip)
+
+            console.print(f"[green][+] {len(alive)} hosts alive[/green]")
+
+            return alive
+
+        except Exception as e:
+            console.print(f"[red]Host discovery failed: {e}[/red]")
+            return []
+
+    # ======================================================
     # RUN NMAP
     # ======================================================
     def run_nmap_scan(self, target, output_xml):
+        alive_hosts = self.discover_alive_hosts(target)
+
+        if not alive_hosts:
+            console.print("[red]No alive hosts found.[/red]")
+            return
+
+        console.print("[*] Running Nmap scan on alive hosts...")
+
         subprocess.run([
             "nmap",
             "-sS",
@@ -95,7 +141,7 @@ class Plugin:
             "--traceroute",
             "-T4",
             "-oX", str(output_xml),
-            target
+            *alive_hosts
         ])
     
     # ======================================================
