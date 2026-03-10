@@ -17,6 +17,7 @@ from core.risk_score import compute_risk_score
 from core.version_matcher import is_version_affected
 from core.utils_timer import step_timer
 from core.host_discovery import discover_hosts
+from core.nmap_xml_parser import parse_nmap_xml
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from tqdm import tqdm
@@ -39,12 +40,11 @@ def risk_badge(level, score):
     else:
         return f"[ {level} ] ({score})"
 
-def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, full_scan=False):
+def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: str, full_scan=False):
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     with step_timer(f"Full analysis for {sub}"):
         res = {"subdomain": sub}
 
-        # === IP RESOLUTION ===
         resolved_ips = []
 
         try:
@@ -62,7 +62,6 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         else:
             log.info("No IP resolved for %s", sub)
 
-        # === IP ENRICHMENT ===
         ip_enrichment = []
 
         for ip in resolved_ips:
@@ -85,10 +84,11 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")        
         with step_timer(f"Nmap scan ({sub})"):
             with yaspin(Spinners.dots, text=f"Nmap scanning {sub}...") as spinner:
-                nmap_txt = nmap_service_scan(sub, full_scan)
+                nmap_txt, xml_path = nmap_service_scan(sub, base_dir, full_scan)
                 spinner.ok("✔")
 
         res["nmap_raw"] = nmap_txt
+        res["nmap_xml"] = xml_path
         res["nmap_structured"] = parse_nmap_text(nmap_txt)
         scheme = infer_scheme_from_nmap(nmap_txt)
         res["scheme"] = scheme
@@ -376,7 +376,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
 
     with ThreadPoolExecutor(max_workers=max(2, threads)) as ex:
         futures = [
-            ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, full_scan)
+            ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan)
             for s in subs
         ]
 
@@ -414,9 +414,25 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     "nmap_structured": data.get("nmap_structured"),
                 }
 
+                safe_sub = sub.replace("/", "_").replace(":", "_")
+
                 # Save raw nmap per sub
-                with open(os.path.join(base_dir, f"nmap_{sub}.txt"), "w", encoding="utf-8") as f:
+                with open(os.path.join(base_dir, f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
                     f.write(data.get("nmap_raw", ""))
+                
+                xml_path = data.get("nmap_xml")
+
+                log.info("Nmap XML saved → %s", xml_path)
+
+                if xml_path and os.path.exists(xml_path):
+                    parsed = parse_nmap_xml(xml_path)
+
+                    json_path = os.path.join(base_dir, f"nmap_{safe_sub}.json")
+
+                    with open(json_path, "w") as jf:
+                        json.dump(parsed, jf, indent=2)
+
+                    log.info("Nmap JSON saved → %s", json_path)
 
             except Exception as e:
                 tqdm.write(f"❌ Error analyzing {sub}: {e}")

@@ -34,8 +34,8 @@ AutoRecon includes:
 ## Clone the repository
 
 ```bash
-git clone https://github.com/R3coNYT/AutoRecon.git
-cd AutoRecon
+git clone https://github.com/R3coNYT/AutoRecon-Pentest.git
+cd AutoRecon-Pentest
 ```
 
 ## Install required system packages

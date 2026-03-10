@@ -7,10 +7,6 @@ PORT_LINE_RE = re.compile(
 )
 
 def parse_nmap_text(nmap_text: str) -> Dict[str, Any]:
-    """
-    Parse un output Nmap texte (-sV).
-    Retourne: ip, rdns, open_ports[{port,proto,service,version_raw,product,version,extrainfo}]
-    """
     out: Dict[str, Any] = {
         "ip": None,
         "rdns": None,
