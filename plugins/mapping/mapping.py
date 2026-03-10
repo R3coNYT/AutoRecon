@@ -131,6 +131,8 @@ class Plugin:
             console.print("[red]No alive hosts found.[/red]")
             return
 
+        cleaned_hosts = [h.strip("()") for h in alive_hosts]
+
         console.print("[*] Running Nmap scan on alive hosts...")
 
         subprocess.run([
@@ -140,8 +142,9 @@ class Plugin:
             "-O",
             "--traceroute",
             "-T4",
+            "-Pn",
             "-oX", str(output_xml),
-            *alive_hosts
+            *cleaned_hosts
         ])
     
     # ======================================================
