@@ -2183,7 +2183,7 @@ class Plugin:
                 pointer="➤"
             ).ask()
 
-            if selected == "⬅ Back":
+            if selected is None or selected == "⬅ Back":
                 return
 
             selected_clean = selected.split(" ", 1)[1]
@@ -2239,10 +2239,7 @@ class Plugin:
                 pointer="➤"
             ).ask()
 
-            if selected is None:
-                return
-
-            if selected == "⬅ Back":
+            if selected is None or selected == "⬅ Back":
                 return
 
             selected_clean = selected.split(" ", 1)[1]
