@@ -1,7 +1,7 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.graphics.shapes import Drawing, Rect, String
 import os
@@ -149,9 +149,6 @@ def _is_sensitive_port(port):
 
 
 def _draw_ports_chart(open_ports):
-    """
-    Petit diagramme horizontal des ports ouverts.
-    """
     if not open_ports:
         return None
 
@@ -161,14 +158,15 @@ def _draw_ports_chart(open_ports):
     bar_width = 12*cm
     bar_height = 0.6*cm
     spacing = 0.8*cm
+    height = max_ports_display * spacing + 1*cm
+    drawing = Drawing(16*cm, height)
 
     for i, p in enumerate(open_ports[:max_ports_display]):
         port = str(p.get("port", ""))
         service = str(p.get("service", ""))
 
-        y = 4.5*cm - i*spacing
+        y = height - (i + 1) * spacing
 
-        # Couleur selon sensibilité
         if _is_sensitive_port(port):
             color = colors.red
         else:
@@ -410,17 +408,18 @@ def write_pdf(report: dict, pdf_path: str):
 
                 rows.append([
                     port_cell,
-                    str(p.get("proto", "")),
-                    service,
-                    str(p.get("product") or ""),
-                    str(p.get("version_raw") or "")
+                    Paragraph(str(p.get("proto", "")), styles["Normal"]),
+                    Paragraph(service, styles["Normal"]),
+                    Paragraph(str(p.get("product") or ""), styles["Normal"]),
+                    Paragraph(str(p.get("version_raw") or ""), styles["Normal"])
                 ])
 
             t = Table(rows, colWidths=[2*cm, 2*cm, 3*cm, 4*cm, 5*cm])
             t.setStyle(TableStyle([
                 ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
                 ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
-                ("FONTSIZE", (0,0), (-1,-1), 9),
+                ("FONTSIZE", (0,0), (-1,-1), 8),
+                ("WORDWRAP", (0,0), (-1,-1), "CJK"),
                 ("VALIGN", (0,0), (-1,-1), "TOP"),
             ]))
             elements.append(t)
@@ -432,7 +431,7 @@ def write_pdf(report: dict, pdf_path: str):
                 elements.append(Spacer(1, 8))
                 elements.append(Paragraph("<b>Open Ports Overview</b>", styles["Heading3"]))
                 elements.append(Spacer(1, 6))
-                elements.append(chart)
+                elements.append(KeepTogether(chart))
                 elements.append(Spacer(1, 12))
         else:
             # fallback: affiche brut si pas structuré
