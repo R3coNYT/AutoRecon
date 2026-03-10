@@ -34,14 +34,14 @@ AutoRecon includes:
 ## Clone the repository
 
 ```bash
-git clone https://github.com/R3coNYT/AutoRecon-Pentest.git
-cd AutoRecon-Pentest
+git clone https://github.com/R3coNYT/AutoRecon.git
+cd AutoRecon
 ```
 
 ## Install required system packages
 
 ```bash
-sudo apt update && sudo apt upgrade
+sudo apt update && sudo apt upgrade -y
 sudo apt install -y nmap python3 python3-venv python3-pip
 ```
 
