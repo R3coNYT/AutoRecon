@@ -2,16 +2,30 @@
 
 ⚡ **Automated reconnaissance & lightweight pentest audit tool**
 
-Built for fast infrastructure analysis, service fingerprinting and CVE correlation.
+AutoRecon is an interactive reconnaissance framework designed to perform fast infrastructure analysis, service fingerprinting and CVE correlation.
 
-## AutoRecon includes
+The tool provides an automated pipeline combining network scanning, web probing, vulnerability lookup and reporting.
 
-- IP & Domain support
+---
+
+# 🔎 Features
+
+AutoRecon includes:
+
+- IP / Domain / CIDR target support
 - Subdomain enumeration
-- Service detection
-- CVE lookup (NVD)
+- Service detection (Nmap)
+- HTTP probing
+- CMS / technology detection
+- WAF detection
+- TLS auditing
+- Web crawling
+- CVE lookup (NVD API)
 - Risk scoring
 - JSON & PDF reporting
+- Plugin system
+- Interactive CLI console
+- Results browser
 
 ---
 
@@ -21,7 +35,7 @@ Built for fast infrastructure analysis, service fingerprinting and CVE correlati
 
 ```bash
 git clone https://github.com/R3coNYT/AutoRecon-Pentest.git
-cd AutoRecon
+cd AutoRecon-Pentest
 ```
 
 ## Install required system packages
@@ -53,235 +67,278 @@ pip install -r requirements.txt
 
 # ▶️ Run the Tool
 
-## Start AutoRecon
+## Start AutoRecon console
 
 ```bash
 python3 AutoRecon.py
 ```
 
-## If the environment is not active
+This will launch the interactive AutoRecon console.
 
-```bash
-cd AutoRecon
-source autorecon_env/bin/activate
-python3 AutoRecon.py
+---
+
+# 🖥 AutoRecon Console
+
+When launched, AutoRecon displays a console menu:
+
+```
+Recon on a target
+Recon Results
+Plugins
+Exit
 ```
 
 ---
 
-# 🔎 How It Works
+# 🎯 Recon on a Target
 
-The tool performs a **full reconnaissance pipeline** on a given target (IP or domain).
+When selecting **Recon on a target**, the tool will:
 
----
+- Ask you to choose or create a **client folder**
+- Let you select an existing target or add a new one
+- Ask for the target:
 
-# 1️⃣ Target Detection
-
-You provide:
-
-```bash
-python main.py --target example.com
+```
+IP
+Domain
+CIDR network (example: 192.168.1.0/24)
 ```
 
-or
+Example:
 
-```bash
-python main.py --target 1.2.3.4
+```
+example.com
+192.168.1.10
+10.0.0.0/24
 ```
 
-The tool automatically detects whether the input is:
+Then AutoRecon asks whether to perform:
 
-- An **IP address**
-- A **Domain name**
+```
+Full Nmap scan (all ports)
+```
 
----
+If enabled, it will run:
 
-# 2️⃣ Reverse DNS (If IP)
+```
+nmap -p- ...
+```
 
-If the target is an IP:
+Otherwise it performs a faster standard scan.
 
-- Reverse DNS lookup is performed
-- If a domain is found → subdomain enumeration is launched
-- If not → direct scan of the IP
-
----
-
-# 3️⃣ Subdomain Enumeration
-
-For domains (or reversed IP domains), the tool uses:
-
-- **Sublist3r**
-
-All discovered subdomains are added to the scan scope.
+The scan pipeline is then launched automatically.
 
 ---
 
-# 4️⃣ Per-Subdomain Deep Analysis
+# 🔬 Recon Pipeline
 
-Each subdomain is analyzed **in parallel (multi-threaded)**.
+For each discovered host / subdomain, AutoRecon performs the following analysis:
 
-For each target:
+## Target processing
 
-## 🔹 IP Resolution & Enrichment
+- IP / domain validation
+- Reverse DNS lookup (if IP)
+- Subdomain enumeration
 
-- DNS resolution
-- Reverse DNS
-- RDAP lookup
-- GeoIP enrichment
+---
 
-## 🔹 Nmap Scan
+## Network Analysis
 
+### Host discovery
+
+Identify reachable hosts.
+
+### Nmap scan
+
+- Open ports detection
 - Service detection
-- Version detection
-- Open ports discovery
-- Protocol inference (HTTP / HTTPS)
+- Version fingerprinting
+- HTTP / HTTPS inference
 
-## 🔹 HTTP Probe
+---
+
+## Web Analysis
 
 If a web service is detected:
 
-- Header analysis
-- HTML snippet inspection
-- Final URL resolution
+### HTTP probing
 
-## 🔹 CMS / Technology Detection
+- Headers analysis
+- HTML snippet analysis
+- Web technology hints
 
-The tool attempts to detect:
+### CMS detection
 
-- CMS (WordPress, Joomla, etc.)
-- Web technologies
-- Backend hints
+Detect technologies such as:
 
-## 🔹 WAF Detection
+- WordPress
+- Joomla
+- common web frameworks
 
-Heuristic-based detection using:
+### WAF detection
+
+Heuristic detection based on:
 
 - HTTP headers
-- Response fingerprints
+- response behavior
 
-## 🔹 TLS Audit (if HTTPS)
+### TLS audit
 
 If HTTPS is detected:
 
 - TLS protocol version
-- Certificate information
-
-## 🔹 Web Crawling (Optional)
-
-If enabled:
-
-- Recursive crawling
-- Depth control
-- Page limit
-- Login form detection
-
-## 🔹 CVE Lookup (NVD API)
-
-If enabled:
-
-The tool extracts:
-
-- Service names
-- Versions
-- CMS technologies
-- HTTP headers
-
-Then:
-
-- Queries the **NVD API**
-- Matches potential vulnerabilities
-- Verifies affected versions
-- Flags confirmed vulnerabilities
+- certificate information
 
 ---
 
-# 📊 Risk Scoring System
+## Web Crawling
 
-Each subdomain receives a risk score based on:
+Optional crawling allows:
 
-- Open ports exposure
-- Critical services detected
-- TLS weaknesses
-- WAF presence
-- CVEs discovered
-- Login form exposure
-
-Final classification:
-
-- 🔴 **HIGH**
-- 🟡 **MEDIUM**
-- 🟢 **LOW**
-- 🟣 **POTENTIAL**
+- page discovery
+- login form detection
+- application surface analysis
 
 ---
 
-# 📁 Output
+## Vulnerability Detection
 
-Each scan generates a timestamped folder:
+### CVE lookup
+
+AutoRecon queries the **NVD API** using:
+
+- detected services
+- software versions
+- web technologies
+
+The tool then attempts to verify if detected versions are affected.
+
+---
+
+# 📊 Risk Scoring
+
+Each analyzed host receives a risk score based on:
+
+- exposed services
+- discovered vulnerabilities
+- TLS configuration
+- web application exposure
+- login form detection
+
+Risk levels:
+
+| Level | Meaning |
+|------|------|
+| 🔴 HIGH | Critical exposure |
+| 🟡 MEDIUM | Moderate risk |
+| 🟢 LOW | Limited risk |
+| 🟣 POTENTIAL | Possible issues |
+
+---
+
+# 📁 Results
+
+Results are stored inside:
 
 ```
-results/<target>_<timestamp>/
+results/
 ```
 
-Contains:
+AutoRecon organizes scans by:
 
-- `report.json` → Full structured data
-- `report.pdf` → Executive pentest-style report
-- `nmap_<sub>.txt` → Raw Nmap output
-- `sublist3r/` → Subdomain enumeration results
+```
+results/
+ ├── client_name/
+ │   ├── target_name/
+ │   │   ├── report.json
+ │   │   ├── report.pdf
+ │   │   ├── nmap_*.txt
+ │   │   └── scan data
+```
+
+Reports generated:
+
+- JSON report → full structured data
+- PDF report → pentest-style report
 
 ---
 
-# ⚙️ Features
+# 📂 Recon Results Browser
 
-- Multi-threaded scanning
-- Live CVE counter
-- Colored CLI output
-- Structured JSON reporting
-- Professional PDF export
-- Modular architecture
-- Plugin support
+From the main menu you can select:
+
+```
+Recon Results
+```
+
+This allows you to:
+
+- browse previous scans
+- open report folders
+- review past recon data
+
+---
+
+# 🔌 Plugin System
+
+AutoRecon includes a plugin architecture located in:
+
+```
+plugins/
+```
+
+Each plugin contains:
+
+```
+plugin_name/
+ ├── manifest.json
+ └── plugin_script.py
+```
+
+Plugins can be launched from the **Plugins menu** in the console.
+
+Example included plugins:
+
+- mapping → network visualization
+- ping → host reachability testing
 
 ---
 
 # 🧠 Architecture Overview
 
 ```
-Target
-   │
-   ├── Reverse DNS (if IP)
-   ├── Sublist3r
-   │
-   ├── For each subdomain:
-   │     ├── DNS Resolution
-   │     ├── IP Enrichment
-   │     ├── Nmap Scan
-   │     ├── HTTP Probe
-   │     ├── CMS Detection
-   │     ├── WAF Detection
-   │     ├── TLS Audit
-   │     ├── Crawl (optional)
-   │     ├── CVE Lookup (optional)
-   │     └── Risk Score
-   │
-   └── JSON + PDF Report
+User
+ │
+ ▼
+AutoRecon Console
+ │
+ ├── Recon Engine
+ │     ├── Host discovery
+ │     ├── Nmap scanning
+ │     ├── HTTP probing
+ │     ├── CMS detection
+ │     ├── WAF detection
+ │     ├── TLS auditing
+ │     ├── Crawling
+ │     └── CVE lookup
+ │
+ ├── Reporting
+ │     ├── JSON report
+ │     └── PDF report
+ │
+ └── Plugin System
 ```
 
 ---
 
-# 🛠 Command Options Example
+# ⚙️ Technologies Used
 
-```
---target example.com
---threads 10
---crawl-depth 2
---max-pages 50
---timeout 5
---use_nvd
---crawl
---pdf
---json
-```
+- Python
+- Nmap
+- Sublist3r
+- NVD API
+- Rich (CLI interface)
+- Questionary (interactive prompts)
 
 ---
 
@@ -294,4 +351,4 @@ This tool is intended for:
 - Educational purposes
 - Red team training labs
 
-⚠️ **Do not use this tool without proper authorization.**
+⚠️ **Do not use this tool against systems without proper authorization.**
