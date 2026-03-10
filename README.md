@@ -20,7 +20,7 @@ Built for fast infrastructure analysis, service fingerprinting and CVE correlati
 ## Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/AutoRecon.git
+git clone https://github.com/R3coNYT/AutoRecon-Pentest.git
 cd AutoRecon
 ```
 
