@@ -43,11 +43,47 @@ sudo apt install -y git nmap masscan wget python3 python3-venv python3-pip
 ```bash
 cd /usr/local/
 sudo wget https://go.dev/dl/go1.26.1.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go1.26.1.linux-amd64.tar.gz
+sudo rm -r go1.26.1.linux-amd64.tar.gz
+```
+
+## Add Go to the PATH
+```bash
+cd ~
+nano .bashrc
+```
+
+#### Add to the end:
+```bash
+export PATH=$PATH:/usr/local/go/bin
+export PATH=$PATH:$HOME/go/bin
+```
+
+```bash
+source ~/.bashrc
+```
+
+### If there is any error when performing `source ~/.bashrc` add Go to the PATH in this file :
+```bash
+cd ~
+nano .zshrc
+```
+
+#### Add to the end:
+```bash
+export PATH=$PATH:/usr/local/go/bin
+export PATH=$PATH:$HOME/go/bin
+```
+
+```bash
+source ~/.zshrc
 ```
 
 ## Clone the repository
 
 ```bash
+cd ~
 git clone https://github.com/R3coNYT/AutoRecon.git
 cd AutoRecon
 ```
@@ -67,6 +103,7 @@ go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
 
 ```bash
 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+nuclei -update-templates
 ```
 
 ## Create a Python virtual environment
