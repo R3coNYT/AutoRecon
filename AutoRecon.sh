@@ -161,7 +161,7 @@ echo "[+] Creating global AutoRecon command"
 sudo tee /usr/local/bin/AutoRecon > /dev/null <<EOF
 #!/bin/bash
 source $INSTALL_DIR/autorecon_env/bin/activate
-python3 $INSTALL_DIR/AutoRecon.py "\$@"
+exec python3 $INSTALL_DIR/AutoRecon.py
 EOF
 
 sudo chmod +x /usr/local/bin/AutoRecon
