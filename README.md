@@ -38,7 +38,7 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install -y git nmap masscan wget python3 python3-venv python3-pip
 ```
 
-##Install Go
+## Install Go
 
 ```bash
 cd /usr/local/
