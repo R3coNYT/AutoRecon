@@ -43,6 +43,16 @@ cd AutoRecon
 git clone https://github.com/aboul3la/Sublist3r.git
 ```
 
+## Install HTTPX
+```bash
+go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+```
+
+## Install Nuclei
+```bash
+go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+```
+
 ## Install required system packages
 
 ```bash
