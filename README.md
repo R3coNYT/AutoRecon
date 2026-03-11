@@ -96,14 +96,22 @@ git clone https://github.com/aboul3la/Sublist3r.git
 ## Install HTTPX
 
 ```bash
-go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+git clone https://github.com/projectdiscovery/httpx.git; \
+cd httpx/cmd/httpx; \
+go build; \
+mv httpx /usr/local/bin/; \
+httpx -version;
 ```
 
 ## Install Nuclei
 
 ```bash
-go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-nuclei -update-templates
+git clone https://github.com/projectdiscovery/nuclei.git; \
+cd nuclei/cmd/nuclei; \
+go build; \
+mv nuclei /usr/local/bin/; \
+nuclei -version; \
+nuclei -update-templates;
 ```
 
 ## Create a Python virtual environment
