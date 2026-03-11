@@ -31,6 +31,13 @@ AutoRecon includes:
 
 # 🚀 Installation
 
+## Install required system packages
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git nmap masscan python3 python3-venv python3-pip
+```
+
 ## Clone the repository
 
 ```bash
@@ -51,13 +58,6 @@ go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
 ## Install Nuclei
 ```bash
 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-```
-
-## Install required system packages
-
-```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y nmap python3 python3-venv python3-pip
 ```
 
 ## Create a Python virtual environment
