@@ -9,53 +9,140 @@ echo "======================================"
 INSTALL_DIR="/opt/autorecon"
 GO_VERSION="1.24.6"
 
+# -------------------------------
+# OS Detection
+# -------------------------------
+echo "[+] Detecting OS..."
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+else
+    echo "[!] Cannot detect OS"
+    exit 1
+fi
+
+case "$OS" in
+    kali)
+        echo "[+] Kali Linux detected"
+        ;;
+    ubuntu)
+        echo "[+] Ubuntu detected"
+        ;;
+    debian)
+        echo "[+] Debian detected"
+        ;;
+    *)
+        echo "[!] Unsupported OS: $OS"
+        echo "Supported: Kali / Ubuntu / Debian"
+        exit 1
+        ;;
+esac
+
+# -------------------------------
+# Update system
+# -------------------------------
 echo "[+] Updating system"
 sudo apt update
 
-echo "[+] Installing system dependencies"
-sudo apt install -y \
-    git \
-    python3 \
-    python3-pip \
-    python3-venv \
-    masscan \
-    nmap \
-    wget \
-    curl
+# -------------------------------
+# Dependency check
+# -------------------------------
+echo "[+] Checking dependencies"
 
-echo "[+] Installing Go $GO_VERSION"
+DEPS=(
+git
+python3
+python3-pip
+python3-venv
+masscan
+nmap
+wget
+curl
+)
 
-cd /tmp
-wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz
+for pkg in "${DEPS[@]}"; do
+    if dpkg -s "$pkg" &> /dev/null; then
+        echo "[✓] $pkg already installed"
+    else
+        echo "[+] Installing $pkg"
+        sudo apt install -y "$pkg"
+    fi
+done
 
-sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
+# -------------------------------
+# Install Go
+# -------------------------------
+if command -v go &> /dev/null; then
+    echo "[✓] Go already installed"
+    go version
+else
+    echo "[+] Installing Go $GO_VERSION"
 
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-echo 'export PATH=$PATH:$HOME/go/bin' >> ~/.bashrc
+    cd /tmp
+    wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz
 
-export PATH=$PATH:/usr/local/go/bin
-export PATH=$PATH:$HOME/go/bin
+    sudo rm -rf /usr/local/go
+    sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
 
-echo "[+] Go installed:"
-go version
+    echo "[+] Configuring PATH"
 
-echo "[+] Installing ProjectDiscovery tools"
+    sudo tee /etc/profile.d/golang.sh > /dev/null <<EOF
+export PATH=\$PATH:/usr/local/go/bin
+export PATH=\$PATH:\$HOME/go/bin
+EOF
 
-go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
-go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+    export PATH=$PATH:/usr/local/go/bin
+    export PATH=$PATH:$HOME/go/bin
+
+    echo "[✓] Go installed"
+    go version
+fi
+
+# -------------------------------
+# Install ProjectDiscovery tools
+# -------------------------------
+echo "[+] Installing ProjectDiscovery tools (httpx | nuclei)"
+
+if ! command -v httpx &> /dev/null; then
+    echo "[+] Installing httpx"
+    go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+else
+    echo "[✓] httpx already installed"
+fi
+
+if ! command -v nuclei &> /dev/null; then
+    echo "[+] Installing nuclei"
+    go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+else
+    echo "[✓] nuclei already installed"
+fi
 
 echo "[+] Updating nuclei templates"
 nuclei -update-templates
 
-echo "[+] Clone Sublist3r repository"
+# -------------------------------
+# Clone Sublist3r
+# -------------------------------
+echo "[+] Checking Sublist3r"
 
-cd $INSTALL_DIR
-sudo git clone https://github.com/aboul3la/Sublist3r.git
+if [ ! -d "$INSTALL_DIR/Sublist3r" ]; then
+    cd $INSTALL_DIR
+    sudo git clone https://github.com/aboul3la/Sublist3r.git
+else
+    echo "[✓] Sublist3r already present"
+fi
 
+# -------------------------------
+# Python environment
+# -------------------------------
 echo "[+] Creating Python virtual environment"
 
-python3 -m venv autorecon_env
+cd $INSTALL_DIR
+
+if [ ! -d "$INSTALL_DIR/autorecon_env" ]; then
+    python3 -m venv autorecon_env
+fi
 
 source autorecon_env/bin/activate
 
@@ -66,6 +153,9 @@ pip install -r requirements.txt
 
 deactivate
 
+# -------------------------------
+# Create global command
+# -------------------------------
 echo "[+] Creating global AutoRecon command"
 
 sudo tee /usr/local/bin/AutoRecon > /dev/null <<EOF
