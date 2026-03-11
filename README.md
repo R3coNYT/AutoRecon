@@ -35,7 +35,12 @@ AutoRecon includes:
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git nmap masscan python3 python3-venv python3-pip
+sudo apt install -y git nmap masscan wget python3 python3-venv python3-pip
+```
+
+##Install Go
+```bash
+sudo wget https://go.dev/dl/go1.26.1.linux-amd64.tar.gz
 ```
 
 ## Clone the repository
