@@ -52,7 +52,7 @@ sudo chmod +x AutoRecon.sh
 ## Start AutoRecon console
 
 ```bash
-Autorecon
+AutoRecon
 ```
 
 This will launch the interactive AutoRecon console.
