@@ -38,6 +38,11 @@ git clone https://github.com/R3coNYT/AutoRecon.git
 cd AutoRecon
 ```
 
+## Clone Sublist3r repository
+```bash
+git clone https://github.com/aboul3la/Sublist3r.git
+```
+
 ## Install required system packages
 
 ```bash
@@ -61,6 +66,7 @@ source autorecon_env/bin/activate
 
 ```bash
 pip install -r requirements.txt
+pip install -r ./Sublist3r/requirements.txt
 ```
 
 ---
