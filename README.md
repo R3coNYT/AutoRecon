@@ -39,7 +39,9 @@ sudo apt install -y git nmap masscan wget python3 python3-venv python3-pip
 ```
 
 ##Install Go
+
 ```bash
+cd /usr/local/
 sudo wget https://go.dev/dl/go1.26.1.linux-amd64.tar.gz
 ```
 
@@ -56,11 +58,13 @@ git clone https://github.com/aboul3la/Sublist3r.git
 ```
 
 ## Install HTTPX
+
 ```bash
 go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
 ```
 
 ## Install Nuclei
+
 ```bash
 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
 ```
