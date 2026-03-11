@@ -31,116 +31,27 @@ AutoRecon includes:
 
 # 🚀 Installation
 
-## Install required system packages
+## Install git
 
 ```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y git nmap masscan wget python3 python3-venv python3-pip
-```
-
-## Install Go
-
-```bash
-cd /usr/local/
-sudo wget https://go.dev/dl/go1.26.1.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go1.26.1.linux-amd64.tar.gz
-sudo rm -r go1.26.1.linux-amd64.tar.gz
-```
-
-## Add Go to the PATH
-```bash
-cd ~
-nano .bashrc
-```
-
-#### Add to the end:
-```bash
-export PATH=$PATH:/usr/local/go/bin
-export PATH=$PATH:$HOME/go/bin
-```
-
-```bash
-source ~/.bashrc
-```
-
-### If there is any error when performing `source ~/.bashrc` add Go to the PATH in this file :
-```bash
-cd ~
-nano .zshrc
-```
-
-#### Add to the end:
-```bash
-export PATH=$PATH:/usr/local/go/bin
-export PATH=$PATH:$HOME/go/bin
-```
-
-```bash
-source ~/.zshrc
+sudo apt update && sudo apt install -y git
 ```
 
 ## Clone the repository
 
 ```bash
-cd ~
-git clone https://github.com/R3coNYT/AutoRecon.git
-cd AutoRecon
+sudo git clone https://github.com/R3coNYT/AutoRecon.git /opt/autorecon
+cd /opt/autorecon
+sudo chmod +x AutoRecon.sh
+./AutoRecon.sh
 ```
-
-## Clone Sublist3r repository
-```bash
-git clone https://github.com/aboul3la/Sublist3r.git
-```
-
-## Install HTTPX
-
-```bash
-git clone https://github.com/projectdiscovery/httpx.git; \
-cd httpx/cmd/httpx; \
-go build; \
-mv httpx /usr/local/bin/; \
-httpx -version;
-```
-
-## Install Nuclei
-
-```bash
-git clone https://github.com/projectdiscovery/nuclei.git; \
-cd nuclei/cmd/nuclei; \
-go build; \
-mv nuclei /usr/local/bin/; \
-nuclei -version; \
-nuclei -update-templates;
-```
-
-## Create a Python virtual environment
-
-```bash
-python3 -m venv autorecon_env
-```
-
-## Activate the environment
-
-```bash
-source autorecon_env/bin/activate
-```
-
-## Install Python dependencies
-
-```bash
-pip install -r requirements.txt
-pip install -r ./Sublist3r/requirements.txt
-```
-
----
 
 # ▶️ Run the Tool
 
 ## Start AutoRecon console
 
 ```bash
-python3 AutoRecon.py
+Autorecon
 ```
 
 This will launch the interactive AutoRecon console.
