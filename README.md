@@ -41,6 +41,7 @@ sudo apt update && sudo apt install -y git
 
 ```bash
 sudo git clone https://github.com/R3coNYT/AutoRecon.git /opt/autorecon
+sudo chmod -R 755 /opt/autorecon
 cd /opt/autorecon
 sudo chmod +x AutoRecon.sh
 ./AutoRecon.sh
