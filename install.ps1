@@ -4,7 +4,7 @@ $RepoUrl = "https://github.com/R3coNYT/AutoRecon.git"
 $InstallDir = "C:\Tools\AutoRecon"
 $GoVersion = "1.26.1"
 $GoMsi = "https://go.dev/dl/go$GoVersion.windows-amd64.msi"
-$HttpxVersion = "1.8.1"
+$HttpxVersion = "1.9.0"
 $NucleiVersion = "3.7.1"
 $ProgressPreference = 'SilentlyContinue'
 $pythonCmd = $null
@@ -139,8 +139,8 @@ function Install-ZipBinary {
     Write-Ok "$Name installed"
 }
 
-Install-ZipBinary -Name "httpx" -Url "https://github.com/projectdiscovery/httpx/releases/download/v$HttpxVersion/httpx_$HttpxVersion_windows_amd64.zip" -ExeName "httpx.exe"
-Install-ZipBinary -Name "nuclei" -Url "https://github.com/projectdiscovery/nuclei/releases/download/v$NucleiVersion/nuclei_$NucleiVersion_windows_amd64.zip" -ExeName "nuclei.exe"
+Install-ZipBinary -Name "httpx" -Url "https://github.com/projectdiscovery/httpx/releases/download/v${HttpxVersion}/httpx_${HttpxVersion}_windows_amd64.zip" -ExeName "httpx.exe"
+Install-ZipBinary -Name "nuclei" -Url "https://github.com/projectdiscovery/nuclei/releases/download/v${NucleiVersion}/nuclei_${NucleiVersion}_windows_amd64.zip" -ExeName "nuclei.exe"
 
 if (!(Test-Path "$InstallDir\Sublist3r")) {
     Write-Info "Cloning Sublist3r"
