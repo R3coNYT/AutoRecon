@@ -197,7 +197,10 @@ sudo chmod +x /usr/local/bin/AutoRecon
 # -------------------------------
 # Replace user in his home repository
 # -------------------------------
-cd ~
+echo "[✓] Current directory: $(pwd)"
+echo "[✓] Moving in $HOME directory"
+cd "$HOME"
+echo "[✓] Current directory: $(pwd)"
 
 echo "======================================"
 echo "       Installation Completed"
