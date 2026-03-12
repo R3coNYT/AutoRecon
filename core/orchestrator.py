@@ -161,6 +161,9 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                     else:
                         res["nuclei"] = []
                         log.info("%d Nuclei vulnerabilities found on %s", len(nuclei_results), sub)
+            else:
+                log.info("No HTTP targets to scan with Nuclei on %s", sub)
+                res["nuclei"] = []
 
         # 2) HTTP probe (headers/html snippet)
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")        
