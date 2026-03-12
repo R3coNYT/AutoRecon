@@ -13,6 +13,10 @@ from core.plugin_loader import load_plugins
 from core.result_browser import browse_results
 from core.client_folder_select import select_or_create_client_folder
 
+BASE_DIR = Path(__file__).resolve().parent
+RESULTS_DIR = BASE_DIR / "results"
+RESULTS_DIR.mkdir(exist_ok=True)
+
 log = logging.getLogger("recon-audit")
 console = Console()
 
@@ -39,6 +43,19 @@ def loading(message="Launching..."):
         import time
         time.sleep(1)
 
+# =========================
+# CHECK DEPENDENCIES
+# =========================
+def check_dependencies():
+    import shutil
+
+    tools = ["nmap", "masscan", "httpx", "nuclei"]
+
+    for t in tools:
+        if shutil.which(t):
+            print(f"[✓] {t} detected")
+        else:
+            print(f"[✗] {t} not found")
 
 # =========================
 # MAIN MENU
@@ -76,7 +93,7 @@ def main_menu():
 # RECON HANDLER
 # =========================
 def handle_recon():
-    results_base = Path("/opt/autorecon/results")
+    results_base = RESULTS_DIR
     client_folder = select_or_create_client_folder(results_base)
     if not client_folder:
         return
@@ -206,4 +223,5 @@ def handle_plugins():
 
 
 if __name__ == "__main__":
+    check_dependencies()
     main_menu()

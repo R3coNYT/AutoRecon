@@ -1,6 +1,8 @@
 import subprocess, os
-
 from rich import json
+import shutil
+
+NMAP_BIN = shutil.which("nmap") or "nmap"
 
 def nmap_service_scan(host: str, output_dir: str, full_scan=False, ports=None):
 
@@ -10,7 +12,7 @@ def nmap_service_scan(host: str, output_dir: str, full_scan=False, ports=None):
         os.makedirs(output_dir, exist_ok=True)
         xml_path = os.path.join(output_dir, f"nmap_{safe_host}.xml")
 
-    cmd = ["nmap", "-sV", "-T4"]
+    cmd = [NMAP_BIN, "-sV", "-T4"]
 
     # scan complet
     if full_scan and not ports:

@@ -12,7 +12,7 @@ REPO_RAW="https://raw.githubusercontent.com/R3coNYT/AutoRecon/main"
 INSTALL_ROOT_LINUX="/opt/autorecon"
 INSTALL_ROOT_MACOS="$HOME/Tools/AutoRecon"
 GO_VERSION="1.26.1"
-HTTPX_VERSION="1.8.1"
+HTTPX_VERSION="1.9.0"
 NUCLEI_VERSION="3.7.1"
 SUBLIST3R_REPO="https://github.com/aboul3la/Sublist3r.git"
 

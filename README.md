@@ -31,28 +31,28 @@ AutoRecon includes:
 
 # 🚀 Installation
 
-## Linux/MacOs
+## Install git
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/R3coNYT/AutoRecon/main/AutoRecon.sh | bash
+sudo apt update && sudo apt install -y git
 ```
 
-## Windows
+## Clone the repository
 
 ```bash
-powershell -ExecutionPolicy Bypass -Command "iwr https://raw.githubusercontent.com/R3coNYT/AutoRecon/main/install.ps1 -UseBasicParsing | iex"
+sudo git clone https://github.com/R3coNYT/AutoRecon.git /opt/autorecon
+sudo chmod -R 755 /opt/autorecon
+cd /opt/autorecon
+sudo chmod +x AutoRecon.sh
+./AutoRecon.sh
 ```
 
 # ▶️ Run the Tool
 
-## Linux/MacOs
+## Start AutoRecon console
+
 ```bash
 Autorecon
-```
-
-## Windows
-```bash
-C:\Tools\AutoRecon\AutoRecon.bat
 ```
 
 This will launch the interactive AutoRecon console.
@@ -324,39 +324,6 @@ AutoRecon Console
 
 ---
 
-
-
-# 🚀 Uninstall
-
-## Linux
-
-```bash
-sudo rm -f /usr/local/bin/AutoRecon
-sudo rm -f /usr/local/bin/httpx
-sudo rm -f /usr/local/bin/nuclei
-sudo rm -rf /opt/autorecon
-rm -rf ~/nuclei-templates
-```
-
-## MacOs
-
-```bash
-rm -f ~/.local/bin/AutoRecon
-rm -f ~/.local/bin/httpx
-rm -f ~/.local/bin/nuclei
-rm -rf ~/Tools/AutoRecon
-rm -rf ~/nuclei-templates
-```
-
-## Windows
-
-```bash
-Remove-Item "C:\Tools\AutoRecon" -Recurse -Force
-Remove-Item "C:\Tools\bin\httpx.exe" -Force
-Remove-Item "C:\Tools\bin\nuclei.exe" -Force
-```
-
----
 # 🔐 Disclaimer
 
 This tool is intended for:

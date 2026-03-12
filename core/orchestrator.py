@@ -24,6 +24,7 @@ from core.nuclei_scan import run_nuclei
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from tqdm import tqdm
+from pathlib import Path
 from colorama import Fore, Style
 import logging
 import ipaddress
@@ -364,9 +365,9 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
         base_dir = output_dir
     else:
         ts = datetime.now().strftime("%Y%m%d-%H%M%S")
-        base_dir = f"results/{target}_{ts}"
+        base_dir = Path("results") / f"{target}_{ts}"
 
-    os.makedirs(base_dir, exist_ok=True)
+    base_dir.mkdir(parents=True, exist_ok=True)
 
     subs = []
 

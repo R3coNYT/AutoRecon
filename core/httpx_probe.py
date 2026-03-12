@@ -1,7 +1,9 @@
 import subprocess
 import json
 import os
+import shutil
 
+HTTPX_BIN = shutil.which("httpx") or "httpx"
 
 def run_httpx(targets, output_dir=None, target_name=None, timeout=10):
 
@@ -9,7 +11,7 @@ def run_httpx(targets, output_dir=None, target_name=None, timeout=10):
         targets = "\n".join(targets)
 
     cmd = [
-        "httpx",
+        HTTPX_BIN,
         "-silent",
         "-json",
         "-title",

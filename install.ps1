@@ -8,6 +8,8 @@ $HttpxVersion = "1.9.0"
 $NucleiVersion = "3.7.1"
 $ProgressPreference = 'SilentlyContinue'
 $pythonCmd = $null
+$NmapUrl = "https://nmap.org/dist/nmap-7.95-setup.exe"
+$MasscanUrl = "https://github.com/robertdavidgraham/masscan/releases/download/1.3.2/masscan-1.3.2-win64.zip"
 
 function Write-Info($msg) {
     Write-Host "[+]" $msg -ForegroundColor Cyan
@@ -95,6 +97,29 @@ if (!(Test-Cmd go)) {
 
 $env:Path += ";C:\Program Files\Go\bin;$env:USERPROFILE\go\bin"
 
+if (!(Test-Cmd nmap)) {
+
+    Write-Info "Installing Nmap"
+
+    $NmapInstaller = "$env:TEMP\nmap-setup.exe"
+
+    Invoke-Retry -Attempts 3 -Script {
+        Invoke-WebRequest -Uri $NmapUrl -OutFile $NmapInstaller
+    }
+
+    Start-Process $NmapInstaller -ArgumentList "/S" -Wait
+    Remove-Item $NmapInstaller -Force -ErrorAction SilentlyContinue
+
+    Write-Ok "Nmap installed"
+
+} else {
+
+    Write-Ok "Nmap already installed"
+
+}
+
+$env:Path += ";C:\Program Files (x86)\Nmap"
+
 if (Test-Path "$InstallDir\.git") {
     Write-Info "Updating repository"
     git -C $InstallDir pull
@@ -142,6 +167,36 @@ function Install-ZipBinary {
 Install-ZipBinary -Name "httpx" -Url "https://github.com/projectdiscovery/httpx/releases/download/v${HttpxVersion}/httpx_${HttpxVersion}_windows_amd64.zip" -ExeName "httpx.exe"
 Install-ZipBinary -Name "nuclei" -Url "https://github.com/projectdiscovery/nuclei/releases/download/v${NucleiVersion}/nuclei_${NucleiVersion}_windows_amd64.zip" -ExeName "nuclei.exe"
 
+if (!(Test-Cmd masscan)) {
+
+    Write-Info "Installing Masscan"
+
+    $TmpZip = "$env:TEMP\masscan.zip"
+    $TmpDir = "$env:TEMP\masscan-extract"
+
+    Invoke-Retry -Attempts 3 -Script {
+        Invoke-WebRequest -Uri $MasscanUrl -OutFile $TmpZip
+    }
+
+    Expand-Archive -Path $TmpZip -DestinationPath $TmpDir -Force
+
+    New-Directory "C:\Tools\bin"
+
+    $exe = Get-ChildItem $TmpDir -Recurse -Filter "masscan.exe" | Select-Object -First 1
+
+    Copy-Item $exe.FullName "C:\Tools\bin\masscan.exe" -Force
+
+    Remove-Item $TmpZip -Force -ErrorAction SilentlyContinue
+    Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
+
+    Write-Ok "Masscan installed"
+
+} else {
+
+    Write-Ok "Masscan already installed"
+
+}
+
 if (!(Test-Path "$InstallDir\Sublist3r")) {
     Write-Info "Cloning Sublist3r"
     Invoke-Retry -Attempts 3 -Script {
@@ -174,6 +229,13 @@ Set-Content -Path "C:\Tools\AutoRecon\AutoRecon.bat" -Value $BatContent -Encodin
 $CurrentPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($CurrentPath -notlike "*C:\Tools\bin*") {
     [Environment]::SetEnvironmentVariable("Path", "$CurrentPath;C:\Tools\bin", "User")
+}
+if ($CurrentPath -notlike "*C:\Program Files (x86)\Nmap*") {
+    [Environment]::SetEnvironmentVariable(
+        "Path",
+        "$CurrentPath;C:\Tools\bin;C:\Program Files (x86)\Nmap",
+        "User"
+    )
 }
 
 Write-Host ""

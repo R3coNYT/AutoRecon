@@ -1,10 +1,12 @@
 import subprocess
 import json
+import shutil
 
+MASSCAN_BIN = shutil.which("masscan") or "masscan"
 
 def run_masscan(target: str, rate=2000, ports="1-65535"):
     cmd = [
-        "masscan",
+        MASSCAN_BIN,
         target,
         "-p", ports,
         "--rate", str(rate),

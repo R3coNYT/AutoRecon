@@ -2,8 +2,9 @@ import subprocess
 import json
 import os
 import shutil
+import shutil
 
-NUCLEI_BIN = shutil.which("nuclei") or "/usr/local/bin/nuclei"
+NUCLEI_BIN = shutil.which("nuclei") or "nuclei"
 
 def run_nuclei(targets, output_dir=None, target_name=None, severity="low,medium,high,critical"):
 
