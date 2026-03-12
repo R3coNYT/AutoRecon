@@ -2,7 +2,6 @@ import os
 import sys
 import shutil
 import re
-from io import StringIO
 import questionary
 import logging
 from pathlib import Path
@@ -77,8 +76,8 @@ def main_menu():
 # RECON HANDLER
 # =========================
 def handle_recon():
-    results_base = Path("/opt/autorecon/")
-    client_folder = select_or_create_client_folder(os.path.join(results_base, "results"))
+    results_base = Path("/opt/autorecon/results")
+    client_folder = select_or_create_client_folder(results_base)
     if not client_folder:
         return
 
