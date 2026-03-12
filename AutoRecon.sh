@@ -97,8 +97,9 @@ export PATH=\$PATH:/usr/local/go/bin
 export PATH=\$PATH:\$HOME/go/bin
 EOF
 
-    export PATH=$PATH:/usr/local/go/bin
-    export PATH=$PATH:$HOME/go/bin
+    export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+    source /etc/profile
+    hash -r
 
     echo "[✓] Go installed"
     go version
@@ -111,6 +112,9 @@ echo "[+] Configuring Go environment"
 
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+source /etc/profile
+hash -r
 
 mkdir -p $GOPATH/bin
 
