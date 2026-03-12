@@ -9,6 +9,8 @@ echo "======================================"
 INSTALL_DIR="/opt/autorecon"
 GO_VERSION="1.24.6"
 
+sudo chown -R $USER:$USER $INSTALL_DIR
+
 # -------------------------------
 # OS Detection
 # -------------------------------
@@ -102,11 +104,17 @@ fi
 # -------------------------------
 # Install ProjectDiscovery tools
 # -------------------------------
+echo "[+] Configuring Go environment"
+
+export GOPROXY=direct
+export GOSUMDB=off
+
 echo "[+] Installing ProjectDiscovery tools (httpx | nuclei)"
 
 if ! command -v httpx &> /dev/null; then
     echo "[+] Installing httpx"
     go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+    sudo cp ~/go/bin/httpx /usr/local/bin/ 2>/dev/null || true
 else
     echo "[✓] httpx already installed"
 fi
@@ -114,6 +122,7 @@ fi
 if ! command -v nuclei &> /dev/null; then
     echo "[+] Installing nuclei"
     go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+    sudo cp ~/go/bin/nuclei /usr/local/bin/ 2>/dev/null || true
 else
     echo "[✓] nuclei already installed"
 fi

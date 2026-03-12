@@ -1,0 +1,4778 @@
+{
+  "input_target": "192.168.1.0/24",
+  "is_ip": false,
+  "reverse_dns": null,
+  "generated_at": "2026-03-11T10:20:04",
+  "subdomains": {
+    "192.168.1.1": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.1"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.1",
+          "reverse_dns": "livebox.home",
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.1",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.1.1",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.1.1",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.1",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.1",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.1",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.1",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "[Errno 111] Connection refused"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [
+        {
+          "id": "CVE-1999-1257",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Xyplex terminal server 6.0.1S1, and possibly other versions, allows remote attackers to bypass the password prompt by entering (1) a CTRL-Z character, or (2) a ? (question mark).",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-1999-1189",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer overflow in Netscape Navigator/Communicator 4.7 for Windows 95 and Windows 98 allows remote attackers to cause a denial of service, and possibly execute arbitrary commands, via a long argument after the ? character in a URL that refe",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2000-0236",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "Netscape Enterprise Server with Directory Indexing enabled allows remote attackers to list server directories via web publishing tags such as ?wp-ver-info and ?wp-cs-dump.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-1203",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 4.3,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Cross-site scripting (XSS) vulnerability in index.php for Mambo Site Server 4.0.10 allows remote attackers to execute script on other clients via the ?option parameter.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2005-0190",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 2.6,
+            "severity": "LOW",
+            "vector": "AV:N/AC:H/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Directory traversal vulnerability in RealPlayer 10.5 (6.0.12.1040) and earlier allows remote attackers to delete arbitrary files via a Real Metadata Packages (RMP) file with a FILENAME tag containing .. (dot dot) sequences in a filename tha",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2006-6291",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 6.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:S/C:N/I:N/A:C"
+          },
+          "summary": "Stack overflow in the IMAP module (MEIMAPS.EXE) in MailEnable Professional 1.6 through 1.83 and 2.0 through 2.33, and MailEnable Enterprise 1.1 through 1.40 and 2.0 through 2.33, allows remote authenticated users to cause a denial of servic",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2008-3550",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "The CQWeb login page in IBM Rational ClearQuest 7.0.1 allows remote attackers to obtain potentially sensitive information (page source code) via a combination of ?script? and ?/script? sequences in the id field, possibly related to a cross-",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2009-0652",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:P"
+          },
+          "summary": "The Internationalized Domain Names (IDN) blacklist in Mozilla Firefox 3.0.6 and other versions before 3.0.9; Thunderbird before 2.0.0.21; and SeaMonkey before 1.1.15 does not include box-drawing characters, which allows remote attackers to ",
+          "confirmed": false
+        }
+      ],
+      "risk": {
+        "score": 15,
+        "level": "POTENTIAL",
+        "reasons": [
+          "Version not confirmed for service '?'",
+          "2 HIGH CVEs (max CVSS=7.5)"
+        ],
+        "version_unknown": true
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for livebox.home (192.168.1.1)\nHost is up (0.0040s latency).\nNot shown: 65528 filtered tcp ports (no-response)\nBug in mqtt-subscribe: no string output.\nPORT      STATE  SERVICE          VERSION\n53/tcp    open   domain           dnsmasq gen_2.86_v1.2.3-1-g7f6cbe6\n| dns-nsid: \n|_  bind.version: dnsmasq-gen_2.86_v1.2.3-1-g7f6cbe6\n80/tcp    open   http\n| fingerprint-strings: \n|   FourOhFourRequest: \n|     HTTP/1.0 404 Not Found\n|     Cache-Control: public,max-age=31536000\n|     ETAG: 66e90cfe\n|     X-Frame-Options: SAMEORIGIN\n|     Strict-Transport-Security: max-age=31536000; includeSubDomains\n|     X-Content-Type-Options: nosniff\n|     chunked\n|     Transfer-Encoding: chunked\n|     Content-Type: text/html\n|     <html><head><title>Not Found</title></head><body><h1>404 - Not Found</h1></body></html>\n|   GetRequest: \n|     HTTP/1.0 200 OK\n|     Cache-Control: must-revalidate\n|     Set-Cookie: 66e90cfe/accept-language=; path=/; SameSite=Strict\n|     ETAG: 66e90cfe\n|     X-Frame-Options: SAMEORIGIN\n|     Strict-Transport-Security: max-age=31536000; includeSubDomains\n|     X-Content-Type-Options: nosniff\n|     Content-Type: text/html; charset=utf-8\n|     Cache-Control: must-revalidate\n|     Content-Length: 1451\n|     <!DOCTYPE html>\n|     <!-- /ht Paul Irish - http://front.ie/j5OMXi -->\n|     <!--[if lt IE 7 ]> <html class=\"no-js ie6\" lang=\"fr\"> <![endif]-->\n|     <!--[if IE 7 ]> <html class=\"no-js ie7\" lang=\"fr\"> <![endif]-->\n|     <!--[if IE 8 ]> <html class=\"no-js ie8\" lang=\"fr\"> <![endif]-->\n|     <!--[if (gte IE 9)|!(IE)]><!-->\n|     <html class=\"no-js\" lang=\"fr\">\n|     <!--<![endif]-->\n|     <head>\n|     <title data-translation=\"common.headtitlelogin\"></title>\n|     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n|     <meta http-equiv=\"x-dns-prefetch-control\" content=\"off\"\n|   HTTPOptions, RTSPRequest: \n|     HTTP/1.0 404 Not Found\n|     Cache-Control: must-revalidate\n|_    Content-Length: 0\n113/tcp   closed ident\n443/tcp   open   ssl/https\n| fingerprint-strings: \n|   FourOhFourRequest: \n|     HTTP/1.0 404 Not Found\n|     Cache-Control: public,max-age=31536000\n|     ETAG: 66e90cfe\n|     X-Frame-Options: SAMEORIGIN\n|     Strict-Transport-Security: max-age=31536000; includeSubDomains\n|     X-Content-Type-Options: nosniff\n|     chunked\n|     Transfer-Encoding: chunked\n|     Content-Type: text/html\n|     <html><head><title>Not Found</title></head><body><h1>404 - Not Found</h1></body></html>\n|   HTTPOptions, RTSPRequest: \n|     HTTP/1.0 404 Not Found\n|     Cache-Control: must-revalidate\n|_    Content-Length: 0\n1990/tcp  open   tcpwrapped\n8883/tcp  open   ssl/secure-mqtt?\n|_ssl-date: TLS randomness does not represent time\n| ssl-cert: Subject: commonName=0887C6-Livebox 4-AN2023709745314/organizationName=Orange/countryName=FR\n| Subject Alternative Name: DNS:livebox, DNS:livebox.local, IP Address:192.168.1.1\n| Not valid before: 2020-08-27T16:03:58\n|_Not valid after:  2035-08-27T16:03:58\n60000/tcp open   upnp\n| fingerprint-strings: \n|   DNSVersionBindReqTCP, RPCCheck, RTSPRequest, SIPOptions, drda, ibm-db2: \n|     HTTP/0.0 400 Bad Request\n|     SERVER: Unspecified, UPnP/1.0, SoftAtHome\n|     CONTENT-LENGTH: 50\n|     CONTENT-TYPE: text/html\n|     <html><body><h1>400 Bad Request</h1></body></html>\n|   FourOhFourRequest, GetRequest: \n|     HTTP/1.0 404 Not Found\n|     SERVER: Unspecified, UPnP/1.0, SoftAtHome\n|     CONTENT-LENGTH: 48\n|     CONTENT-TYPE: text/html\n|     <html><body><h1>404 Not Found</h1></body></html>\n|   HTTPOptions: \n|     HTTP/0.0 501 Not Implemented\n|     SERVER: Unspecified, UPnP/1.0, SoftAtHome\n|     CONTENT-LENGTH: 54\n|     CONTENT-TYPE: text/html\n|_    <html><body><h1>501 Not Implemented</h1></body></html>\n3 services unrecognized despite returning data. If you know the service/version, please submit the following fingerprints at https://nmap.org/cgi-bin/submit.cgi?new-service :\n==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============\nSF-Port80-TCP:V=7.95%I=7%D=3/11%Time=69B17AD5%P=x86_64-pc-linux-gnu%r(GetR\nSF:equest,70A,\"HTTP/1\\.0\\x20200\\x20OK\\r\\nCache-Control:\\x20must-revalidate\nSF:\\r\\nSet-Cookie:\\x2066e90cfe/accept-language=;\\x20path=/;\\x20SameSite=St\nSF:rict\\r\\nETAG:\\x2066e90cfe\\r\\nX-Frame-Options:\\x20SAMEORIGIN\\r\\nStrict-T\nSF:ransport-Security:\\x20max-age=31536000;\\x20includeSubDomains\\r\\nX-Conte\nSF:nt-Type-Options:\\x20nosniff\\r\\nContent-Type:\\x20text/html;\\x20charset=u\nSF:tf-8\\r\\nCache-Control:\\x20must-revalidate\\r\\nContent-Length:\\x201451\\r\\\nSF:n\\r\\n<!DOCTYPE\\x20html>\\n<!--\\x20/ht\\x20Paul\\x20Irish\\x20-\\x20http://fr\nSF:ont\\.ie/j5OMXi\\x20-->\\n<!--\\[if\\x20lt\\x20IE\\x207\\x20\\]>\\x20<html\\x20cla\nSF:ss=\\\"no-js\\x20ie6\\\"\\x20lang=\\\"fr\\\">\\x20<!\\[endif\\]-->\\n<!--\\[if\\x20IE\\x\nSF:207\\x20\\]>\\x20\\x20\\x20\\x20<html\\x20class=\\\"no-js\\x20ie7\\\"\\x20lang=\\\"fr\\\nSF:\">\\x20<!\\[endif\\]-->\\n<!--\\[if\\x20IE\\x208\\x20\\]>\\x20\\x20\\x20\\x20<html\\x\nSF:20class=\\\"no-js\\x20ie8\\\"\\x20lang=\\\"fr\\\">\\x20<!\\[endif\\]-->\\n<!--\\[if\\x2\nSF:0\\(gte\\x20IE\\x209\\)\\|!\\(IE\\)\\]><!-->\\n<html\\x20class=\\\"no-js\\\"\\x20lang=\nSF:\\\"fr\\\">\\n\\x20\\x20<!--<!\\[endif\\]-->\\n\\x20\\x20<head>\\n\\x20\\x20\\x20\\x20<t\nSF:itle\\x20data-translation=\\\"common\\.headtitlelogin\\\"></title>\\n\\x20\\x20\\\nSF:x20\\x20<meta\\x20http-equiv=\\\"Content-Type\\\"\\x20content=\\\"text/html;\\x20\nSF:charset=UTF-8\\\">\\n\\x20\\x20\\x20\\x20<meta\\x20http-equiv=\\\"x-dns-prefetch-\nSF:control\\\"\\x20content=\\\"off\\\"\")%r(HTTPOptions,4D,\"HTTP/1\\.0\\x20404\\x20No\nSF:t\\x20Found\\r\\nCache-Control:\\x20must-revalidate\\r\\nContent-Length:\\x200\nSF:\\r\\n\\r\\n\")%r(RTSPRequest,4D,\"HTTP/1\\.0\\x20404\\x20Not\\x20Found\\r\\nCache-\nSF:Control:\\x20must-revalidate\\r\\nContent-Length:\\x200\\r\\n\\r\\n\")%r(FourOhF\nSF:ourRequest,175,\"HTTP/1\\.0\\x20404\\x20Not\\x20Found\\r\\nCache-Control:\\x20p\nSF:ublic,max-age=31536000\\r\\nETAG:\\x2066e90cfe\\r\\nX-Frame-Options:\\x20SAME\nSF:ORIGIN\\r\\nStrict-Transport-Security:\\x20max-age=31536000;\\x20includeSub\nSF:Domains\\r\\nX-Content-Type-Options:\\x20nosniff\\r\\nTE:\\x20chunked\\r\\nTran\nSF:sfer-Encoding:\\x20chunked\\r\\nContent-Type:\\x20text/html\\r\\n\\r\\n58\\r\\n<h\nSF:tml><head><title>Not\\x20Found</title></head><body><h1>404\\x20-\\x20Not\\x\nSF:20Found</h1></body></html>\\n\\r\\n0\\r\\n\\r\\n\");\n==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============\nSF-Port443-TCP:V=7.95%T=SSL%I=7%D=3/11%Time=69B17ADC%P=x86_64-pc-linux-gnu\nSF:%r(HTTPOptions,4D,\"HTTP/1\\.0\\x20404\\x20Not\\x20Found\\r\\nCache-Control:\\x\nSF:20must-revalidate\\r\\nContent-Length:\\x200\\r\\n\\r\\n\")%r(FourOhFourRequest\nSF:,175,\"HTTP/1\\.0\\x20404\\x20Not\\x20Found\\r\\nCache-Control:\\x20public,max-\nSF:age=31536000\\r\\nETAG:\\x2066e90cfe\\r\\nX-Frame-Options:\\x20SAMEORIGIN\\r\\n\nSF:Strict-Transport-Security:\\x20max-age=31536000;\\x20includeSubDomains\\r\\\nSF:nX-Content-Type-Options:\\x20nosniff\\r\\nTE:\\x20chunked\\r\\nTransfer-Encod\nSF:ing:\\x20chunked\\r\\nContent-Type:\\x20text/html\\r\\n\\r\\n58\\r\\n<html><head>\nSF:<title>Not\\x20Found</title></head><body><h1>404\\x20-\\x20Not\\x20Found</h\nSF:1></body></html>\\n\\r\\n0\\r\\n\\r\\n\")%r(RTSPRequest,4D,\"HTTP/1\\.0\\x20404\\x2\nSF:0Not\\x20Found\\r\\nCache-Control:\\x20must-revalidate\\r\\nContent-Length:\\x\nSF:200\\r\\n\\r\\n\");\n==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============\nSF-Port60000-TCP:V=7.95%I=7%D=3/11%Time=69B17AD5%P=x86_64-pc-linux-gnu%r(i\nSF:bm-db2,A6,\"HTTP/0\\.0\\x20400\\x20Bad\\x20Request\\r\\nSERVER:\\x20Unspecified\nSF:,\\x20UPnP/1\\.0,\\x20SoftAtHome\\r\\nCONTENT-LENGTH:\\x2050\\r\\nCONTENT-TYPE:\nSF:\\x20text/html\\r\\n\\r\\n<html><body><h1>400\\x20Bad\\x20Request</h1></body><\nSF:/html>\")%r(drda,A6,\"HTTP/0\\.0\\x20400\\x20Bad\\x20Request\\r\\nSERVER:\\x20Un\nSF:specified,\\x20UPnP/1\\.0,\\x20SoftAtHome\\r\\nCONTENT-LENGTH:\\x2050\\r\\nCONT\nSF:ENT-TYPE:\\x20text/html\\r\\n\\r\\n<html><body><h1>400\\x20Bad\\x20Request</h1\nSF:></body></html>\")%r(GetRequest,A2,\"HTTP/1\\.0\\x20404\\x20Not\\x20Found\\r\\n\nSF:SERVER:\\x20Unspecified,\\x20UPnP/1\\.0,\\x20SoftAtHome\\r\\nCONTENT-LENGTH:\\\nSF:x2048\\r\\nCONTENT-TYPE:\\x20text/html\\r\\n\\r\\n<html><body><h1>404\\x20Not\\x\nSF:20Found</h1></body></html>\")%r(HTTPOptions,AE,\"HTTP/0\\.0\\x20501\\x20Not\\\nSF:x20Implemented\\r\\nSERVER:\\x20Unspecified,\\x20UPnP/1\\.0,\\x20SoftAtHome\\r\nSF:\\nCONTENT-LENGTH:\\x2054\\r\\nCONTENT-TYPE:\\x20text/html\\r\\n\\r\\n<html><bod\nSF:y><h1>501\\x20Not\\x20Implemented</h1></body></html>\")%r(RTSPRequest,A6,\"\nSF:HTTP/0\\.0\\x20400\\x20Bad\\x20Request\\r\\nSERVER:\\x20Unspecified,\\x20UPnP/1\nSF:\\.0,\\x20SoftAtHome\\r\\nCONTENT-LENGTH:\\x2050\\r\\nCONTENT-TYPE:\\x20text/ht\nSF:ml\\r\\n\\r\\n<html><body><h1>400\\x20Bad\\x20Request</h1></body></html>\")%r(\nSF:RPCCheck,A6,\"HTTP/0\\.0\\x20400\\x20Bad\\x20Request\\r\\nSERVER:\\x20Unspecifi\nSF:ed,\\x20UPnP/1\\.0,\\x20SoftAtHome\\r\\nCONTENT-LENGTH:\\x2050\\r\\nCONTENT-TYP\nSF:E:\\x20text/html\\r\\n\\r\\n<html><body><h1>400\\x20Bad\\x20Request</h1></body\nSF:></html>\")%r(DNSVersionBindReqTCP,A6,\"HTTP/0\\.0\\x20400\\x20Bad\\x20Reques\nSF:t\\r\\nSERVER:\\x20Unspecified,\\x20UPnP/1\\.0,\\x20SoftAtHome\\r\\nCONTENT-LEN\nSF:GTH:\\x2050\\r\\nCONTENT-TYPE:\\x20text/html\\r\\n\\r\\n<html><body><h1>400\\x20\nSF:Bad\\x20Request</h1></body></html>\")%r(FourOhFourRequest,A2,\"HTTP/1\\.0\\x\nSF:20404\\x20Not\\x20Found\\r\\nSERVER:\\x20Unspecified,\\x20UPnP/1\\.0,\\x20SoftA\nSF:tHome\\r\\nCONTENT-LENGTH:\\x2048\\r\\nCONTENT-TYPE:\\x20text/html\\r\\n\\r\\n<ht\nSF:ml><body><h1>404\\x20Not\\x20Found</h1></body></html>\")%r(SIPOptions,A6,\"\nSF:HTTP/0\\.0\\x20400\\x20Bad\\x20Request\\r\\nSERVER:\\x20Unspecified,\\x20UPnP/1\nSF:\\.0,\\x20SoftAtHome\\r\\nCONTENT-LENGTH:\\x2050\\r\\nCONTENT-TYPE:\\x20text/ht\nSF:ml\\r\\n\\r\\n<html><body><h1>400\\x20Bad\\x20Request</h1></body></html>\");\nMAC Address: 08:87:C6:4A:59:D0 (Ingram Micro Services)\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 184.00 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.1",
+        "rdns": "livebox.home",
+        "open_ports": [
+          {
+            "port": 53,
+            "proto": "tcp",
+            "service": "domain",
+            "version_raw": "dnsmasq gen_2.86_v1.2.3-1-g7f6cbe6",
+            "product": "dnsmasq gen_2.86_v1.2.3-1-g7f6cbe6",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 80,
+            "proto": "tcp",
+            "service": "http",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 443,
+            "proto": "tcp",
+            "service": "ssl/https",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 1990,
+            "proto": "tcp",
+            "service": "tcpwrapped",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 8883,
+            "proto": "tcp",
+            "service": "ssl/secure-mqtt",
+            "version_raw": "?",
+            "product": "?",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 60000,
+            "proto": "tcp",
+            "service": "upnp",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    },
+    "192.168.1.10": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.10"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.10",
+          "reverse_dns": "r3con-pc.home",
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.10",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.1.10",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.1.10",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.10",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.10",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.10",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.10",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "timed out"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [
+        {
+          "id": "CVE-1999-1257",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Xyplex terminal server 6.0.1S1, and possibly other versions, allows remote attackers to bypass the password prompt by entering (1) a CTRL-Z character, or (2) a ? (question mark).",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-1999-1189",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer overflow in Netscape Navigator/Communicator 4.7 for Windows 95 and Windows 98 allows remote attackers to cause a denial of service, and possibly execute arbitrary commands, via a long argument after the ? character in a URL that refe",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2000-0236",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "Netscape Enterprise Server with Directory Indexing enabled allows remote attackers to list server directories via web publishing tags such as ?wp-ver-info and ?wp-cs-dump.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-1203",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 4.3,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Cross-site scripting (XSS) vulnerability in index.php for Mambo Site Server 4.0.10 allows remote attackers to execute script on other clients via the ?option parameter.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2005-0190",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 2.6,
+            "severity": "LOW",
+            "vector": "AV:N/AC:H/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Directory traversal vulnerability in RealPlayer 10.5 (6.0.12.1040) and earlier allows remote attackers to delete arbitrary files via a Real Metadata Packages (RMP) file with a FILENAME tag containing .. (dot dot) sequences in a filename tha",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2006-6291",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 6.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:S/C:N/I:N/A:C"
+          },
+          "summary": "Stack overflow in the IMAP module (MEIMAPS.EXE) in MailEnable Professional 1.6 through 1.83 and 2.0 through 2.33, and MailEnable Enterprise 1.1 through 1.40 and 2.0 through 2.33, allows remote authenticated users to cause a denial of servic",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2008-3550",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "The CQWeb login page in IBM Rational ClearQuest 7.0.1 allows remote attackers to obtain potentially sensitive information (page source code) via a combination of ?script? and ?/script? sequences in the id field, possibly related to a cross-",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2009-0652",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:P"
+          },
+          "summary": "The Internationalized Domain Names (IDN) blacklist in Mozilla Firefox 3.0.6 and other versions before 3.0.9; Thunderbird before 2.0.0.21; and SeaMonkey before 1.1.15 does not include box-drawing characters, which allows remote attackers to ",
+          "confirmed": false
+        }
+      ],
+      "risk": {
+        "score": 15,
+        "level": "POTENTIAL",
+        "reasons": [
+          "Version not confirmed for service '?'",
+          "2 HIGH CVEs (max CVSS=7.5)"
+        ],
+        "version_unknown": true
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for r3con-pc.home (192.168.1.10)\nHost is up (0.0037s latency).\nNot shown: 65530 filtered tcp ports (no-response)\nPORT      STATE SERVICE    VERSION\n1844/tcp  open  websocket  WebSocket++ 0.8.1\n5040/tcp  open  unknown\n5357/tcp  open  http       Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)\n|_http-server-header: Microsoft-HTTPAPI/2.0\n|_http-title: Service Unavailable\n7680/tcp  open  pando-pub?\n28198/tcp open  unknown\nMAC Address: 24:4B:FE:50:9B:86 (ASUSTek Computer)\nService Info: OS: Windows; CPE: cpe:/o:microsoft:windows\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 418.40 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.10",
+        "rdns": "r3con-pc.home",
+        "open_ports": [
+          {
+            "port": 1844,
+            "proto": "tcp",
+            "service": "websocket",
+            "version_raw": "WebSocket++ 0.8.1",
+            "product": "WebSocket++ 0.8.1",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 5040,
+            "proto": "tcp",
+            "service": "unknown",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 5357,
+            "proto": "tcp",
+            "service": "http",
+            "version_raw": "Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)",
+            "product": "Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 7680,
+            "proto": "tcp",
+            "service": "pando-pub",
+            "version_raw": "?",
+            "product": "?",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 28198,
+            "proto": "tcp",
+            "service": "unknown",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    },
+    "192.168.1.11": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.11"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.11",
+          "reverse_dns": null,
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.11",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "[Errno 111] Connection refused"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [],
+      "risk": {
+        "score": 0,
+        "level": "LOW",
+        "reasons": [],
+        "version_unknown": false
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nWarning: 192.168.1.11 giving up on port because retransmission cap hit (6).\nNmap scan report for 192.168.1.11\nHost is up (0.0062s latency).\nNot shown: 65534 closed tcp ports (reset)\nPORT     STATE SERVICE    VERSION\n6668/tcp open  tcpwrapped\n|_irc-info: Unable to open connection\nMAC Address: 10:52:1C:47:5A:B5 (Espressif)\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 730.81 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.11",
+        "rdns": null,
+        "open_ports": [
+          {
+            "port": 6668,
+            "proto": "tcp",
+            "service": "tcpwrapped",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    },
+    "192.168.1.12": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.12"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.12",
+          "reverse_dns": "wlan0.home",
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.12",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "[Errno 111] Connection refused"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [
+        {
+          "id": "CVE-1999-1257",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Xyplex terminal server 6.0.1S1, and possibly other versions, allows remote attackers to bypass the password prompt by entering (1) a CTRL-Z character, or (2) a ? (question mark).",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-1999-1189",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer overflow in Netscape Navigator/Communicator 4.7 for Windows 95 and Windows 98 allows remote attackers to cause a denial of service, and possibly execute arbitrary commands, via a long argument after the ? character in a URL that refe",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2000-0236",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "Netscape Enterprise Server with Directory Indexing enabled allows remote attackers to list server directories via web publishing tags such as ?wp-ver-info and ?wp-cs-dump.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-1203",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 4.3,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Cross-site scripting (XSS) vulnerability in index.php for Mambo Site Server 4.0.10 allows remote attackers to execute script on other clients via the ?option parameter.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2005-0190",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 2.6,
+            "severity": "LOW",
+            "vector": "AV:N/AC:H/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Directory traversal vulnerability in RealPlayer 10.5 (6.0.12.1040) and earlier allows remote attackers to delete arbitrary files via a Real Metadata Packages (RMP) file with a FILENAME tag containing .. (dot dot) sequences in a filename tha",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2006-6291",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 6.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:S/C:N/I:N/A:C"
+          },
+          "summary": "Stack overflow in the IMAP module (MEIMAPS.EXE) in MailEnable Professional 1.6 through 1.83 and 2.0 through 2.33, and MailEnable Enterprise 1.1 through 1.40 and 2.0 through 2.33, allows remote authenticated users to cause a denial of servic",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2008-3550",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "The CQWeb login page in IBM Rational ClearQuest 7.0.1 allows remote attackers to obtain potentially sensitive information (page source code) via a combination of ?script? and ?/script? sequences in the id field, possibly related to a cross-",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2009-0652",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:P"
+          },
+          "summary": "The Internationalized Domain Names (IDN) blacklist in Mozilla Firefox 3.0.6 and other versions before 3.0.9; Thunderbird before 2.0.0.21; and SeaMonkey before 1.1.15 does not include box-drawing characters, which allows remote attackers to ",
+          "confirmed": false
+        }
+      ],
+      "risk": {
+        "score": 15,
+        "level": "POTENTIAL",
+        "reasons": [
+          "Version not confirmed for service '?'",
+          "2 HIGH CVEs (max CVSS=7.5)"
+        ],
+        "version_unknown": true
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for wlan0.home (192.168.1.12)\nHost is up (0.0084s latency).\nNot shown: 65534 closed tcp ports (reset)\nPORT     STATE SERVICE VERSION\n6668/tcp open  irc?\n|_irc-info: Unable to open connection\nMAC Address: 4C:A9:19:5A:7C:9A (Tuya Smart)\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 333.47 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.12",
+        "rdns": "wlan0.home",
+        "open_ports": [
+          {
+            "port": 6668,
+            "proto": "tcp",
+            "service": "irc",
+            "version_raw": "?",
+            "product": "?",
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    },
+    "192.168.1.15": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.15"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.15",
+          "reverse_dns": "r3con-portable.home",
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.15",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "[Errno 111] Connection refused"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [
+        {
+          "id": "CVE-2000-0771",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 2.1,
+            "severity": "LOW",
+            "vector": "AV:L/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "Microsoft Windows 2000 allows local users to cause a denial of service by corrupting the local security policy via malformed RPC traffic, aka the \"Local Security Policy Corruption\" vulnerability.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2001-0509",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "Vulnerabilities in RPC servers in (1) Microsoft Exchange Server 2000 and earlier, (2) Microsoft SQL Server 2000 and earlier, (3) Windows NT 4.0, and (4) Windows 2000 allow remote attackers to cause a denial of service via malformed inputs.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2002-1140",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "The Sun Microsystems RPC library Services for Unix 3.0 Interix SD, as implemented on Microsoft Windows NT4, 2000, and XP, allows remote attackers to cause a denial of service (service hang) via malformed packet fragments, aka \"Improper para",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2002-1141",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "An input validation error in the Sun Microsystems RPC library Services for Unix 3.0 Interix SD, as implemented on Microsoft Windows NT4, 2000, and XP, allows remote attackers to cause a denial of service via malformed fragmented RPC client ",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-0003",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer overflow in the RPC Locator service for Microsoft Windows NT 4.0, Windows NT 4.0 Terminal Server Edition, Windows 2000, and Windows XP allows local users to execute arbitrary code via an RPC call to the service containing certain par",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-0352",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer overflow in a certain DCOM interface for RPC in Microsoft Windows NT 4.0, 2000, XP, and Server 2003 allows remote attackers to execute arbitrary code via a malformed message, as exploited by the Blaster/MSblast/LovSAN and Nachi/Welch",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-0807",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "Buffer overflow in the COM Internet Services and in the RPC over HTTP Proxy components for Microsoft Windows NT Server 4.0, NT 4.0 Terminal Server Edition, 2000, XP, and Server 2003 allows remote attackers to cause a denial of service via a",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2004-0116",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "An Activation function in the RPCSS Service involved with DCOM activation for Microsoft Windows 2000, XP, and 2003 allows remote attackers to cause a denial of service (memory consumption) via an activation request with a large length field",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-1999-1257",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Xyplex terminal server 6.0.1S1, and possibly other versions, allows remote attackers to bypass the password prompt by entering (1) a CTRL-Z character, or (2) a ? (question mark).",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-1999-1189",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer overflow in Netscape Navigator/Communicator 4.7 for Windows 95 and Windows 98 allows remote attackers to cause a denial of service, and possibly execute arbitrary commands, via a long argument after the ? character in a URL that refe",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2000-0236",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "Netscape Enterprise Server with Directory Indexing enabled allows remote attackers to list server directories via web publishing tags such as ?wp-ver-info and ?wp-cs-dump.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-1203",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 4.3,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Cross-site scripting (XSS) vulnerability in index.php for Mambo Site Server 4.0.10 allows remote attackers to execute script on other clients via the ?option parameter.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2005-0190",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 2.6,
+            "severity": "LOW",
+            "vector": "AV:N/AC:H/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Directory traversal vulnerability in RealPlayer 10.5 (6.0.12.1040) and earlier allows remote attackers to delete arbitrary files via a Real Metadata Packages (RMP) file with a FILENAME tag containing .. (dot dot) sequences in a filename tha",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2006-6291",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 6.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:S/C:N/I:N/A:C"
+          },
+          "summary": "Stack overflow in the IMAP module (MEIMAPS.EXE) in MailEnable Professional 1.6 through 1.83 and 2.0 through 2.33, and MailEnable Enterprise 1.1 through 1.40 and 2.0 through 2.33, allows remote authenticated users to cause a denial of servic",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2008-3550",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "The CQWeb login page in IBM Rational ClearQuest 7.0.1 allows remote attackers to obtain potentially sensitive information (page source code) via a combination of ?script? and ?/script? sequences in the id field, possibly related to a cross-",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2009-0652",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:P"
+          },
+          "summary": "The Internationalized Domain Names (IDN) blacklist in Mozilla Firefox 3.0.6 and other versions before 3.0.9; Thunderbird before 2.0.0.21; and SeaMonkey before 1.1.15 does not include box-drawing characters, which allows remote attackers to ",
+          "confirmed": false
+        }
+      ],
+      "risk": {
+        "score": 40,
+        "level": "POTENTIAL",
+        "reasons": [
+          "Sensitive ports exposed: [445]",
+          "Version not confirmed for service 'Microsoft Windows RPC'",
+          "Version not confirmed for service 'Microsoft Windows netbios-ssn'",
+          "Version not confirmed for service '?'",
+          "Version not confirmed for service '?'",
+          "Version not confirmed for service 'Microsoft Windows RPC'",
+          "Version not confirmed for service 'Microsoft Windows RPC'",
+          "Version not confirmed for service 'Microsoft Windows RPC'",
+          "Version not confirmed for service 'Microsoft Windows RPC'",
+          "Version not confirmed for service 'Microsoft Windows RPC'",
+          "Version not confirmed for service 'Microsoft Windows RPC'",
+          "4 HIGH CVEs (max CVSS=7.5)"
+        ],
+        "version_unknown": true
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for r3con-portable.home (192.168.1.15)\nHost is up (0.00045s latency).\nNot shown: 65523 closed tcp ports (reset)\nPORT      STATE SERVICE       VERSION\n135/tcp   open  msrpc         Microsoft Windows RPC\n139/tcp   open  netbios-ssn   Microsoft Windows netbios-ssn\n445/tcp   open  microsoft-ds?\n5040/tcp  open  unknown\n5357/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)\n|_http-title: Service Unavailable\n|_http-server-header: Microsoft-HTTPAPI/2.0\n7680/tcp  open  pando-pub?\n49664/tcp open  msrpc         Microsoft Windows RPC\n49665/tcp open  msrpc         Microsoft Windows RPC\n49668/tcp open  msrpc         Microsoft Windows RPC\n49669/tcp open  msrpc         Microsoft Windows RPC\n49676/tcp open  msrpc         Microsoft Windows RPC\n49690/tcp open  msrpc         Microsoft Windows RPC\nMAC Address: D4:D8:53:9F:86:E3 (Intel Corporate)\nService Info: OS: Windows; CPE: cpe:/o:microsoft:windows\n\nHost script results:\n| smb2-security-mode: \n|   3:1:1: \n|_    Message signing enabled but not required\n| smb2-time: \n|   date: 2026-03-11T14:22:11\n|_  start_date: N/A\n|_nbstat: NetBIOS name: R3CON-PORTABLE, NetBIOS user: <unknown>, NetBIOS MAC: d4:d8:53:9f:86:e3 (Intel Corporate)\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 79.34 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.15",
+        "rdns": "r3con-portable.home",
+        "open_ports": [
+          {
+            "port": 135,
+            "proto": "tcp",
+            "service": "msrpc",
+            "version_raw": "Microsoft Windows RPC",
+            "product": "Microsoft Windows RPC",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 139,
+            "proto": "tcp",
+            "service": "netbios-ssn",
+            "version_raw": "Microsoft Windows netbios-ssn",
+            "product": "Microsoft Windows netbios-ssn",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 445,
+            "proto": "tcp",
+            "service": "microsoft-ds",
+            "version_raw": "?",
+            "product": "?",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 5040,
+            "proto": "tcp",
+            "service": "unknown",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 5357,
+            "proto": "tcp",
+            "service": "http",
+            "version_raw": "Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)",
+            "product": "Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 7680,
+            "proto": "tcp",
+            "service": "pando-pub",
+            "version_raw": "?",
+            "product": "?",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 49664,
+            "proto": "tcp",
+            "service": "msrpc",
+            "version_raw": "Microsoft Windows RPC",
+            "product": "Microsoft Windows RPC",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 49665,
+            "proto": "tcp",
+            "service": "msrpc",
+            "version_raw": "Microsoft Windows RPC",
+            "product": "Microsoft Windows RPC",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 49668,
+            "proto": "tcp",
+            "service": "msrpc",
+            "version_raw": "Microsoft Windows RPC",
+            "product": "Microsoft Windows RPC",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 49669,
+            "proto": "tcp",
+            "service": "msrpc",
+            "version_raw": "Microsoft Windows RPC",
+            "product": "Microsoft Windows RPC",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 49676,
+            "proto": "tcp",
+            "service": "msrpc",
+            "version_raw": "Microsoft Windows RPC",
+            "product": "Microsoft Windows RPC",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 49690,
+            "proto": "tcp",
+            "service": "msrpc",
+            "version_raw": "Microsoft Windows RPC",
+            "product": "Microsoft Windows RPC",
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    },
+    "192.168.1.18": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.18"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.18",
+          "reverse_dns": null,
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.18",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1033)"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [
+        {
+          "id": "CVE-1999-1257",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Xyplex terminal server 6.0.1S1, and possibly other versions, allows remote attackers to bypass the password prompt by entering (1) a CTRL-Z character, or (2) a ? (question mark).",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-1999-1189",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer overflow in Netscape Navigator/Communicator 4.7 for Windows 95 and Windows 98 allows remote attackers to cause a denial of service, and possibly execute arbitrary commands, via a long argument after the ? character in a URL that refe",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2000-0236",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "Netscape Enterprise Server with Directory Indexing enabled allows remote attackers to list server directories via web publishing tags such as ?wp-ver-info and ?wp-cs-dump.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-1203",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 4.3,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Cross-site scripting (XSS) vulnerability in index.php for Mambo Site Server 4.0.10 allows remote attackers to execute script on other clients via the ?option parameter.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2005-0190",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 2.6,
+            "severity": "LOW",
+            "vector": "AV:N/AC:H/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Directory traversal vulnerability in RealPlayer 10.5 (6.0.12.1040) and earlier allows remote attackers to delete arbitrary files via a Real Metadata Packages (RMP) file with a FILENAME tag containing .. (dot dot) sequences in a filename tha",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2006-6291",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 6.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:S/C:N/I:N/A:C"
+          },
+          "summary": "Stack overflow in the IMAP module (MEIMAPS.EXE) in MailEnable Professional 1.6 through 1.83 and 2.0 through 2.33, and MailEnable Enterprise 1.1 through 1.40 and 2.0 through 2.33, allows remote authenticated users to cause a denial of servic",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2008-3550",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "The CQWeb login page in IBM Rational ClearQuest 7.0.1 allows remote attackers to obtain potentially sensitive information (page source code) via a combination of ?script? and ?/script? sequences in the id field, possibly related to a cross-",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2009-0652",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:P"
+          },
+          "summary": "The Internationalized Domain Names (IDN) blacklist in Mozilla Firefox 3.0.6 and other versions before 3.0.9; Thunderbird before 2.0.0.21; and SeaMonkey before 1.1.15 does not include box-drawing characters, which allows remote attackers to ",
+          "confirmed": false
+        }
+      ],
+      "risk": {
+        "score": 15,
+        "level": "POTENTIAL",
+        "reasons": [
+          "Version not confirmed for service '?'",
+          "Version not confirmed for service '?'",
+          "2 HIGH CVEs (max CVSS=7.5)"
+        ],
+        "version_unknown": true
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for 192.168.1.18\nHost is up (0.061s latency).\nNot shown: 65529 closed tcp ports (reset)\nPORT     STATE SERVICE    VERSION\n80/tcp   open  tcpwrapped\n|_http-server-header: EPSON_Linux UPnP/1.0 Epson UPnP SDK/1.0\n|_http-title: Site doesn't have a title (text/html).\n443/tcp  open  tcpwrapped\n| ssl-cert: Subject: commonName=EPSON968BAA/organizationName=SEIKO EPSON CORP.\n| Subject Alternative Name: DNS:EPSON968BAA, DNS:EPSON968BAA.local, IP Address:192.168.1.37, DNS:192.168.1.37\n| Not valid before: 2010-01-01T00:00:00\n|_Not valid after:  2038-01-01T00:00:00\n|_http-title: Site doesn't have a title (text/html).\n|_http-server-header: EPSON_Linux UPnP/1.0 Epson UPnP SDK/1.0\n|_ssl-date: TLS randomness does not represent time\n515/tcp  open  printer\n631/tcp  open  tcpwrapped\n|_http-title: Site doesn't have a title (application/ipp).\n|_http-server-header: Epson_IPP-Server/2.0.0\n1865/tcp open  entp?\n9100/tcp open  jetdirect?\n1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :\nSF-Port1865-TCP:V=7.95%I=7%D=3/11%Time=69B17A9A%P=x86_64-pc-linux-gnu%r(NU\nSF:LL,11,\"IS\\x80\\x000\\x0c\\0\\0\\0\\x05\\0\\0\\x01\\x04\\0\\0\\0\")%r(GenericLines,11,\nSF:\"IS\\x80\\x000\\x0c\\0\\0\\0\\x05\\0\\0\\x01\\x04\\0\\0\\0\")%r(Help,11,\"IS\\x80\\x000\\x\nSF:0c\\0\\0\\0\\x05\\0\\0\\x01\\x04\\0\\0\\0\")%r(X11Probe,11,\"IS\\x80\\x000\\x0c\\0\\0\\0\\x\nSF:05\\0\\0\\x01\\x04\\0\\0\\0\")%r(LPDString,11,\"IS\\x80\\x000\\x0c\\0\\0\\0\\x05\\0\\0\\x0\nSF:1\\x04\\0\\0\\0\")%r(TerminalServer,11,\"IS\\x80\\x000\\x0c\\0\\0\\0\\x05\\0\\0\\x01\\x0\nSF:4\\0\\0\\0\")%r(JavaRMI,11,\"IS\\x80\\x000\\x0c\\0\\0\\0\\x05\\0\\0\\x01\\x04\\0\\0\\0\");\nMAC Address: 50:57:9C:96:8B:AA (Seiko Epson)\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 131.64 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.18",
+        "rdns": null,
+        "open_ports": [
+          {
+            "port": 80,
+            "proto": "tcp",
+            "service": "tcpwrapped",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 443,
+            "proto": "tcp",
+            "service": "tcpwrapped",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 515,
+            "proto": "tcp",
+            "service": "printer",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 631,
+            "proto": "tcp",
+            "service": "tcpwrapped",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 1865,
+            "proto": "tcp",
+            "service": "entp",
+            "version_raw": "?",
+            "product": "?",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 9100,
+            "proto": "tcp",
+            "service": "jetdirect",
+            "version_raw": "?",
+            "product": "?",
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    },
+    "192.168.1.24": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.24"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.24",
+          "reverse_dns": "device-57.home",
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.24",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "[Errno 111] Connection refused"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [
+        {
+          "id": "CVE-1999-1257",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Xyplex terminal server 6.0.1S1, and possibly other versions, allows remote attackers to bypass the password prompt by entering (1) a CTRL-Z character, or (2) a ? (question mark).",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-1999-1189",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer overflow in Netscape Navigator/Communicator 4.7 for Windows 95 and Windows 98 allows remote attackers to cause a denial of service, and possibly execute arbitrary commands, via a long argument after the ? character in a URL that refe",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2000-0236",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "Netscape Enterprise Server with Directory Indexing enabled allows remote attackers to list server directories via web publishing tags such as ?wp-ver-info and ?wp-cs-dump.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-1203",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 4.3,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Cross-site scripting (XSS) vulnerability in index.php for Mambo Site Server 4.0.10 allows remote attackers to execute script on other clients via the ?option parameter.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2005-0190",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 2.6,
+            "severity": "LOW",
+            "vector": "AV:N/AC:H/Au:N/C:N/I:P/A:N"
+          },
+          "summary": "Directory traversal vulnerability in RealPlayer 10.5 (6.0.12.1040) and earlier allows remote attackers to delete arbitrary files via a Real Metadata Packages (RMP) file with a FILENAME tag containing .. (dot dot) sequences in a filename tha",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2006-6291",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 6.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:S/C:N/I:N/A:C"
+          },
+          "summary": "Stack overflow in the IMAP module (MEIMAPS.EXE) in MailEnable Professional 1.6 through 1.83 and 2.0 through 2.33, and MailEnable Enterprise 1.1 through 1.40 and 2.0 through 2.33, allows remote authenticated users to cause a denial of servic",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2008-3550",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "The CQWeb login page in IBM Rational ClearQuest 7.0.1 allows remote attackers to obtain potentially sensitive information (page source code) via a combination of ?script? and ?/script? sequences in the id field, possibly related to a cross-",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2009-0652",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:P"
+          },
+          "summary": "The Internationalized Domain Names (IDN) blacklist in Mozilla Firefox 3.0.6 and other versions before 3.0.9; Thunderbird before 2.0.0.21; and SeaMonkey before 1.1.15 does not include box-drawing characters, which allows remote attackers to ",
+          "confirmed": false
+        }
+      ],
+      "risk": {
+        "score": 15,
+        "level": "POTENTIAL",
+        "reasons": [
+          "Version not confirmed for service 'Netgear GS110TP http config'",
+          "Version not confirmed for service '?'",
+          "Version not confirmed for service 'Broadcom FASTPATH Switching telnetd'",
+          "2 HIGH CVEs (max CVSS=7.5)"
+        ],
+        "version_unknown": true
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for device-57.home (192.168.1.24)\nHost is up (0.0047s latency).\nNot shown: 65532 closed tcp ports (reset)\nPORT      STATE SERVICE         VERSION\n80/tcp    open  http            Netgear GS110TP http config\n|_http-title: NETGEAR GS110TP\n|_http-server-header: Web Server\n4242/tcp  open  vrml-multi-use?\n|_dicom-ping: ERROR: Script execution failed (use -d to debug)\n60000/tcp open  telnet          Broadcom FASTPATH Switching telnetd\nMAC Address: 6C:B0:CE:21:5B:3E (Netgear)\nService Info: Device: switch; CPE: cpe:/h:netgear:gs110tp\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 719.30 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.24",
+        "rdns": "device-57.home",
+        "open_ports": [
+          {
+            "port": 80,
+            "proto": "tcp",
+            "service": "http",
+            "version_raw": "Netgear GS110TP http config",
+            "product": "Netgear GS110TP http config",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 4242,
+            "proto": "tcp",
+            "service": "vrml-multi-use",
+            "version_raw": "?",
+            "product": "?",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 60000,
+            "proto": "tcp",
+            "service": "telnet",
+            "version_raw": "Broadcom FASTPATH Switching telnetd",
+            "product": "Broadcom FASTPATH Switching telnetd",
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    },
+    "192.168.1.25": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.25"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.25",
+          "reverse_dns": null,
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.25",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.1.25",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.1.25",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.25",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.25",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.25",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.25",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "[Errno 111] Connection refused"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [],
+      "risk": {
+        "score": 0,
+        "level": "LOW",
+        "reasons": [],
+        "version_unknown": false
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for 192.168.1.25\nHost is up (0.013s latency).\nNot shown: 65532 closed tcp ports (reset)\nPORT      STATE SERVICE    VERSION\n49152/tcp open  tcpwrapped\n62078/tcp open  tcpwrapped\n62787/tcp open  unknown\nMAC Address: BA:86:72:4B:E7:5F (Unknown)\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 194.75 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.25",
+        "rdns": null,
+        "open_ports": [
+          {
+            "port": 49152,
+            "proto": "tcp",
+            "service": "tcpwrapped",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 62078,
+            "proto": "tcp",
+            "service": "tcpwrapped",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 62787,
+            "proto": "tcp",
+            "service": "unknown",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    },
+    "192.168.1.27": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.27"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.27",
+          "reverse_dns": "server.home",
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.27",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.184.171",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: IP address mismatch, certificate is not valid for '192.168.1.27'. (_ssl.c:1033)"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [
+        {
+          "id": "CVE-2009-2629",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer underflow in src/http/ngx_http_parse.c in nginx 0.1.0 through 0.5.37, 0.6.x before 0.6.39, 0.7.x before 0.7.62, and 0.8.x before 0.8.15 allows remote attackers to execute arbitrary code via crafted HTTP requests.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2009-3896",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "src/http/ngx_http_parse.c in nginx (aka Engine X) 0.1.0 through 0.4.14, 0.5.x before 0.5.38, 0.6.x before 0.6.39, 0.7.x before 0.7.62, and 0.8.x before 0.8.14 allows remote attackers to cause a denial of service (NULL pointer dereference an",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2009-3898",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 4.9,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:S/C:P/I:P/A:N"
+          },
+          "summary": "Directory traversal vulnerability in src/http/modules/ngx_http_dav_module.c in nginx (aka Engine X) before 0.7.63, and 0.8.x before 0.8.17, allows remote authenticated users to create or overwrite arbitrary files via a .. (dot dot) in the D",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2009-4487",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 6.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "nginx 0.7.64 writes data to a log file without sanitizing non-printable characters, which might allow remote attackers to modify a window's title, or possibly execute arbitrary commands or overwrite files, via an HTTP request containing an ",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2010-2263",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "nginx 0.8 before 0.8.40 and 0.7 before 0.7.66, when running on Windows, allows remote attackers to obtain source code or unparsed content of arbitrary files under the web document root by appending ::$DATA to the URI.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2010-2266",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "nginx 0.8.36 allows remote attackers to cause a denial of service (crash) via certain encoded directory traversal sequences that trigger memory corruption, as demonstrated using the \"%c0.%c0.\" sequence.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2011-4315",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 6.8,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:M/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Heap-based buffer overflow in compression-pointer processing in core/ngx_resolver.c in nginx before 1.0.10 allows remote resolvers to cause a denial of service (daemon crash) or possibly have unspecified other impact via a long response.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2012-1180",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "Use-after-free vulnerability in nginx before 1.0.14 and 1.1.x before 1.1.17 allows remote HTTP servers to obtain sensitive information from process memory via a crafted backend response, in conjunction with a client request.",
+          "confirmed": false
+        }
+      ],
+      "risk": {
+        "score": 40,
+        "level": "POTENTIAL",
+        "reasons": [
+          "Sensitive ports exposed: [22]",
+          "Version not confirmed for service 'nginx'",
+          "Version not confirmed for service 'nginx'",
+          "1 HIGH CVEs (max CVSS=7.5)"
+        ],
+        "version_unknown": true
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for server.home (192.168.1.27)\nHost is up (0.0034s latency).\nNot shown: 65528 filtered tcp ports (no-response)\nPORT      STATE  SERVICE        VERSION\n22/tcp    open   ssh            OpenSSH 8.4p1 Debian 5+deb11u5 (protocol 2.0)\n| ssh-hostkey: \n|   3072 75:95:6c:3b:14:52:8c:94:10:b1:b0:31:9d:aa:27:6d (RSA)\n|   256 9a:44:60:e9:e7:14:50:b0:22:9c:20:0e:c7:25:9b:b5 (ECDSA)\n|_  256 03:22:45:31:eb:c3:67:aa:88:c3:2e:29:0a:20:93:88 (ED25519)\n80/tcp    open   http           nginx\n|_http-title: Did not follow redirect to https://server.home/\n443/tcp   open   ssl/http       nginx\n|_http-title: Frankulin.fr\n|_ssl-date: TLS randomness does not represent time\n| ssl-cert: Subject: commonName=frankulin.fr\n| Subject Alternative Name: DNS:frankulin.fr\n| Not valid before: 2025-08-21T14:31:52\n|_Not valid after:  2025-11-19T14:31:51\n| http-robots.txt: 9 disallowed entries \n| /admins/ /api/ /socket.io/ /uploads/ /profil-pics/ \n|_/css/ /js/ /images/ /forbidden\n8443/tcp  closed https-alt\n9443/tcp  closed tungsten-https\n51820/tcp closed unknown\n51821/tcp open   unknown\n| fingerprint-strings: \n|   DNSStatusRequestTCP, DNSVersionBindReqTCP, RPCCheck: \n|     HTTP/1.1 400 Bad Request\n|     Connection: close\n|   GetRequest, HTTPOptions, RTSPRequest: \n|     HTTP/1.1 302 Found\n|     set-cookie: i18n_redirected=en; Path=/; Expires=Thu, 11 Mar 2027 14:23:48 GMT; SameSite=Lax\n|     set-cookie: theme=system; Path=/\n|     location: /login\n|     Accept-CH: Sec-CH-Prefers-Color-Scheme\n|     Vary: Sec-CH-Prefers-Color-Scheme\n|     Critical-CH: Sec-CH-Prefers-Color-Scheme\n|     content-type: text/html\n|     Date: Wed, 11 Mar 2026 14:23:48 GMT\n|     Connection: close\n|_    <!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=/login\"></head></html>\n1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :\nSF-Port51821-TCP:V=7.95%I=7%D=3/11%Time=69B17AF5%P=x86_64-pc-linux-gnu%r(G\nSF:etRequest,1C9,\"HTTP/1\\.1\\x20302\\x20Found\\r\\nset-cookie:\\x20i18n_redirec\nSF:ted=en;\\x20Path=/;\\x20Expires=Thu,\\x2011\\x20Mar\\x202027\\x2014:23:48\\x20\nSF:GMT;\\x20SameSite=Lax\\r\\nset-cookie:\\x20theme=system;\\x20Path=/\\r\\nlocat\nSF:ion:\\x20/login\\r\\nAccept-CH:\\x20Sec-CH-Prefers-Color-Scheme\\r\\nVary:\\x2\nSF:0Sec-CH-Prefers-Color-Scheme\\r\\nCritical-CH:\\x20Sec-CH-Prefers-Color-Sc\nSF:heme\\r\\ncontent-type:\\x20text/html\\r\\nDate:\\x20Wed,\\x2011\\x20Mar\\x20202\nSF:6\\x2014:23:48\\x20GMT\\r\\nConnection:\\x20close\\r\\n\\r\\n<!DOCTYPE\\x20html><\nSF:html><head><meta\\x20http-equiv=\\\"refresh\\\"\\x20content=\\\"0;\\x20url=/logi\nSF:n\\\"></head></html>\")%r(HTTPOptions,1C9,\"HTTP/1\\.1\\x20302\\x20Found\\r\\nse\nSF:t-cookie:\\x20i18n_redirected=en;\\x20Path=/;\\x20Expires=Thu,\\x2011\\x20Ma\nSF:r\\x202027\\x2014:23:48\\x20GMT;\\x20SameSite=Lax\\r\\nset-cookie:\\x20theme=s\nSF:ystem;\\x20Path=/\\r\\nlocation:\\x20/login\\r\\nAccept-CH:\\x20Sec-CH-Prefers\nSF:-Color-Scheme\\r\\nVary:\\x20Sec-CH-Prefers-Color-Scheme\\r\\nCritical-CH:\\x\nSF:20Sec-CH-Prefers-Color-Scheme\\r\\ncontent-type:\\x20text/html\\r\\nDate:\\x2\nSF:0Wed,\\x2011\\x20Mar\\x202026\\x2014:23:48\\x20GMT\\r\\nConnection:\\x20close\\r\nSF:\\n\\r\\n<!DOCTYPE\\x20html><html><head><meta\\x20http-equiv=\\\"refresh\\\"\\x20\nSF:content=\\\"0;\\x20url=/login\\\"></head></html>\")%r(RTSPRequest,1C9,\"HTTP/1\nSF:\\.1\\x20302\\x20Found\\r\\nset-cookie:\\x20i18n_redirected=en;\\x20Path=/;\\x2\nSF:0Expires=Thu,\\x2011\\x20Mar\\x202027\\x2014:23:48\\x20GMT;\\x20SameSite=Lax\\\nSF:r\\nset-cookie:\\x20theme=system;\\x20Path=/\\r\\nlocation:\\x20/login\\r\\nAcc\nSF:ept-CH:\\x20Sec-CH-Prefers-Color-Scheme\\r\\nVary:\\x20Sec-CH-Prefers-Color\nSF:-Scheme\\r\\nCritical-CH:\\x20Sec-CH-Prefers-Color-Scheme\\r\\ncontent-type:\nSF:\\x20text/html\\r\\nDate:\\x20Wed,\\x2011\\x20Mar\\x202026\\x2014:23:48\\x20GMT\\\nSF:r\\nConnection:\\x20close\\r\\n\\r\\n<!DOCTYPE\\x20html><html><head><meta\\x20h\nSF:ttp-equiv=\\\"refresh\\\"\\x20content=\\\"0;\\x20url=/login\\\"></head></html>\")%\nSF:r(RPCCheck,2F,\"HTTP/1\\.1\\x20400\\x20Bad\\x20Request\\r\\nConnection:\\x20clo\nSF:se\\r\\n\\r\\n\")%r(DNSVersionBindReqTCP,2F,\"HTTP/1\\.1\\x20400\\x20Bad\\x20Requ\nSF:est\\r\\nConnection:\\x20close\\r\\n\\r\\n\")%r(DNSStatusRequestTCP,2F,\"HTTP/1\\\nSF:.1\\x20400\\x20Bad\\x20Request\\r\\nConnection:\\x20close\\r\\n\\r\\n\");\nMAC Address: 54:BF:64:85:0C:45 (Dell)\nService Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 177.15 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.27",
+        "rdns": "server.home",
+        "open_ports": [
+          {
+            "port": 22,
+            "proto": "tcp",
+            "service": "ssh",
+            "version_raw": "OpenSSH 8.4p1 Debian 5+deb11u5 (protocol 2.0)",
+            "product": "OpenSSH",
+            "version": "8.4p1",
+            "extrainfo": "Debian 5+deb11u5 (protocol 2.0)"
+          },
+          {
+            "port": 80,
+            "proto": "tcp",
+            "service": "http",
+            "version_raw": "nginx",
+            "product": "nginx",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 443,
+            "proto": "tcp",
+            "service": "ssl/http",
+            "version_raw": "nginx",
+            "product": "nginx",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 51821,
+            "proto": "tcp",
+            "service": "unknown",
+            "version_raw": "",
+            "product": null,
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    },
+    "192.168.1.36": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.36"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.36",
+          "reverse_dns": "kali.home",
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.36",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.1.36",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.1.36",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.36",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.36",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.36",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.1.36",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "[Errno 111] Connection refused"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [],
+      "risk": {
+        "score": 25,
+        "level": "MEDIUM",
+        "reasons": [
+          "Sensitive ports exposed: [22]"
+        ],
+        "version_unknown": false
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for kali.home (192.168.1.36)\nHost is up (0.0000020s latency).\nNot shown: 65534 closed tcp ports (reset)\nPORT   STATE SERVICE VERSION\n22/tcp open  ssh     OpenSSH 10.2p1 Debian 3 (protocol 2.0)\nService Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 1.84 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.36",
+        "rdns": "kali.home",
+        "open_ports": [
+          {
+            "port": 22,
+            "proto": "tcp",
+            "service": "ssh",
+            "version_raw": "OpenSSH 10.2p1 Debian 3 (protocol 2.0)",
+            "product": "OpenSSH",
+            "version": "10.2p1",
+            "extrainfo": "Debian 3 (protocol 2.0)"
+          }
+        ]
+      }
+    },
+    "192.168.1.200": {
+      "scheme": "https",
+      "resolved_ips": [
+        "192.168.1.200"
+      ],
+      "ip_enrichment": [
+        {
+          "ip": "192.168.1.200",
+          "reverse_dns": null,
+          "rdap": {
+            "handle": "NET-192-168-0-0-1",
+            "name": "PRIVATE-ADDRESS-CBLK-RFC1918-IANA-RESERVED",
+            "type": null,
+            "startAddress": "192.168.0.0",
+            "endAddress": "192.168.255.255",
+            "country": null,
+            "parentHandle": "NET-192-0-0-0-0",
+            "rdap_url": "https://rdap.org/ip/192.168.1.200",
+            "entities": [
+              {
+                "handle": "IANA",
+                "vcardArray": [
+                  "vcard",
+                  [
+                    [
+                      "version",
+                      {},
+                      "text",
+                      "4.0"
+                    ],
+                    [
+                      "fn",
+                      {},
+                      "text",
+                      "Internet Assigned Numbers Authority"
+                    ],
+                    [
+                      "adr",
+                      {
+                        "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                      },
+                      "text",
+                      [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ],
+                    [
+                      "kind",
+                      {},
+                      "text",
+                      "org"
+                    ]
+                  ]
+                ],
+                "roles": [
+                  "registrant"
+                ],
+                "links": [
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                    "rel": "self",
+                    "type": "application/rdap+json",
+                    "href": "https://rdap.arin.net/registry/entity/IANA"
+                  },
+                  {
+                    "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                    "rel": "alternate",
+                    "type": "application/xml",
+                    "href": "https://whois.arin.net/rest/org/IANA"
+                  }
+                ],
+                "events": [
+                  {
+                    "eventAction": "last changed",
+                    "eventDate": "2024-05-24T10:19:53-04:00"
+                  }
+                ],
+                "entities": [
+                  {
+                    "handle": "IANA-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "Internet Corporation for Assigned Names and Number"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "res-ip@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-823-9358"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "administrative"
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2013-11-11T13:27:24-05:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  },
+                  {
+                    "handle": "IANA-IP-ARIN",
+                    "vcardArray": [
+                      "vcard",
+                      [
+                        [
+                          "version",
+                          {},
+                          "text",
+                          "4.0"
+                        ],
+                        [
+                          "adr",
+                          {
+                            "label": "12025 Waterfront Drive\r\nSuite 300\nLos Angeles\nCA\n90292\nUnited States"
+                          },
+                          "text",
+                          [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                          ]
+                        ],
+                        [
+                          "fn",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "org",
+                          {},
+                          "text",
+                          "ICANN"
+                        ],
+                        [
+                          "kind",
+                          {},
+                          "text",
+                          "group"
+                        ],
+                        [
+                          "email",
+                          {},
+                          "text",
+                          "abuse@iana.org"
+                        ],
+                        [
+                          "tel",
+                          {
+                            "type": [
+                              "work",
+                              "voice"
+                            ]
+                          },
+                          "text",
+                          "+1-310-301-5820"
+                        ]
+                      ]
+                    ],
+                    "roles": [
+                      "technical",
+                      "abuse"
+                    ],
+                    "remarks": [
+                      {
+                        "title": "Registration Comments",
+                        "description": [
+                          "Think we're attacking you? Please look here: \r",
+                          "http://www.iana.org/abuse"
+                        ]
+                      }
+                    ],
+                    "links": [
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "self",
+                        "type": "application/rdap+json",
+                        "href": "https://rdap.arin.net/registry/entity/IANA-IP-ARIN"
+                      },
+                      {
+                        "value": "https://rdap.arin.net/registry/ip/192.168.6.204",
+                        "rel": "alternate",
+                        "type": "application/xml",
+                        "href": "https://whois.arin.net/rest/poc/IANA-IP-ARIN"
+                      }
+                    ],
+                    "events": [
+                      {
+                        "eventAction": "last changed",
+                        "eventDate": "2014-08-11T13:22:29-04:00"
+                      },
+                      {
+                        "eventAction": "registration",
+                        "eventDate": "2003-08-25T00:00:00-04:00"
+                      }
+                    ],
+                    "status": [
+                      "validated"
+                    ],
+                    "port43": "whois.arin.net",
+                    "objectClassName": "entity"
+                  }
+                ],
+                "port43": "whois.arin.net",
+                "objectClassName": "entity"
+              }
+            ]
+          },
+          "geo": {
+            "error": "private range"
+          }
+        }
+      ],
+      "tls": {
+        "error": "timed out"
+      },
+      "cms": [],
+      "waf": [],
+      "pages": [],
+      "login_forms": [],
+      "cves": [
+        {
+          "id": "CVE-2000-1195",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "telnet daemon (telnetd) from the Linux netkit package before netkit-telnet-0.16 allows remote attackers to bypass authentication when telnetd is running with the -L command line option.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2020-8797",
+          "cvss": {
+            "version": "cvssMetricV31",
+            "score": 6.7,
+            "severity": "MEDIUM",
+            "vector": "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "summary": "Juplink RX4-1500 v1.0.3 allows remote attackers to gain root access to the Linux subsystem via an unsanitized exec call (aka Command Line Injection), if the undocumented telnetd service is enabled and the attacker can authenticate as admin ",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2021-27171",
+          "cvss": {
+            "version": "cvssMetricV31",
+            "score": 9.8,
+            "severity": "CRITICAL",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "summary": "An issue was discovered on FiberHome HG6245D devices through RP2613. It is possible to start a Linux telnetd as root on port 26/tcp by using the CLI interface commands of ddd and shell (or tshell).",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2022-39028",
+          "cvss": {
+            "version": "cvssMetricV31",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "summary": "telnetd in GNU Inetutils through 2.3, MIT krb5-appl through 1.0.3, and derivative works has a NULL pointer dereference via 0xff 0xf7 or 0xff 0xf8. In a typical installation, the telnetd application would crash but the telnet service would r",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2001-0385",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "GoAhead webserver 2.1 allows remote attackers to cause a denial of service via an HTTP request to the /aux directory.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2002-1951",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Buffer overflow in GoAhead WebServer 2.1 allows remote attackers to execute arbitrary code via a long HTTP GET request with a large number of subdirectories.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2003-0169",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "hpnst.exe in the GoAhead-Webs webserver for HP Instant TopTools before 5.55 allows remote attackers to cause a denial of service (CPU consumption) via a request to hpnst.exe that calls itself, which causes an infinite loop.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2002-2427",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N"
+          },
+          "summary": "The security handler in GoAhead WebServer before 2.1.1 allows remote attackers to bypass authentication and obtain access to protected web content via \"an extra slash in a URL,\" a different vulnerability than CVE-2002-1603.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2002-2428",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "webs.c in GoAhead WebServer before 2.1.4 allows remote attackers to cause a denial of service (NULL pointer dereference and daemon crash) via an HTTP POST request that contains a Content-Length header but no body data.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2002-2429",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "webs.c in GoAhead WebServer before 2.1.4 allows remote attackers to cause a denial of service (daemon crash) via an HTTP POST request that contains a negative integer in the Content-Length header.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2002-2430",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 5.0,
+            "severity": "MEDIUM",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P"
+          },
+          "summary": "GoAhead WebServer before 2.1.1 allows remote attackers to cause a denial of service (CPU consumption) by performing a socket disconnect to terminate a request before it has been fully processed by the server.",
+          "confirmed": false
+        },
+        {
+          "id": "CVE-2002-2431",
+          "cvss": {
+            "version": "cvssMetricV2",
+            "score": 7.5,
+            "severity": "HIGH",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P"
+          },
+          "summary": "Unspecified vulnerability in GoAhead WebServer before 2.1.4 allows remote attackers to cause \"incorrect behavior\" via unknown \"malicious code,\" related to incorrect use of the socketInputBuffered function by sockGen.c.",
+          "confirmed": false
+        }
+      ],
+      "risk": {
+        "score": 55,
+        "level": "POTENTIAL",
+        "reasons": [
+          "Sensitive ports exposed: [23]",
+          "Version not confirmed for service 'Linux telnetd'",
+          "Version not confirmed for service 'GoAhead WebServer'",
+          "1 CRITICAL CVEs (max CVSS=9.8)"
+        ],
+        "version_unknown": true
+      },
+      "nmap_raw": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-11 10:20 EDT\nNmap scan report for 192.168.1.200\nHost is up (0.12s latency).\nNot shown: 65532 closed tcp ports (reset)\nPORT    STATE    SERVICE VERSION\n23/tcp  open     telnet  Linux telnetd\n80/tcp  open     http    GoAhead WebServer\n| http-title: Site doesn't have a title (text/html).\n|_Requested resource was http://192.168.1.200/index.htm\n443/tcp filtered https\nMAC Address: 00:E0:53:17:ED:2A (Cellport Labs)\nService Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 352.38 seconds\n",
+      "nmap_structured": {
+        "ip": "192.168.1.200",
+        "rdns": null,
+        "open_ports": [
+          {
+            "port": 23,
+            "proto": "tcp",
+            "service": "telnet",
+            "version_raw": "Linux telnetd",
+            "product": "Linux telnetd",
+            "version": null,
+            "extrainfo": null
+          },
+          {
+            "port": 80,
+            "proto": "tcp",
+            "service": "http",
+            "version_raw": "GoAhead WebServer",
+            "product": "GoAhead WebServer",
+            "version": null,
+            "extrainfo": null
+          }
+        ]
+      }
+    }
+  }
+}

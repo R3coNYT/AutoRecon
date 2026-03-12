@@ -31,28 +31,46 @@ AutoRecon includes:
 
 # 🚀 Installation
 
-## Install git
-
-```bash
-sudo apt update && sudo apt install -y git
-```
-
 ## Clone the repository
 
 ```bash
-sudo git clone https://github.com/R3coNYT/AutoRecon.git /opt/autorecon
-sudo chmod -R 755 /opt/autorecon
-cd /opt/autorecon
-sudo chmod +x AutoRecon.sh
-./AutoRecon.sh
+git clone https://github.com/R3coNYT/AutoRecon.git
+cd AutoRecon
 ```
+
+## Install required system packages
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y nmap python3 python3-venv python3-pip
+```
+
+## Create a Python virtual environment
+
+```bash
+python3 -m venv autorecon_env
+```
+
+## Activate the environment
+
+```bash
+source autorecon_env/bin/activate
+```
+
+## Install Python dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
 
 # ▶️ Run the Tool
 
 ## Start AutoRecon console
 
 ```bash
-AutoRecon
+python3 AutoRecon.py
 ```
 
 This will launch the interactive AutoRecon console.

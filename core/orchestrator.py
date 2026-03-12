@@ -18,6 +18,9 @@ from core.version_matcher import is_version_affected
 from core.utils_timer import step_timer
 from core.host_discovery import discover_hosts
 from core.nmap_xml_parser import parse_nmap_xml
+from core.masscan_scan import run_masscan
+from core.httpx_probe import run_httpx
+from core.nuclei_scan import run_nuclei
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from tqdm import tqdm
@@ -80,11 +83,31 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         if resolved_ips:
             log.info("Enriching IPs: %s", resolved_ips)
 
-        # 1) Nmap (versions)
-        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")        
+        # 1) Masscan (fast port scan)
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        with step_timer(f"Masscan scan ({sub})"):
+            masscan_results = run_masscan(sub)
+
+        ports = []
+        for ip in masscan_results:
+            ports.extend(masscan_results[ip])
+
+        if ports:
+            log.info("Masscan found ports on %s → %s", sub, ports)
+        else:
+            log.info("Masscan found no ports on %s", sub)
+
+        # 2) Nmap service scan
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         with step_timer(f"Nmap scan ({sub})"):
             with yaspin(Spinners.dots, text=f"Nmap scanning {sub}...") as spinner:
-                nmap_txt, xml_path = nmap_service_scan(sub, base_dir, full_scan)
+
+                if ports:
+                    port_str = ",".join(map(str, ports))
+                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir, full_scan, ports=port_str)
+                else:
+                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir, full_scan)
+
                 spinner.ok("✔")
 
         res["nmap_raw"] = nmap_txt
@@ -100,6 +123,44 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                     [p.get("port") for p in open_ports])
         else:
             log.info("No open ports detected on %s", sub)
+
+        # HTTPX probe (fast web detection)
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        with step_timer(f"HTTPX probing ({sub})"):
+            urls = []
+
+            for p in open_ports:
+                port = p.get("port")
+
+                urls.append(f"{sub}:{port}")
+
+            httpx_results = run_httpx(urls)
+
+            res["httpx"] = httpx_results
+
+            if httpx_results:
+                log.info("HTTP services detected on %s → %d endpoints", sub, len(httpx_results))
+            else:
+                log.info("%d HTTP services endpoints detected on %s", len(httpx_results), sub)
+
+        # Nuclei vulnerability scan
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        with step_timer(f"Nuclei vulnerability scan on ({sub})"):
+            targets = [r.get("url") for r in httpx_results if r.get("url")]
+
+            nuclei_results = []
+            if targets:
+                log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                with step_timer(f"Nuclei scan ({sub})"):
+                    nuclei_results = run_nuclei(targets)
+
+                res["nuclei"] = nuclei_results
+
+                if nuclei_results:
+                    log.info("Nuclei vulnerabilities found on %s → %d", sub, len(nuclei_results))
+            else:
+                res["nuclei"] = []
+                log.info("%d Nuclei vulnerabilities found on %s", len(nuclei_results), sub)
 
         # 2) HTTP probe (headers/html snippet)
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")        
@@ -347,7 +408,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
 
         else:
             log.info("No reverse DNS domain found. Running scan directly on IP.")
-            subs = [target]
+            subsip = [target]
 
     else:
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -359,7 +420,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     if subs:
         log.info("Subdomains found: %s", subs)
     else:
-        log.info("No subdomains found.")
+        log.info("No subdomains found for %s", subsip)
 
 
     report = {
@@ -375,68 +436,138 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     total_cve_found = 0
 
     with ThreadPoolExecutor(max_workers=max(2, threads)) as ex:
-        futures = [
-            ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan)
-            for s in subs
-        ]
+        if subs:
+            futures = [
+                ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan)
+                for s in subs
+            ]
+        else:
+            futures = [
+                ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan)
+                for s in subsip
+            ]
 
-        for sub, fut in zip(
-            subs,
-            tqdm(
-                futures,
-                total=len(futures),
-                desc="Recon Progress",
-                dynamic_ncols=True,
-                bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
-            )
-        ):
-            try:
-                data = fut.result()
+        if subs:
+            for sub, fut in zip(
+                subs,
+                tqdm(
+                    futures,
+                    total=len(futures),
+                    desc="Recon Progress",
+                    dynamic_ncols=True,
+                    bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
+                )
+            ):
+                try:
+                    data = fut.result()
 
-                # ✅ LIVE CVE COUNTER
-                cve_count = len(data.get("cves", []))
-                total_cve_found += cve_count
-                tqdm.write(f"🔎 CVE found for {sub}: {cve_count} (Total: {total_cve_found})")
+                    # ✅ LIVE CVE COUNTER
+                    cve_count = len(data.get("cves", []))
+                    total_cve_found += cve_count
+                    tqdm.write(f"🔎 CVE found for {sub}: {cve_count} (Total: {total_cve_found})")
 
-                # ✅ Report save
-                report["subdomains"][sub] = {
-                    "scheme": data.get("scheme"),
-                    "resolved_ips": data.get("resolved_ips", []),
-                    "ip_enrichment": data.get("ip_enrichment", []),
-                    "tls": data.get("tls"),
-                    "cms": data.get("cms", []),
-                    "waf": data.get("waf", []),
-                    "pages": data.get("pages", []),
-                    "login_forms": data.get("login_forms", []),
-                    "cves": data.get("cves", []),
-                    "risk": data.get("risk"),
-                    "nmap_raw": data.get("nmap_raw"),
-                    "nmap_structured": data.get("nmap_structured"),
-                }
+                    # ✅ Report save
+                    report["subdomains"][sub] = {
+                        "scheme": data.get("scheme"),
+                        "resolved_ips": data.get("resolved_ips", []),
+                        "ip_enrichment": data.get("ip_enrichment", []),
+                        "tls": data.get("tls"),
+                        "cms": data.get("cms", []),
+                        "waf": data.get("waf", []),
+                        "pages": data.get("pages", []),
+                        "login_forms": data.get("login_forms", []),
+                        "cves": data.get("cves", []),
+                        "risk": data.get("risk"),
+                        "httpx": data.get("httpx", []),
+                        "nuclei": data.get("nuclei", []),
+                        "nmap_raw": data.get("nmap_raw"),
+                        "nmap_structured": data.get("nmap_structured"),
+                    }
 
-                safe_sub = sub.replace("/", "_").replace(":", "_")
+                    safe_sub = sub.replace("/", "_").replace(":", "_")
 
-                # Save raw nmap per sub
-                with open(os.path.join(base_dir, f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
-                    f.write(data.get("nmap_raw", ""))
-                
-                xml_path = data.get("nmap_xml")
+                    # Save raw nmap per sub
+                    with open(os.path.join(base_dir, f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
+                        f.write(data.get("nmap_raw", ""))
+                    
+                    xml_path = data.get("nmap_xml")
 
-                log.info("Nmap XML saved → %s", xml_path)
+                    log.info("Nmap XML saved → %s", xml_path)
 
-                if xml_path and os.path.exists(xml_path):
-                    parsed = parse_nmap_xml(xml_path)
+                    if xml_path and os.path.exists(xml_path):
+                        parsed = parse_nmap_xml(xml_path)
 
-                    json_path = os.path.join(base_dir, f"nmap_{safe_sub}.json")
+                        json_path = os.path.join(base_dir, f"nmap_{safe_sub}.json")
 
-                    with open(json_path, "w") as jf:
-                        json.dump(parsed, jf, indent=2)
+                        with open(json_path, "w") as jf:
+                            json.dump(parsed, jf, indent=2)
 
-                    log.info("Nmap JSON saved → %s", json_path)
+                        log.info("Nmap JSON saved → %s", json_path)
 
-            except Exception as e:
-                tqdm.write(f"❌ Error analyzing {sub}: {e}")
-                log.error("Error analyzing %s: %s", sub, e)
+                except Exception as e:
+                    tqdm.write(f"❌ Error analyzing {sub}: {e}")
+                    log.error("Error analyzing %s: %s", sub, e)
+        else:
+            for sub, fut in zip(
+                subsip,
+                tqdm(
+                    futures,
+                    total=len(futures),
+                    desc="Recon Progress",
+                    dynamic_ncols=True,
+                    bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
+                )
+            ):
+                try:
+                    data = fut.result()
+
+                    # ✅ LIVE CVE COUNTER
+                    cve_count = len(data.get("cves", []))
+                    total_cve_found += cve_count
+                    tqdm.write(f"🔎 CVE found for {sub}: {cve_count} (Total: {total_cve_found})")
+
+                    # ✅ Report save
+                    report["subdomains"][sub] = {
+                        "scheme": data.get("scheme"),
+                        "resolved_ips": data.get("resolved_ips", []),
+                        "ip_enrichment": data.get("ip_enrichment", []),
+                        "tls": data.get("tls"),
+                        "cms": data.get("cms", []),
+                        "waf": data.get("waf", []),
+                        "pages": data.get("pages", []),
+                        "login_forms": data.get("login_forms", []),
+                        "cves": data.get("cves", []),
+                        "risk": data.get("risk"),
+                        "httpx": data.get("httpx", []),
+                        "nuclei": data.get("nuclei", []),
+                        "nmap_raw": data.get("nmap_raw"),
+                        "nmap_structured": data.get("nmap_structured"),
+                    }
+
+                    safe_sub = sub.replace("/", "_").replace(":", "_")
+
+                    # Save raw nmap per sub
+                    with open(os.path.join(base_dir, f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
+                        f.write(data.get("nmap_raw", ""))
+                    
+                    xml_path = data.get("nmap_xml")
+
+                    log.info("Nmap XML saved → %s", xml_path)
+
+                    if xml_path and os.path.exists(xml_path):
+                        parsed = parse_nmap_xml(xml_path)
+
+                        json_path = os.path.join(base_dir, f"nmap_{safe_sub}.json")
+
+                        with open(json_path, "w") as jf:
+                            json.dump(parsed, jf, indent=2)
+
+                        log.info("Nmap JSON saved → %s", json_path)
+
+                except Exception as e:
+                    tqdm.write(f"❌ Error analyzing {sub}: {e}")
+                    log.error("Error analyzing %s: %s", sub, e)
+
 
     json_path = os.path.join(base_dir, "report.json")
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -465,7 +596,10 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     log.info(f"{Fore.CYAN}✔ Audit Completed{Style.RESET_ALL}")
     log.info(f"⏱ Total duration: {total_time:.2f} sec")
-    log.info(f"🎯 Targets analyzed: {len(subs)}")
+    if subs:
+        log.info(f"🎯 Targets analyzed: {len(subs)}")
+    else:
+        log.info(f"🎯 Targets analyzed: {len(subsip)}")
     log.info(f"🐞 Total CVE found: {total_cve_found}")
     log.info(f"📁 Output directory: {base_dir}")
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")

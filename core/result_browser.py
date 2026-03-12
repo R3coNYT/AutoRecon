@@ -64,6 +64,8 @@ def sort_items(path):
         key=lambda x: (
             not os.path.isdir(os.path.join(path, x)),  # dossiers en premier
             x.endswith(".txt"),                        # txt en dernier
+            x.endswith(".xml"),
+            x.endswith(".json"),
             x.lower()
         )
     )

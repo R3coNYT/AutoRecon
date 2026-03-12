@@ -1,15 +1,25 @@
 import subprocess, os
 
-def nmap_service_scan(host: str, output_dir: str, full_scan=False) -> str:
+def nmap_service_scan(host: str, output_dir: str, full_scan=False, ports=None):
 
     safe_host = host.replace("/", "_").replace(":", "_")
-
     xml_path = os.path.join(output_dir, f"nmap_{safe_host}.xml")
 
-    if full_scan:
-        cmd = ["nmap", "-sV", "-sC", "-T4", "-p-", "-oX", xml_path, host]
-    else:
-        cmd = ["nmap", "-sV", "-T4", "--top-ports", "200", "-oX", xml_path, host]
+    cmd = ["nmap", "-sV", "-T4"]
+
+    # scan complet
+    if full_scan and not ports:
+        cmd += ["-sC", "-p-"]
+
+    # ports venant de masscan
+    if ports:
+        cmd += ["-p", ports]
+
+    # scan classique si rien trouvé par masscan
+    if not full_scan and not ports:
+        cmd += ["--top-ports", "200"]
+
+    cmd += ["-oX", xml_path, host]
 
     try:
         result = subprocess.check_output(
