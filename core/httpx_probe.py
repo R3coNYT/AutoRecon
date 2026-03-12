@@ -3,7 +3,7 @@ import json
 import os
 
 
-def run_httpx(targets, output_dir=None, timeout=10):
+def run_httpx(targets, output_dir=None, target_name=None, timeout=10):
 
     if isinstance(targets, list):
         targets = "\n".join(targets)
@@ -44,7 +44,12 @@ def run_httpx(targets, output_dir=None, timeout=10):
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
 
-        with open(os.path.join(output_dir, "httpx.json"), "w") as f:
+        if target_name:
+            file = f"httpx_{target_name}.json"
+        else:
+            file = "httpx.json"
+
+        with open(os.path.join(output_dir, file), "w") as f:
             json.dump(results, f, indent=2)
 
     return results

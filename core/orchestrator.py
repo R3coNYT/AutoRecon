@@ -137,7 +137,13 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                 urls.append(f"{sub}:{port}")
 
             os.makedirs(os.path.join(base_dir, "httpx"), exist_ok=True)
-            httpx_results = run_httpx(urls, os.path.join(base_dir, "httpx"))
+            safe_sub = sub.replace("/", "_").replace(":", "_")
+
+            httpx_results = run_httpx(
+                urls,
+                os.path.join(base_dir, "httpx"),
+                target_name=safe_sub
+            )
 
             res["httpx"] = httpx_results
 
@@ -156,7 +162,13 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                 log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 with step_timer(f"Nuclei scan {sub}"):
                     os.makedirs(os.path.join(base_dir, "nuclei"), exist_ok=True)
-                    nuclei_results = run_nuclei(targets, os.path.join(base_dir, "nuclei"))
+                    safe_sub = sub.replace("/", "_").replace(":", "_")
+
+                    nuclei_results = run_nuclei(
+                        targets,
+                        os.path.join(base_dir, "nuclei"),
+                        target_name=safe_sub
+                    )
 
                     res["nuclei"] = nuclei_results
 
@@ -504,15 +516,20 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
 
                     log.info("Nmap XML saved → %s", xml_path)
 
-                    if xml_path and os.path.exists(xml_path):
-                        parsed = parse_nmap_xml(xml_path)
+                    if xml_path and os.path.exists(xml_path) and os.path.getsize(xml_path) > 50:
 
-                        json_path = os.path.join(os.path.join(base_dir, "nmap"), f"nmap_{safe_sub}.json")
+                        try:
+                            parsed = parse_nmap_xml(xml_path)
 
-                        with open(json_path, "w") as jf:
-                            json.dump(parsed, jf, indent=2)
+                            json_path = os.path.join(base_dir, "nmap", f"nmap_{safe_sub}.json")
 
-                        log.info("Nmap JSON saved → %s", json_path)
+                            with open(json_path, "w") as jf:
+                                json.dump(parsed, jf, indent=2)
+
+                            log.info("Nmap JSON saved → %s", json_path)
+
+                        except Exception as e:
+                            log.warning("Failed to parse Nmap XML for %s: %s", sub, e)
 
                 except Exception as e:
                     tqdm.write(f"❌ Error analyzing {sub}: {e}")
@@ -566,15 +583,20 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
 
                     log.info("Nmap XML saved → %s", xml_path)
 
-                    if xml_path and os.path.exists(xml_path):
-                        parsed = parse_nmap_xml(xml_path)
+                    if xml_path and os.path.exists(xml_path) and os.path.getsize(xml_path) > 50:
 
-                        json_path = os.path.join(os.path.join(base_dir, "nmap"), f"nmap_{safe_sub}.json")
+                        try:
+                            parsed = parse_nmap_xml(xml_path)
 
-                        with open(json_path, "w") as jf:
-                            json.dump(parsed, jf, indent=2)
+                            json_path = os.path.join(base_dir, "nmap", f"nmap_{safe_sub}.json")
 
-                        log.info("Nmap JSON saved → %s", json_path)
+                            with open(json_path, "w") as jf:
+                                json.dump(parsed, jf, indent=2)
+
+                            log.info("Nmap JSON saved → %s", json_path)
+
+                        except Exception as e:
+                            log.warning("Failed to parse Nmap XML for %s: %s", sub, e)
 
                 except Exception as e:
                     tqdm.write(f"❌ Error analyzing {sub}: {e}")
