@@ -7,7 +7,7 @@ echo "       AutoRecon Installer"
 echo "======================================"
 
 INSTALL_DIR="/opt/autorecon"
-GO_VERSION="1.24.6"
+GO_VERSION="1.26.1"
 
 sudo chown -R $USER:$USER $INSTALL_DIR
 
