@@ -77,7 +77,7 @@ def main_menu():
 # RECON HANDLER
 # =========================
 def handle_recon():
-    client_folder = select_or_create_client_folder(Path("results"))
+    client_folder = select_or_create_client_folder("opt/autorecon/results")
     if not client_folder:
         return
 
