@@ -4,11 +4,13 @@ $RepoUrl = "https://github.com/R3coNYT/AutoRecon.git"
 $InstallDir = "C:\Tools\AutoRecon"
 $GoVersion = "1.26.1"
 $GoMsi = "https://go.dev/dl/go$GoVersion.windows-amd64.msi"
+$GoExe = "C:\Program Files\Go\bin\go.exe"
 $HttpxVersion = "1.9.0"
 $NucleiVersion = "3.7.1"
 $ProgressPreference = 'SilentlyContinue'
 $pythonCmd = $null
 $NmapUrl = "https://nmap.org/dist/nmap-7.95-setup.exe"
+
 
 function Write-Info($msg) {
     Write-Host "[+]" $msg -ForegroundColor Cyan
@@ -58,6 +60,8 @@ Write-Info "Creating install directory"
 New-Directory "C:\Tools"
 New-Directory $InstallDir
 
+$env:Path += ";C:\Tools\bin"
+
 if (!(Test-Cmd git)) {
     Write-Err "Git is required. Install Git for Windows first."
     exit 1
@@ -79,7 +83,7 @@ else {
 
 Write-Ok "Python detected: $pythonCmd"
 
-if (!(Test-Cmd go)) {
+if (!(Test-Path $GoExe)) {
     Write-Info "Installing Go $GoVersion"
     $GoInstaller = "$env:TEMP\go-$GoVersion.msi"
 
@@ -168,58 +172,42 @@ Install-ZipBinary -Name "nuclei" -Url "https://github.com/projectdiscovery/nucle
 
 if (!(Test-Cmd masscan)) {
 
-    Write-Info "Installing Masscan (compiling from source)"
+    Write-Info "Installing Masscan"
 
-    $MasscanDir = "$env:TEMP\masscan-src"
+    $MasscanUrl = "https://github.com/bi-zone/masscan-ng/releases/download/v1.3.2/masscan-ng_win.zip"
 
-    if (Test-Path $MasscanDir) {
-        Remove-Item $MasscanDir -Recurse -Force
+    $TmpZip = "$env:TEMP\masscan.zip"
+    $TmpDir = "$env:TEMP\masscan"
+
+    Invoke-Retry -Attempts 3 -Script {
+        Invoke-WebRequest -Uri $MasscanUrl -OutFile $TmpZip
     }
 
-    git clone https://github.com/robertdavidgraham/masscan $MasscanDir
+    Expand-Archive -Path $TmpZip -DestinationPath $TmpDir -Force
 
-    if (!(Test-Cmd gcc)) {
+    New-Directory "C:\Tools\bin"
 
-        Write-Info "Installing MinGW (GCC)"
+    $exe = Get-ChildItem $TmpDir -Recurse -Filter "masscan-ng.exe" | Select-Object -First 1
 
-        $MingwUrl = "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.2.0posix-13.0.0-ucrt-r6/winlibs-x86_64-posix-seh-gcc-15.2.0-mingw-w64ucrt-13.0.0-r6.zip"
-        $TmpZip = "$env:TEMP\mingw.zip"
-        $TmpDir = "$env:TEMP\mingw"
+    if ($exe) {
 
-        Invoke-Retry -Attempts 3 -Script {
-            Invoke-WebRequest -Uri $MingwUrl -OutFile $TmpZip
-        }
+        $dir = Split-Path $exe.FullName
 
-        Expand-Archive $TmpZip -DestinationPath $TmpDir -Force
+        Copy-Item "$dir\*" "C:\Tools\bin\" -Force
 
-        $gccPath = Get-ChildItem $TmpDir -Recurse -Directory | Where-Object { $_.Name -eq "bin" } | Select-Object -First 1
+        Rename-Item "C:\Tools\bin\masscan-ng.exe" "masscan.exe" -Force
 
-        $env:Path += ";$($gccPath.FullName)"
-
-        Write-Ok "GCC installed"
-
-    }
-
-    Write-Info "Compiling Masscan..."
-
-    Set-Location $MasscanDir
-
-    make
-
-    if (Test-Path "$MasscanDir\bin\masscan.exe") {
-
-        New-Directory "C:\Tools\bin"
-
-        Copy-Item "$MasscanDir\bin\masscan.exe" "C:\Tools\bin\masscan.exe" -Force
-
-        Write-Ok "Masscan compiled and installed"
+        Write-Ok "Masscan installed"
 
     } else {
 
-        Write-Err "Masscan compilation failed"
+        Write-Err "masscan-ng.exe not found in archive"
         exit 1
 
     }
+
+    Remove-Item $TmpZip -Force -ErrorAction SilentlyContinue
+    Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
 
 } else {
 
