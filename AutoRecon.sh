@@ -194,6 +194,11 @@ EOF
 
 sudo chmod +x /usr/local/bin/AutoRecon
 
+# -------------------------------
+# Replace user in his home repository
+# -------------------------------
+cd ~
+
 echo "======================================"
 echo "       Installation Completed"
 echo "======================================"
