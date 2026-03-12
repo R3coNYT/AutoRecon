@@ -6,6 +6,8 @@ $GoVersion = "1.26.1"
 $GoMsi = "https://go.dev/dl/go$GoVersion.windows-amd64.msi"
 $HttpxVersion = "1.8.1"
 $NucleiVersion = "3.7.1"
+$ProgressPreference = 'SilentlyContinue'
+$pythonCmd = $null
 
 function Write-Info($msg) {
     Write-Host "[+]" $msg -ForegroundColor Cyan
@@ -60,10 +62,21 @@ if (!(Test-Cmd git)) {
     exit 1
 }
 
-if (!(Test-Cmd python)) {
+if (Test-Cmd "py") {
+    $pythonCmd = "py -3"
+}
+elseif (Test-Cmd "python") {
+    $pythonCmd = "python"
+}
+elseif (Test-Cmd "python3") {
+    $pythonCmd = "python3"
+}
+else {
     Write-Err "Python 3 is required. Install Python first."
     exit 1
 }
+
+Write-Ok "Python detected: $pythonCmd"
 
 if (!(Test-Cmd go)) {
     Write-Info "Installing Go $GoVersion"
@@ -142,7 +155,7 @@ Write-Info "Creating Python virtual environment"
 Set-Location $InstallDir
 
 if (!(Test-Path "$InstallDir\autorecon_env")) {
-    python -m venv autorecon_env
+    Invoke-Expression "$pythonCmd -m venv autorecon_env"
 } else {
     Write-Ok "Virtual environment already exists"
 }
