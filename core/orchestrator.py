@@ -136,6 +136,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
                 urls.append(f"{sub}:{port}")
 
+            os.makedirs(os.path.join(base_dir, "httpx"), exist_ok=True)
             httpx_results = run_httpx(urls, os.path.join(base_dir, "httpx"))
 
             res["httpx"] = httpx_results
@@ -154,6 +155,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             if targets:
                 log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 with step_timer(f"Nuclei scan {sub}"):
+                    os.makedirs(os.path.join(base_dir, "nuclei"), exist_ok=True)
                     nuclei_results = run_nuclei(targets, os.path.join(base_dir, "nuclei"))
 
                     res["nuclei"] = nuclei_results
@@ -548,6 +550,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                         "risk": data.get("risk"),
                         "httpx": data.get("httpx", []),
                         "nuclei": data.get("nuclei", []),
+                        "masscan": data.get("masscan", {}),
                         "nmap_raw": data.get("nmap_raw"),
                         "nmap_structured": data.get("nmap_structured"),
                     }
