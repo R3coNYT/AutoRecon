@@ -9,7 +9,6 @@ $NucleiVersion = "3.7.1"
 $ProgressPreference = 'SilentlyContinue'
 $pythonCmd = $null
 $NmapUrl = "https://nmap.org/dist/nmap-7.95-setup.exe"
-$MasscanUrl = "https://github.com/robertdavidgraham/masscan/releases/download/1.3.2/masscan-1.3.2-win64.zip"
 
 function Write-Info($msg) {
     Write-Host "[+]" $msg -ForegroundColor Cyan
@@ -169,27 +168,58 @@ Install-ZipBinary -Name "nuclei" -Url "https://github.com/projectdiscovery/nucle
 
 if (!(Test-Cmd masscan)) {
 
-    Write-Info "Installing Masscan"
+    Write-Info "Installing Masscan (compiling from source)"
 
-    $TmpZip = "$env:TEMP\masscan.zip"
-    $TmpDir = "$env:TEMP\masscan-extract"
+    $MasscanDir = "$env:TEMP\masscan-src"
 
-    Invoke-Retry -Attempts 3 -Script {
-        Invoke-WebRequest -Uri $MasscanUrl -OutFile $TmpZip
+    if (Test-Path $MasscanDir) {
+        Remove-Item $MasscanDir -Recurse -Force
     }
 
-    Expand-Archive -Path $TmpZip -DestinationPath $TmpDir -Force
+    git clone https://github.com/robertdavidgraham/masscan $MasscanDir
 
-    New-Directory "C:\Tools\bin"
+    if (!(Test-Cmd gcc)) {
 
-    $exe = Get-ChildItem $TmpDir -Recurse -Filter "masscan.exe" | Select-Object -First 1
+        Write-Info "Installing MinGW (GCC)"
 
-    Copy-Item $exe.FullName "C:\Tools\bin\masscan.exe" -Force
+        $MingwUrl = "https://github.com/brechtsanders/winlibs_mingw/releases/latest/download/winlibs-x86_64-posix-seh-gcc.zip"
+        $TmpZip = "$env:TEMP\mingw.zip"
+        $TmpDir = "$env:TEMP\mingw"
 
-    Remove-Item $TmpZip -Force -ErrorAction SilentlyContinue
-    Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
+        Invoke-Retry -Attempts 3 -Script {
+            Invoke-WebRequest -Uri $MingwUrl -OutFile $TmpZip
+        }
 
-    Write-Ok "Masscan installed"
+        Expand-Archive $TmpZip -DestinationPath $TmpDir -Force
+
+        $gccPath = Get-ChildItem $TmpDir -Recurse -Directory | Where-Object { $_.Name -eq "bin" } | Select-Object -First 1
+
+        $env:Path += ";$($gccPath.FullName)"
+
+        Write-Ok "GCC installed"
+
+    }
+
+    Write-Info "Compiling Masscan..."
+
+    Set-Location $MasscanDir
+
+    make
+
+    if (Test-Path "$MasscanDir\bin\masscan.exe") {
+
+        New-Directory "C:\Tools\bin"
+
+        Copy-Item "$MasscanDir\bin\masscan.exe" "C:\Tools\bin\masscan.exe" -Force
+
+        Write-Ok "Masscan compiled and installed"
+
+    } else {
+
+        Write-Err "Masscan compilation failed"
+        exit 1
+
+    }
 
 } else {
 
