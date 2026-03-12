@@ -1,23 +1,33 @@
-import os
 import subprocess
 import platform
 import questionary
+from pathlib import Path
 from rich.console import Console
-from rich.text import Text
 from core.banner import print_banner
 
 console = Console()
-RESULTS_DIR = "results"
+
+# =========================
+# PATHS CROSS OS
+# =========================
+BASE_DIR = Path(__file__).resolve().parent.parent
+RESULTS_DIR = BASE_DIR / "results"
 
 
 # =========================
 # OUVERTURE FICHIER
 # =========================
 def open_file(path):
+
+    path = str(path)
+
     if platform.system() == "Windows":
+        import os
         os.startfile(path)
+
     elif platform.system() == "Darwin":
         subprocess.run(["open", path])
+
     else:
         subprocess.run(["xdg-open", path])
 
@@ -26,6 +36,7 @@ def open_file(path):
 # HEADER
 # =========================
 def draw_header(title="Results Browser"):
+
     console.clear()
     print_banner()
     console.rule("[bold red]AutoRecon Console[/bold red]")
@@ -40,7 +51,7 @@ def get_icon(name, is_dir):
     if is_dir:
         return "📁"
 
-    ext = os.path.splitext(name)[1].lower()
+    ext = Path(name).suffix.lower()
 
     if ext == ".json":
         return "📄"
@@ -57,16 +68,16 @@ def get_icon(name, is_dir):
 # =========================
 def sort_items(path):
 
-    items = os.listdir(path)
+    items = list(path.iterdir())
 
     return sorted(
         items,
         key=lambda x: (
-            not os.path.isdir(os.path.join(path, x)),  # dossiers en premier
-            x.endswith(".txt"),                        # txt en dernier
-            x.endswith(".xml"),
-            x.endswith(".json"),
-            x.lower()
+            not x.is_dir(),
+            x.name.endswith(".txt"),
+            x.name.endswith(".xml"),
+            x.name.endswith(".json"),
+            x.name.lower()
         )
     )
 
@@ -78,11 +89,12 @@ def navigate_directory(path):
 
     while True:
 
-        draw_header(f"Browsing: {path}")
+        draw_header(f"Browsing: {path.relative_to(BASE_DIR)}")
 
         items = sort_items(path)
 
         if not items:
+
             console.print("[yellow]Empty directory.[/yellow]")
             questionary.press_any_key_to_continue().ask()
             return
@@ -91,10 +103,9 @@ def navigate_directory(path):
 
         for item in items:
 
-            full_path = os.path.join(path, item)
-            icon = get_icon(item, os.path.isdir(full_path))
+            icon = get_icon(item.name, item.is_dir())
+            label = f"{icon} {item.name}"
 
-            label = f"{icon} {item}"
             choices.append(label)
 
         choices.append("⬅ Back")
@@ -109,12 +120,14 @@ def navigate_directory(path):
             return
 
         selected_clean = selected.split(" ", 1)[1]
-        selected_path = os.path.join(path, selected_clean)
+        selected_path = path / selected_clean
 
-        if os.path.isdir(selected_path):
+        if selected_path.is_dir():
+
             navigate_directory(selected_path)
 
         else:
+
             console.print(f"\n[bold red]Opening {selected_clean}...[/bold red]")
             open_file(selected_path)
 
@@ -124,13 +137,13 @@ def navigate_directory(path):
 # =========================
 def browse_results():
 
-    if not os.path.exists(RESULTS_DIR):
+    if not RESULTS_DIR.exists():
 
         console.print("[yellow]No results directory found.[/yellow]")
         questionary.press_any_key_to_continue().ask()
         return
 
-    targets = sorted(os.listdir(RESULTS_DIR))
+    targets = sorted([p.name for p in RESULTS_DIR.iterdir() if p.is_dir()])
 
     if not targets:
 
@@ -155,6 +168,6 @@ def browse_results():
             return
 
         selected_clean = selected.split(" ", 1)[1]
-        target_path = os.path.join(RESULTS_DIR, selected_clean)
+        target_path = RESULTS_DIR / selected_clean
 
         navigate_directory(target_path)

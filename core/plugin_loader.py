@@ -1,32 +1,36 @@
-import os
 import json
 import importlib.util
+from pathlib import Path
 
-PLUGINS_DIR = "plugins"
+BASE_DIR = Path(__file__).resolve().parent.parent
+PLUGINS_DIR = BASE_DIR / "plugins"
 
 def load_plugins():
     plugins = []
 
-    if not os.path.exists(PLUGINS_DIR):
+    if not PLUGINS_DIR.exists():
         return plugins
 
-    for folder in os.listdir(PLUGINS_DIR):
-        path = os.path.join(PLUGINS_DIR, folder)
-        manifest_path = os.path.join(path, "manifest.json")
+    for folder in PLUGINS_DIR.iterdir():
 
-        if os.path.isdir(path) and os.path.exists(manifest_path):
-            with open(manifest_path, "r") as f:
+        manifest_path = folder / "manifest.json"
+
+        if folder.is_dir() and manifest_path.exists():
+
+            with open(manifest_path, "r", encoding="utf-8") as f:
                 manifest = json.load(f)
 
-            plugin_file = os.path.join(path, manifest["entry"])
+            plugin_file = folder / manifest["entry"]
 
             spec = importlib.util.spec_from_file_location(
                 manifest["name"], plugin_file
             )
+
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
             plugin_class = getattr(module, manifest["class"])
+
             plugins.append(plugin_class())
 
     return plugins
