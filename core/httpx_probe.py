@@ -1,8 +1,10 @@
 import subprocess
 import json
+import os
 
 
-def run_httpx(targets, timeout=10):
+def run_httpx(targets, output_dir=None, timeout=10):
+
     if isinstance(targets, list):
         targets = "\n".join(targets)
 
@@ -13,7 +15,6 @@ def run_httpx(targets, timeout=10):
         "-title",
         "-tech-detect",
         "-status-code",
-        "-ports",
         "-timeout", str(timeout)
     ]
 
@@ -39,5 +40,11 @@ def run_httpx(targets, timeout=10):
             results.append(json.loads(line))
         except:
             pass
+
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+
+        with open(os.path.join(output_dir, "httpx.json"), "w") as f:
+            json.dump(results, f, indent=2)
 
     return results

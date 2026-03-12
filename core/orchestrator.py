@@ -134,7 +134,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
                 urls.append(f"{sub}:{port}")
 
-            httpx_results = run_httpx(urls)
+            httpx_results = run_httpx(urls, os.path.join(base_dir, "httpx"))
 
             res["httpx"] = httpx_results
 
@@ -152,15 +152,15 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             if targets:
                 log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 with step_timer(f"Nuclei scan ({sub})"):
-                    nuclei_results = run_nuclei(targets)
+                    nuclei_results = run_nuclei(targets, os.path.join(base_dir, "nuclei"))
 
-                res["nuclei"] = nuclei_results
+                    res["nuclei"] = nuclei_results
 
-                if nuclei_results:
-                    log.info("Nuclei vulnerabilities found on %s → %d", sub, len(nuclei_results))
-            else:
-                res["nuclei"] = []
-                log.info("%d Nuclei vulnerabilities found on %s", len(nuclei_results), sub)
+                    if nuclei_results:
+                        log.info("Nuclei vulnerabilities found on %s → %d", sub, len(nuclei_results))
+                    else:
+                        res["nuclei"] = []
+                        log.info("%d Nuclei vulnerabilities found on %s", len(nuclei_results), sub)
 
         # 2) HTTP probe (headers/html snippet)
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")        
