@@ -199,7 +199,7 @@ sudo chmod +x /usr/local/bin/AutoRecon
 # -------------------------------
 echo "[✓] Current directory: $(pwd)"
 echo "[✓] Moving in $HOME directory"
-cd "$HOME"
+cd $HOME
 echo "[✓] Current directory: $(pwd)"
 
 echo "======================================"
