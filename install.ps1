@@ -1,0 +1,174 @@
+$ErrorActionPreference = "Stop"
+
+$RepoUrl = "https://github.com/R3coNYT/AutoRecon.git"
+$InstallDir = "C:\Tools\AutoRecon"
+$GoVersion = "1.26.1"
+$GoMsi = "https://go.dev/dl/go$GoVersion.windows-amd64.msi"
+$HttpxVersion = "1.8.1"
+$NucleiVersion = "3.7.1"
+
+function Write-Info($msg) {
+    Write-Host "[+]" $msg -ForegroundColor Cyan
+}
+
+function Write-Ok($msg) {
+    Write-Host "[✓]" $msg -ForegroundColor Green
+}
+
+function Write-Warn($msg) {
+    Write-Host "[!]" $msg -ForegroundColor Yellow
+}
+
+function Write-Err($msg) {
+    Write-Host "[✗]" $msg -ForegroundColor Red
+}
+
+function Test-Cmd($name) {
+    return $null -ne (Get-Command $name -ErrorAction SilentlyContinue)
+}
+
+function Invoke-Retry {
+    param(
+        [int]$Attempts = 3,
+        [scriptblock]$Script
+    )
+
+    for ($i = 1; $i -le $Attempts; $i++) {
+        try {
+            & $Script
+            return
+        } catch {
+            if ($i -eq $Attempts) { throw }
+            Write-Warn "Retry $i/$Attempts..."
+            Start-Sleep -Seconds 2
+        }
+    }
+}
+
+function New-Directory($Path) {
+    if (!(Test-Path $Path)) {
+        New-Item -ItemType Directory -Path $Path -Force | Out-Null
+    }
+}
+
+Write-Info "Creating install directory"
+New-Directory "C:\Tools"
+New-Directory $InstallDir
+
+if (!(Test-Cmd git)) {
+    Write-Err "Git is required. Install Git for Windows first."
+    exit 1
+}
+
+if (!(Test-Cmd python)) {
+    Write-Err "Python 3 is required. Install Python first."
+    exit 1
+}
+
+if (!(Test-Cmd go)) {
+    Write-Info "Installing Go $GoVersion"
+    $GoInstaller = "$env:TEMP\go-$GoVersion.msi"
+
+    Invoke-Retry -Attempts 3 -Script {
+        Invoke-WebRequest -Uri $GoMsi -OutFile $GoInstaller
+    }
+
+    Start-Process msiexec.exe -ArgumentList "/i `"$GoInstaller`" /quiet /norestart" -Wait
+    Remove-Item $GoInstaller -Force -ErrorAction SilentlyContinue
+    Write-Ok "Go installed"
+} else {
+    Write-Ok "Go already installed"
+}
+
+$env:Path += ";C:\Program Files\Go\bin;$env:USERPROFILE\go\bin"
+
+if (Test-Path "$InstallDir\.git") {
+    Write-Info "Updating repository"
+    git -C $InstallDir pull
+} else {
+    Write-Info "Cloning AutoRecon"
+    Invoke-Retry -Attempts 3 -Script {
+        git clone $RepoUrl $InstallDir
+    }
+}
+
+function Install-ZipBinary {
+    param(
+        [string]$Name,
+        [string]$Url,
+        [string]$ExeName
+    )
+
+    if (Test-Cmd $Name) {
+        Write-Ok "$Name already installed"
+        return
+    }
+
+    $TmpZip = "$env:TEMP\$Name.zip"
+    $TmpDir = "$env:TEMP\$Name-extract"
+
+    if (Test-Path $TmpDir) {
+        Remove-Item $TmpDir -Recurse -Force
+    }
+
+    Invoke-Retry -Attempts 3 -Script {
+        Invoke-WebRequest -Uri $Url -OutFile $TmpZip
+    }
+
+    Expand-Archive -Path $TmpZip -DestinationPath $TmpDir -Force
+
+    New-Directory "C:\Tools\bin"
+    Copy-Item "$TmpDir\$ExeName" "C:\Tools\bin\$ExeName" -Force
+
+    Remove-Item $TmpZip -Force -ErrorAction SilentlyContinue
+    Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
+
+    Write-Ok "$Name installed"
+}
+
+Install-ZipBinary -Name "httpx" -Url "https://github.com/projectdiscovery/httpx/releases/download/v$HttpxVersion/httpx_$HttpxVersion_windows_amd64.zip" -ExeName "httpx.exe"
+Install-ZipBinary -Name "nuclei" -Url "https://github.com/projectdiscovery/nuclei/releases/download/v$NucleiVersion/nuclei_$NucleiVersion_windows_amd64.zip" -ExeName "nuclei.exe"
+
+if (!(Test-Path "$InstallDir\Sublist3r")) {
+    Write-Info "Cloning Sublist3r"
+    Invoke-Retry -Attempts 3 -Script {
+        git clone https://github.com/aboul3la/Sublist3r.git "$InstallDir\Sublist3r"
+    }
+} else {
+    Write-Ok "Sublist3r already present"
+}
+
+Write-Info "Creating Python virtual environment"
+Set-Location $InstallDir
+
+if (!(Test-Path "$InstallDir\autorecon_env")) {
+    python -m venv autorecon_env
+} else {
+    Write-Ok "Virtual environment already exists"
+}
+
+& "$InstallDir\autorecon_env\Scripts\python.exe" -m pip install --upgrade pip
+& "$InstallDir\autorecon_env\Scripts\pip.exe" install -r "$InstallDir\requirements.txt"
+
+$BatContent = @"
+@echo off
+call C:\Tools\AutoRecon\autorecon_env\Scripts\activate.bat
+python C:\Tools\AutoRecon\AutoRecon.py
+"@
+
+Set-Content -Path "C:\Tools\AutoRecon\AutoRecon.bat" -Value $BatContent -Encoding ASCII
+
+$CurrentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($CurrentPath -notlike "*C:\Tools\bin*") {
+    [Environment]::SetEnvironmentVariable("Path", "$CurrentPath;C:\Tools\bin", "User")
+}
+
+Write-Host ""
+Write-Host "======================================" 
+Write-Host "       Installation Completed"
+Write-Host "======================================"
+Write-Host ""
+Write-Host "Run AutoRecon with:"
+Write-Host "C:\Tools\AutoRecon\AutoRecon.bat"
+Write-Host ""
+Write-Host "Reopen your terminal if commands are not yet available."
