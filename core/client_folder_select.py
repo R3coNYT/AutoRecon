@@ -17,7 +17,7 @@ def draw_header(title="Results Browser"):
 
 def select_or_create_client_folder(results_base: Path):
 
-    results_base.mkdir(exist_ok=True)
+    os.makedirs(results_base, exist_ok=True)
 
     while True:
         draw_header("Select Client Folder")
