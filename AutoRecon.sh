@@ -72,6 +72,8 @@ for pkg in "${DEPS[@]}"; do
     fi
 done
 
+sudo setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which masscan)
+
 # -------------------------------
 # Install Go
 # -------------------------------
