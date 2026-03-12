@@ -77,9 +77,10 @@ sudo setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which masscan)
 # -------------------------------
 # Install Go
 # -------------------------------
-if command -v go &> /dev/null; then
-    echo "[✓] Go already installed"
-    go version
+CURRENT_GO_VERSION=$(go version 2>/dev/null | awk '{print $3}' | sed 's/go//')
+
+if [ "$CURRENT_GO_VERSION" = "$GO_VERSION" ]; then
+    echo "[✓] Go $GO_VERSION already installed"
 else
     echo "[+] Installing Go $GO_VERSION"
 
@@ -193,14 +194,6 @@ exec python3 $INSTALL_DIR/AutoRecon.py
 EOF
 
 sudo chmod +x /usr/local/bin/AutoRecon
-
-# -------------------------------
-# Replace user in his home repository
-# -------------------------------
-echo "[✓] Current directory: $(pwd)"
-echo "[✓] Moving in $HOME directory"
-cd $HOME
-echo "[✓] Current directory: $(pwd)"
 
 echo "======================================"
 echo "       Installation Completed"
