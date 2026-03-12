@@ -1,9 +1,14 @@
 import subprocess, os
 
+from rich import json
+
 def nmap_service_scan(host: str, output_dir: str, full_scan=False, ports=None):
 
     safe_host = host.replace("/", "_").replace(":", "_")
-    xml_path = os.path.join(output_dir, f"nmap_{safe_host}.xml")
+    xml_path = ""
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+        xml_path = os.path.join(output_dir, f"nmap_{safe_host}.xml")
 
     cmd = ["nmap", "-sV", "-T4"]
 

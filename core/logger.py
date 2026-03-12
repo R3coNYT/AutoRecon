@@ -46,7 +46,8 @@ def setup_logging(target, output_dir=None):
     # File logging (CUSTOM DIR)
     # =========================
     if output_dir:
-        log_path = os.path.join(output_dir, "recon.log")
+        os.makedirs(os.path.join(output_dir, "logs"), exist_ok=True)
+        log_path = os.path.join(os.path.join(output_dir, "logs"), "recon.log")
     else:
         # fallback legacy
         ts = datetime.now().strftime("%Y%m%d-%H%M%S")

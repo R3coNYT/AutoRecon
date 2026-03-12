@@ -4,7 +4,6 @@ import json
 
 def run_masscan(target: str, rate=2000, ports="1-65535"):
     cmd = [
-        "sudo",
         "masscan",
         target,
         "-p", ports,

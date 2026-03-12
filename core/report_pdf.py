@@ -323,7 +323,7 @@ def write_pdf(report: dict, pdf_path: str):
         level = (risk.get("level") or "LOW").upper()
         score = risk.get("score")
         color = _risk_color(level)
-
+        
         if level == "HIGH":
             alert_table = Table(
                 [[Paragraph(f"<b>⚠ CRITICAL RISK DETECTED ({score})</b>", styles["Normal"])]],
@@ -505,6 +505,26 @@ def write_pdf(report: dict, pdf_path: str):
 
             technologies.add(name)
 
+        # MASSCAN RESULTS
+        masscan_data = data.get("masscan", {})
+        masscan_ports = []
+
+        for ip in masscan_data:
+            masscan_ports.extend(masscan_data[ip])
+
+        if masscan_ports:
+            elements.append(Paragraph("<b>Masscan Fast Port Discovery</b>", styles["Heading3"]))
+
+            elements.append(Paragraph(
+                f"Masscan detected <b>{len(masscan_ports)}</b> open ports during high-speed scan.",
+                styles["Normal"]
+            ))
+
+            port_list = ", ".join(str(p) for p in sorted(set(masscan_ports))[:30])
+
+            elements.append(Paragraph(f"Ports: {port_list}", styles["Code"]))
+            elements.append(Spacer(1,10))
+
         # 2️⃣ Services Nmap
         nmap_s = data.get("nmap_structured", {}) or {}
         open_ports = nmap_s.get("open_ports", []) or []
@@ -531,6 +551,33 @@ def write_pdf(report: dict, pdf_path: str):
                 elements.append(Paragraph(f"- {w}", styles["Normal"]))
             elements.append(Spacer(1, 8))
 
+        # HTTPX WEB SERVICE DETECTION
+        httpx_results = data.get("httpx", []) or []
+
+        if httpx_results:
+            elements.append(Paragraph("<b>HTTP Services Detected (HTTPX)</b>", styles["Heading3"]))
+
+            rows = [["URL", "Status", "Title", "Technology", "Web Server"]]
+
+            for r in httpx_results[:15]:
+                rows.append([
+                    Paragraph(str(r.get("url")), styles["Normal"]),
+                    Paragraph(str(r.get("status_code")), styles["Normal"]),
+                    Paragraph(str(r.get("title") or ""), styles["Normal"]),
+                    Paragraph(str(r.get("tech") or ""), styles["Normal"]),
+                    Paragraph(str(r.get("webserver") or ""), styles["Normal"])
+                ])
+
+            table = Table(rows, colWidths=[7*cm, 2*cm, 4*cm, 3*cm])
+            table.setStyle(TableStyle([
+                ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+                ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
+                ("FONTSIZE", (0,0), (-1,-1), 8),
+            ]))
+
+            elements.append(table)
+            elements.append(Spacer(1, 10))
+
         # Pages
         pages = data.get("pages", []) or []
         if pages:
@@ -539,6 +586,45 @@ def write_pdf(report: dict, pdf_path: str):
             restricted = [p for p in pages if p.get("status") == 403]
             elements.append(Paragraph(f"Restricted resources (403): {len(restricted)}", styles["Normal"]))
             elements.append(Spacer(1, 8))
+
+        # NUCLEI SCAN RESULTS
+        nuclei = data.get("nuclei", []) or []
+
+        if nuclei:
+            elements.append(Paragraph("<b>Nuclei Vulnerability Scan</b>", styles["Heading3"]))
+            elements.append(Spacer(1,6))
+
+            rows = [["Template", "Severity", "Matched URL", "Description"]]
+
+            for v in nuclei[:20]:
+                sev = v.get("severity","").upper()
+
+                if sev == "CRITICAL":
+                    color = "red"
+                elif sev == "HIGH":
+                    color = "orange"
+                elif sev == "MEDIUM":
+                    color = "purple"
+                else:
+                    color = "green"
+
+                rows.append([
+                    Paragraph(str(v.get("template")), styles["Normal"]),
+                    Paragraph(f"<font color='{color}'>{sev}</font>", styles["Normal"]),
+                    Paragraph(str(v.get("url")), styles["Code"]),
+                    Paragraph(str(v.get("info", {}).get("name","")), styles["Normal"])
+                ])
+
+            t = Table(rows, colWidths=[6*cm, 3*cm, 7*cm])
+
+            t.setStyle(TableStyle([
+                ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+                ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
+                ("FONTSIZE", (0,0), (-1,-1), 8),
+            ]))
+
+            elements.append(t)
+            elements.append(Spacer(1,12))
 
         # CVEs
         cves = data.get("cves", []) or []
@@ -603,23 +689,23 @@ def write_pdf(report: dict, pdf_path: str):
 
                 elements.append(Spacer(1, 6))
 
-                # --- HOW TO FIX SECTION ---
-                elements.append(Paragraph(
-                    "<b>How to fix this vulnerability:</b>",
-                    ParagraphStyle(
-                        'FixStyle',
-                        parent=styles['Normal'],
-                        textColor=colors.darkblue
-                    )
-                ))
-                elements.append(Spacer(1, 2))
+                # # --- HOW TO FIX SECTION ---
+                # elements.append(Paragraph(
+                #     "<b>How to fix this vulnerability:</b>",
+                #     ParagraphStyle(
+                #         'FixStyle',
+                #         parent=styles['Normal'],
+                #         textColor=colors.darkblue
+                #     )
+                # ))
+                # elements.append(Spacer(1, 2))
 
-                fixes = _generate_fix_recommendation(v)
+                # fixes = _generate_fix_recommendation(v)
 
-                for fix in fixes:
-                    elements.append(Paragraph(fix, styles["Normal"]))
+                # for fix in fixes:
+                #     elements.append(Paragraph(fix, styles["Normal"]))
 
-                elements.append(Spacer(1, 10))
+                # elements.append(Spacer(1, 10))
 
         if sub != list(subs.keys())[-1]:
             elements.append(PageBreak())

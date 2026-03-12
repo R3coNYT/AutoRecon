@@ -59,9 +59,11 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             resolved_ips = []
 
         res["resolved_ips"] = resolved_ips
-
-        if resolved_ips:
-            log.info("Resolved IPs for %s → %s", sub, resolved_ips)
+        
+        if is_ip(sub) and resolved_ips:
+            log.info("No IP resolved for %s. %s already IP", sub, sub)
+        elif not is_ip(sub) and resolved_ips:
+            log.info("Resolved IPs for %s → %s", sub, ", ".join(resolved_ips))
         else:
             log.info("No IP resolved for %s", sub)
 
@@ -81,11 +83,11 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         if resolved_ips:
-            log.info("Enriching IPs: %s", resolved_ips)
+            log.info("Enriching IPs: %s", ", ".join(resolved_ips))
 
         # 1) Masscan (fast port scan)
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        with step_timer(f"Masscan scan ({sub})"):
+        with step_timer(f"Masscan scan {sub}"):
             masscan_results = run_masscan(sub)
 
         ports = []
@@ -99,14 +101,14 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
         # 2) Nmap service scan
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        with step_timer(f"Nmap scan ({sub})"):
+        with step_timer(f"Nmap scan {sub}"):
             with yaspin(Spinners.dots, text=f"Nmap scanning {sub}...") as spinner:
 
                 if ports:
                     port_str = ",".join(map(str, ports))
-                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir, full_scan, ports=port_str)
+                    nmap_txt, xml_path = nmap_service_scan(sub, os.path.join(base_dir, "nmap"), full_scan, ports=port_str)
                 else:
-                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir, full_scan)
+                    nmap_txt, xml_path = nmap_service_scan(sub, os.path.join(base_dir, "nmap"), full_scan)
 
                 spinner.ok("✔")
 
@@ -126,7 +128,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
         # HTTPX probe (fast web detection)
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        with step_timer(f"HTTPX probing ({sub})"):
+        with step_timer(f"HTTPX probing {sub}"):
             urls = []
 
             for p in open_ports:
@@ -151,7 +153,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             nuclei_results = []
             if targets:
                 log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-                with step_timer(f"Nuclei scan ({sub})"):
+                with step_timer(f"Nuclei scan {sub}"):
                     nuclei_results = run_nuclei(targets, os.path.join(base_dir, "nuclei"))
 
                     res["nuclei"] = nuclei_results
@@ -233,7 +235,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
         if use_nvd:
             log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            with step_timer(f"CVE lookup ({sub})"):
+            with step_timer(f"CVE lookup {sub}"):
                 services = {}
 
                 # 1️⃣ Services détectés via Nmap
@@ -423,7 +425,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     if subs:
         log.info("Subdomains found: %s", subs)
     else:
-        log.info("No subdomains found for %s", subsip)
+        log.info("No subdomains found for %s", ", ".join(subsip))
+
 
 
     report = {
@@ -483,6 +486,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                         "risk": data.get("risk"),
                         "httpx": data.get("httpx", []),
                         "nuclei": data.get("nuclei", []),
+                        "masscan": data.get("masscan", {}),
                         "nmap_raw": data.get("nmap_raw"),
                         "nmap_structured": data.get("nmap_structured"),
                     }
@@ -490,7 +494,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     safe_sub = sub.replace("/", "_").replace(":", "_")
 
                     # Save raw nmap per sub
-                    with open(os.path.join(base_dir, f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
+                    os.makedirs(os.path.join(base_dir, "nmap"), exist_ok=True)
+                    with open(os.path.join(os.path.join(base_dir, "nmap"), f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
                         f.write(data.get("nmap_raw", ""))
                     
                     xml_path = data.get("nmap_xml")
@@ -500,7 +505,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     if xml_path and os.path.exists(xml_path):
                         parsed = parse_nmap_xml(xml_path)
 
-                        json_path = os.path.join(base_dir, f"nmap_{safe_sub}.json")
+                        json_path = os.path.join(os.path.join(base_dir, "nmap"), f"nmap_{safe_sub}.json")
 
                         with open(json_path, "w") as jf:
                             json.dump(parsed, jf, indent=2)
@@ -550,7 +555,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     safe_sub = sub.replace("/", "_").replace(":", "_")
 
                     # Save raw nmap per sub
-                    with open(os.path.join(base_dir, f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
+                    os.makedirs(os.path.join(base_dir, "nmap"), exist_ok=True)
+                    with open(os.path.join(os.path.join(base_dir, "nmap"), f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
                         f.write(data.get("nmap_raw", ""))
                     
                     xml_path = data.get("nmap_xml")
@@ -560,7 +566,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     if xml_path and os.path.exists(xml_path):
                         parsed = parse_nmap_xml(xml_path)
 
-                        json_path = os.path.join(base_dir, f"nmap_{safe_sub}.json")
+                        json_path = os.path.join(os.path.join(base_dir, "nmap"), f"nmap_{safe_sub}.json")
 
                         with open(json_path, "w") as jf:
                             json.dump(parsed, jf, indent=2)
