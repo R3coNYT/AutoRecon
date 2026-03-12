@@ -108,26 +108,43 @@ fi
 # -------------------------------
 echo "[+] Configuring Go environment"
 
-export GOPROXY=direct
-export GOSUMDB=off
+export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
-echo "[+] Installing ProjectDiscovery tools (httpx | nuclei)"
+mkdir -p $GOPATH/bin
 
-if ! command -v httpx &> /dev/null; then
-    echo "[+] Installing httpx"
-    go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
-    sudo cp ~/go/bin/httpx /usr/local/bin/ 2>/dev/null || true
-else
-    echo "[✓] httpx already installed"
-fi
+install_go_tool() {
 
-if ! command -v nuclei &> /dev/null; then
-    echo "[+] Installing nuclei"
-    go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-    sudo cp ~/go/bin/nuclei /usr/local/bin/ 2>/dev/null || true
-else
-    echo "[✓] nuclei already installed"
-fi
+    TOOL_NAME=$1
+    GO_PATH=$2
+
+    if command -v $TOOL_NAME &> /dev/null; then
+        echo "[✓] $TOOL_NAME already installed"
+        return
+    fi
+
+    echo "[+] Installing $TOOL_NAME"
+
+    for i in {1..3}; do
+        echo "[+] Attempt $i to install $TOOL_NAME"
+
+        go install -v $GO_PATH@latest && break
+
+        echo "[!] Retry installing $TOOL_NAME..."
+        sleep 2
+    done
+
+    if [ -f "$GOPATH/bin/$TOOL_NAME" ]; then
+        sudo cp "$GOPATH/bin/$TOOL_NAME" /usr/local/bin/
+        echo "[✓] $TOOL_NAME installed"
+    else
+        echo "[✗] Failed to install $TOOL_NAME"
+        exit 1
+    fi
+}
+
+install_go_tool httpx github.com/projectdiscovery/httpx/cmd/httpx
+install_go_tool nuclei github.com/projectdiscovery/nuclei/v3/cmd/nuclei
 
 echo "[+] Updating nuclei templates"
 nuclei -update-templates
