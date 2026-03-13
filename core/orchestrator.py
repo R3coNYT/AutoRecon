@@ -170,7 +170,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
                     nuclei_results = run_nuclei(
                         targets,
-                        nuclei_base_dir,
+                        output_dir=nuclei_base_dir,
                         target_name=safe_sub
                     )
 

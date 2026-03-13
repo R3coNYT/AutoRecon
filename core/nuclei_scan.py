@@ -4,7 +4,7 @@ import shutil
 
 NUCLEI_BIN = shutil.which("nuclei") or "C:/Tools/bin/nuclei.exe"
 
-def run_nuclei(targets, output_dir=None, target_name=None, severity="low,medium,high,critical"):
+def run_nuclei(targets, output_dir=None, target_name=None, severity=None):
 
     if isinstance(targets, list):
         targets = "\n".join(targets)
@@ -13,8 +13,10 @@ def run_nuclei(targets, output_dir=None, target_name=None, severity="low,medium,
         NUCLEI_BIN,
         "-json",
         "-silent",
-        "-severity", severity
     ]
+
+    if severity:
+        cmd += ["-severity", severity]
 
     try:
         process = subprocess.Popen(
@@ -47,7 +49,7 @@ def run_nuclei(targets, output_dir=None, target_name=None, severity="low,medium,
         else:
             file_name = "nuclei.json"
 
-        with open(output_dir / file_name, "w") as f:
+        with open(output_dir / file_name, "w", encoding="utf-8") as f:
             json.dump(vulns, f, indent=2)
 
     return vulns
