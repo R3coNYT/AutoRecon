@@ -357,6 +357,12 @@ rm -rf ~/nuclei-templates
 Remove-Item "C:\Tools\AutoRecon" -Recurse -Force
 Remove-Item "C:\Tools\bin\httpx.exe" -Force
 Remove-Item "C:\Tools\bin\nuclei.exe" -Force
+Remove-Item "C:\Tools\bin\masscan.exe" -Force
+Remove-Item "C:\Tools\bin\libcrypto-1_1.dll" -Force
+Remove-Item "C:\Tools\bin\libssl-1_1.dll" -Force
+Remove-Item "C:\Tools\bin\pcre.dll" -Force
+Remove-Item "C:\Tools\bin\masscan-ng.ilk" -Force
+Remove-Item "C:\Tools\bin\masscan-ng.pdb" -Force
 ```
 
 ---
