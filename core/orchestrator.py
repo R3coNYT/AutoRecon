@@ -107,9 +107,9 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
                 if ports:
                     port_str = ",".join(map(str, ports))
-                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan, ports=port_str)
+                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=False, ports=port_str)
                 else:
-                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan)
+                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=True)
 
                 spinner.ok("✔")
 
@@ -528,7 +528,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     log.info("Nmap XML saved → %s", xml_path)
 
                     xml_path = Path(xml_path)
-                    if xml_path.exists() and xml_path.stat().st_size > 50:
+                    if xml_path.exists() and xml_path.stat().st_size > 200:
 
                         try:
                             parsed = parse_nmap_xml(xml_path)
