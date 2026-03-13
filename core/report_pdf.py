@@ -4,35 +4,34 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.graphics.shapes import Drawing, Rect, String
-import os
-
+from pathlib import Path
 
 def _load_personalization():
-    base = "personalize_pdf"
+    base = Path("personalize_pdf")
 
     logo_path = None
     sign_path = None
     name = None
 
-    if os.path.exists(base):
+    if base.exists():
 
         # logo
         for ext in ["png", "jpg", "jpeg"]:
-            p = os.path.join(base, f"logo.{ext}")
-            if os.path.exists(p):
+            p = base / f"logo.{ext}"
+            if p.exists():
                 logo_path = p
                 break
 
         # signature
         for ext in ["png", "jpg", "jpeg"]:
-            p = os.path.join(base, f"sign.{ext}")
-            if os.path.exists(p):
+            p = base / f"sign.{ext}"
+            if p.exists():
                 sign_path = p
                 break
 
         # name
-        name_file = os.path.join(base, "name.txt")
-        if os.path.exists(name_file):
+        name_file = base / "name.txt"
+        if name_file.exists():
             with open(name_file, "r", encoding="utf-8") as f:
                 name = f.read().strip()
 
@@ -208,7 +207,8 @@ def _generate_fix_recommendation(cve):
     return fixes
 
 
-def write_pdf(report: dict, pdf_path: str):
+def write_pdf(report: dict, pdf_path: Path):
+    pdf_path = str(pdf_path)
     doc = SimpleDocTemplate(
         pdf_path,
         pagesize=A4,

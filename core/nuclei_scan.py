@@ -1,16 +1,10 @@
 import subprocess
 import json
-import os
-import shutil
 import shutil
 
-NUCLEI_BIN = shutil.which("nuclei") or "nuclei"
+NUCLEI_BIN = shutil.which("nuclei") or "C:/Tools/bin/nuclei.exe"
 
 def run_nuclei(targets, output_dir=None, target_name=None, severity="low,medium,high,critical"):
-
-    if not os.path.exists(NUCLEI_BIN):
-        print("[nuclei_error] nuclei binary not found")
-        return []
 
     if isinstance(targets, list):
         targets = "\n".join(targets)
@@ -46,14 +40,14 @@ def run_nuclei(targets, output_dir=None, target_name=None, severity="low,medium,
             pass
 
     if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
         if target_name:
             file_name = f"nuclei_{target_name}.json"
         else:
             file_name = "nuclei.json"
 
-        with open(os.path.join(output_dir, file_name), "w") as f:
+        with open(output_dir / file_name, "w") as f:
             json.dump(vulns, f, indent=2)
 
     return vulns

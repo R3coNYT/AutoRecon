@@ -17,6 +17,11 @@ BASE_DIR = Path(__file__).resolve().parent
 RESULTS_DIR = BASE_DIR / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
+sys.stdout.reconfigure(encoding="utf-8")
+sys.stderr.reconfigure(encoding="utf-8")
+
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
 log = logging.getLogger("recon-audit")
 console = Console()
 

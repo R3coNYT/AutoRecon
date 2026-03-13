@@ -1,4 +1,3 @@
-import os
 import re
 import questionary
 from pathlib import Path
@@ -17,15 +16,14 @@ def draw_header(title="Results Browser"):
 
 def select_or_create_client_folder(results_base: Path):
 
-    os.makedirs(results_base, exist_ok=True)
+    results_base.mkdir(parents=True, exist_ok=True)
 
     while True:
         draw_header("Select Client Folder")
 
-        folders = [
-            f for f in os.listdir(results_base)
-            if (results_base / f).is_dir()
-        ]
+        folders = sorted(
+            [f.name for f in results_base.iterdir()if f.is_dir()]
+        )
 
         choice = questionary.select(
             "Select an existing folder or create a new one:",

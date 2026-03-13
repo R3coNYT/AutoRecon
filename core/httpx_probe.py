@@ -1,9 +1,8 @@
 import subprocess
 import json
-import os
 import shutil
 
-HTTPX_BIN = shutil.which("httpx") or "httpx"
+HTTPX_BIN = shutil.which("httpx") or "C:/Tools/bin/httpx.exe"
 
 def run_httpx(targets, output_dir=None, target_name=None, timeout=10):
 
@@ -44,14 +43,14 @@ def run_httpx(targets, output_dir=None, target_name=None, timeout=10):
             pass
 
     if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
         if target_name:
             file = f"httpx_{target_name}.json"
         else:
             file = "httpx.json"
 
-        with open(os.path.join(output_dir, file), "w") as f:
+        with open(output_dir / file, "w") as f:
             json.dump(results, f, indent=2)
 
     return results

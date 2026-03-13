@@ -1,4 +1,4 @@
-import os, json
+import json
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from core.subdomains import run_sublist3r
@@ -44,7 +44,7 @@ def risk_badge(level, score):
     else:
         return f"[ {level} ] ({score})"
 
-def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: str, full_scan=False):
+def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False):
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     with step_timer(f"Full analysis for {sub}"):
         res = {"subdomain": sub}
@@ -107,9 +107,9 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
                 if ports:
                     port_str = ",".join(map(str, ports))
-                    nmap_txt, xml_path = nmap_service_scan(sub, os.path.join(base_dir, "nmap"), full_scan, ports=port_str)
+                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan, ports=port_str)
                 else:
-                    nmap_txt, xml_path = nmap_service_scan(sub, os.path.join(base_dir, "nmap"), full_scan)
+                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan)
 
                 spinner.ok("✔")
 
@@ -137,12 +137,14 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
                 urls.append(f"{sub}:{port}")
 
-            os.makedirs(os.path.join(base_dir, "httpx"), exist_ok=True)
+
+            httpx_base_dir = base_dir / "httpx"
+            httpx_base_dir.mkdir(parents=True, exist_ok=True)
             safe_sub = sub.replace("/", "_").replace(":", "_")
 
             httpx_results = run_httpx(
                 urls,
-                os.path.join(base_dir, "httpx"),
+                httpx_base_dir,
                 target_name=safe_sub
             )
 
@@ -162,12 +164,13 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             if targets:
                 log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 with step_timer(f"Nuclei scan {sub}"):
-                    os.makedirs(os.path.join(base_dir, "nuclei"), exist_ok=True)
+                    nuclei_base_dir = base_dir / "nuclei" 
+                    nuclei_base_dir.mkdir(parents=True, exist_ok=True)
                     safe_sub = sub.replace("/", "_").replace(":", "_")
 
                     nuclei_results = run_nuclei(
                         targets,
-                        os.path.join(base_dir, "nuclei"),
+                        nuclei_base_dir,
                         target_name=safe_sub
                     )
 
@@ -345,6 +348,8 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             res["risk"].get("level"),
             res["risk"].get("score")
         )
+        
+        badge = badge.replace("\x1b[32m", "").replace("\x1b[0m", "")
 
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         log.info("Risk assessment for %s → %s", sub, badge)
@@ -353,16 +358,19 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         return res
 
 def file_size_mb(path):
-    if not os.path.exists(path):
+    path = Path(path)
+    
+    if not path.exists():
         return 0
-    return round(os.path.getsize(path) / (1024 * 1024), 2)
+    
+    return round(path.stat().st_size / (1024 * 1024), 2)
 
 def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeout: int,
               use_nvd: bool, do_crawl: bool, generate_pdf: bool, write_json: bool,
               full_scan=False , output_dir=None):
 
     if output_dir:
-        base_dir = output_dir
+        base_dir = Path(output_dir)
     else:
         ts = datetime.now().strftime("%Y%m%d-%H%M%S")
         base_dir = Path("results") / f"{target}_{ts}"
@@ -370,6 +378,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     base_dir.mkdir(parents=True, exist_ok=True)
 
     subs = []
+    subsip = []
 
     domain = None
 
@@ -421,7 +430,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
             subs = [target]
 
             with step_timer(f"Sublist3r enumeration on {domain}"):
-                domain_subs = run_sublist3r(domain, out_dir=os.path.join(base_dir, "sublist3r"))
+                domain_subs = run_sublist3r(domain, out_dir=base_dir / "sublist3r")
             subs.extend(domain_subs)
 
             subs = list(set(subs))
@@ -434,7 +443,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         log.info("Target is detected as domain.")
         with step_timer(f"Sublist3r enumeration on {target}"):
-            subs = run_sublist3r(target, out_dir=os.path.join(base_dir, "sublist3r"))
+            subs = run_sublist3r(target, out_dir=base_dir / "sublist3r")
 
     log.info("Total targets to analyze: %d", len(subs))
     if subs:
@@ -509,20 +518,22 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     safe_sub = sub.replace("/", "_").replace(":", "_")
 
                     # Save raw nmap per sub
-                    os.makedirs(os.path.join(base_dir, "nmap"), exist_ok=True)
-                    with open(os.path.join(os.path.join(base_dir, "nmap"), f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
+                    nmap_base_dir = base_dir / "nmap"
+                    nmap_base_dir.mkdir(parents=True, exist_ok=True)
+                    with open(nmap_base_dir / f"nmap_{safe_sub}.txt", "w", encoding="utf-8") as f:
                         f.write(data.get("nmap_raw", ""))
                     
                     xml_path = data.get("nmap_xml")
 
                     log.info("Nmap XML saved → %s", xml_path)
 
-                    if xml_path and os.path.exists(xml_path) and os.path.getsize(xml_path) > 50:
+                    xml_path = Path(xml_path)
+                    if xml_path.exists() and xml_path.stat().st_size > 50:
 
                         try:
                             parsed = parse_nmap_xml(xml_path)
 
-                            json_path = os.path.join(base_dir, "nmap", f"nmap_{safe_sub}.json")
+                            json_path = nmap_base_dir / f"nmap_{safe_sub}.json"
 
                             with open(json_path, "w") as jf:
                                 json.dump(parsed, jf, indent=2)
@@ -576,20 +587,21 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     safe_sub = sub.replace("/", "_").replace(":", "_")
 
                     # Save raw nmap per sub
-                    os.makedirs(os.path.join(base_dir, "nmap"), exist_ok=True)
-                    with open(os.path.join(os.path.join(base_dir, "nmap"), f"nmap_{safe_sub}.txt"), "w", encoding="utf-8") as f:
+                    nmap_base_dir = base_dir / "nmap"
+                    nmap_base_dir.mkdir(parents=True, exist_ok=True)
+                    with open(nmap_base_dir / f"nmap_{safe_sub}.txt", "w", encoding="utf-8") as f:
                         f.write(data.get("nmap_raw", ""))
                     
                     xml_path = data.get("nmap_xml")
 
                     log.info("Nmap XML saved → %s", xml_path)
 
-                    if xml_path and os.path.exists(xml_path) and os.path.getsize(xml_path) > 50:
+                    if xml_path and xml_path.exists() and xml_path.stat().st_size > 50:
 
                         try:
                             parsed = parse_nmap_xml(xml_path)
 
-                            json_path = os.path.join(base_dir, "nmap", f"nmap_{safe_sub}.json")
+                            json_path = nmap_base_dir / f"nmap_{safe_sub}.json"
 
                             with open(json_path, "w") as jf:
                                 json.dump(parsed, jf, indent=2)
@@ -604,7 +616,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     log.error("Error analyzing %s: %s", sub, e)
 
 
-    json_path = os.path.join(base_dir, "report.json")
+    json_path = base_dir / "report.json"
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     log.info("Writing JSON report → %s", json_path)
     if write_json:
@@ -614,7 +626,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
         log.info("JSON written (%.2f MB)", size)
 
 
-    pdf_path = os.path.join(base_dir, "report.pdf")
+    pdf_path = base_dir / "report.pdf"
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     log.info("Generating PDF report → %s", pdf_path)
     if generate_pdf:

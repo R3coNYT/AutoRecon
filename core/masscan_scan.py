@@ -2,7 +2,7 @@ import subprocess
 import json
 import shutil
 
-MASSCAN_BIN = shutil.which("masscan") or "masscan"
+MASSCAN_BIN = shutil.which("masscan") or "C:/Tools/bin/masscan.exe"
 
 def run_masscan(target: str, rate=2000, ports="1-65535"):
     cmd = [

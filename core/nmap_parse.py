@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 PORT_LINE_RE = re.compile(
     r"^(?P<port>\d+)\/(?P<proto>\w+)\s+open\s+(?P<service>[\w\-\./]+)\s*(?P<version>.*)$",

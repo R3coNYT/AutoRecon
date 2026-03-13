@@ -54,6 +54,8 @@ Autorecon
 
 ## Windows
 
+### --PowerShell/CMD as Administrator
+
 ```bash
 C:\Tools\AutoRecon\AutoRecon.bat
 ```

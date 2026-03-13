@@ -1,16 +1,16 @@
-import subprocess, os
-from rich import json
+import subprocess
 import shutil
+from pathlib import Path
 
-NMAP_BIN = shutil.which("nmap") or "nmap"
+NMAP_BIN = shutil.which("nmap") or r"C:\Program Files (x86)\Nmap\nmap.exe"
 
-def nmap_service_scan(host: str, output_dir: str, full_scan=False, ports=None):
+def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None):
 
     safe_host = host.replace("/", "_").replace(":", "_")
     xml_path = ""
     if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-        xml_path = os.path.join(output_dir, f"nmap_{safe_host}.xml")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        xml_path = output_dir / f"nmap_{safe_host}.xml"
 
     cmd = [NMAP_BIN, "-sV", "-T4"]
 
