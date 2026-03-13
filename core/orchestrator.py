@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from core.subdomains import run_sublist3r
 from core.nmap_scan import nmap_service_scan, infer_scheme_from_nmap
 from core.http_probe import probe_base

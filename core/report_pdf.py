@@ -7,23 +7,48 @@ from reportlab.graphics.shapes import Drawing, Rect, String
 from pathlib import Path
 
 def _load_personalization():
-    base = Path("personalize_pdf")
+    # Resolve personalization folder from stable project locations first,
+    # then fall back to current working directory.
+    candidates = []
+    try:
+        project_root = Path(__file__).resolve().parents[1]
+        candidates.append(project_root / "personalize_pdf")
+    except Exception:
+        pass
+
+    candidates.append(Path.cwd() / "personalize_pdf")
+    candidates.append(Path("personalize_pdf").resolve())
+
+    unique_candidates = []
+    seen = set()
+    for c in candidates:
+        rc = c.resolve()
+        key = str(rc).lower()
+        if key not in seen:
+            seen.add(key)
+            unique_candidates.append(rc)
+
+    base = None
+    for c in unique_candidates:
+        if c.exists() and c.is_dir():
+            base = c
+            break
 
     logo_path = None
     sign_path = None
     name = None
 
-    if base.exists():
+    if base and base.exists():
 
         # logo
-        for ext in ["png", "jpg", "jpeg"]:
+        for ext in ["png", "jpg", "jpeg", "PNG", "JPG", "JPEG"]:
             p = base / f"logo.{ext}"
             if p.exists():
                 logo_path = p
                 break
 
         # signature
-        for ext in ["png", "jpg", "jpeg"]:
+        for ext in ["png", "jpg", "jpeg", "PNG", "JPG", "JPEG"]:
             p = base / f"sign.{ext}"
             if p.exists():
                 sign_path = p
@@ -713,15 +738,21 @@ def write_pdf(report: dict, pdf_path: Path):
     # ---------- SIGNATURE PAGE ----------
     logo_path, sign_path, name = _load_personalization()
 
-    if name:
+    if name or sign_path or logo_path:
         elements.append(PageBreak())
         elements.append(Paragraph("<b>Author</b>", styles["Heading2"]))
         elements.append(Spacer(1, 6))
 
-        elements.append(Paragraph(
-            f"Analysis report prepared by <b>{name}</b>.",
-            styles["Normal"]
-        ))
+        if name:
+            elements.append(Paragraph(
+                f"Analysis report prepared by <b>{name}</b>.",
+                styles["Normal"]
+            ))
+        else:
+            elements.append(Paragraph(
+                "Analysis report prepared by the AutoRecon operator.",
+                styles["Normal"]
+            ))
         elements.append(Spacer(1, 20))
 
         if sign_path:
