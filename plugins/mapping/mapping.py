@@ -2,7 +2,6 @@ import subprocess
 import xml.etree.ElementTree as ET
 import json
 import csv
-import os
 import re
 import platform
 import questionary
@@ -25,6 +24,7 @@ from core.report_pdf import _load_personalization
 from core.client_folder_select import select_or_create_client_folder
 
 console = Console()
+NMAP_BIN = shutil.which("nmap") or r"C:\Program Files (x86)\Nmap\nmap.exe"
 
 # ======================================================
 # HEADER
@@ -63,12 +63,21 @@ class Plugin:
     # FILE OPEN (cross-platform)
     # ======================================================
     def open_file(self, path):
+        path = Path(path)
+
         if platform.system() == "Windows":
-            os.startfile(path)
+            subprocess.run(["cmd", "/c", "start", "", str(path)], check=False)
         elif platform.system() == "Darwin":
-            subprocess.run(["open", path])
+            subprocess.run(["open", str(path)], check=False)
         else:
-            if shutil.which("chromium"):
+            if shutil.which("xdg-open"):
+                subprocess.Popen(
+                    ["xdg-open", str(path)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True
+                )
+            elif shutil.which("chromium"):
                 subprocess.Popen(
                     ["chromium", "--new-tab", str(path)],
                     stdout=subprocess.DEVNULL,
@@ -92,7 +101,7 @@ class Plugin:
         try:
             result = subprocess.run(
                 [
-                    "nmap",
+                    NMAP_BIN,
                     "-sn",
                     "-n",
                     "-PE",
@@ -136,7 +145,7 @@ class Plugin:
         console.print("[*] Running Nmap scan on alive hosts...")
 
         subprocess.run([
-            "nmap",
+            NMAP_BIN,
             "-sS",
             "-sV",
             "-O",
@@ -564,10 +573,10 @@ class Plugin:
         csv_file = output_dir / "inventory.csv"
         traceroute_file = output_dir / "traceroutes.json"
 
-        with open(json_file, "w") as f:
+        with open(json_file, "w", encoding="utf-8") as f:
             json.dump(assets, f, indent=4)
 
-        with open(csv_file, "w", newline="") as csvfile:
+        with open(csv_file, "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(["IP", "Zone", "Type", "Risk Score"])
 
@@ -579,7 +588,7 @@ class Plugin:
                     asset["risk_score"]
                 ])
 
-        with open(traceroute_file, "w") as f:
+        with open(traceroute_file, "w", encoding="utf-8") as f:
             traceroutes = {a["ip"]: a.get("trace_path") for a in assets if a.get("trace_path")}
             json.dump(traceroutes, f, indent=4)
 
@@ -593,19 +602,19 @@ class Plugin:
         # -------------------------
         # JSON EXPORTS
         # -------------------------
-        with open(output_dir / "exposure_by_zone.json", "w") as f:
+        with open(output_dir / "exposure_by_zone.json", "w", encoding="utf-8") as f:
             json.dump(exposure, f, indent=4)
 
-        with open(output_dir / "criticality_matrix.json", "w") as f:
+        with open(output_dir / "criticality_matrix.json", "w", encoding="utf-8") as f:
             json.dump(criticality, f, indent=4)
 
-        with open(output_dir / "attack_paths.json", "w") as f:
+        with open(output_dir / "attack_paths.json", "w", encoding="utf-8") as f:
             json.dump(attack_paths, f, indent=4)
 
         # -------------------------
         # CSV EXPOSURE EXPORT
         # -------------------------
-        with open(output_dir / "exposure_by_zone.csv", "w", newline="") as csvfile:
+        with open(output_dir / "exposure_by_zone.csv", "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([
                 "Zone",
@@ -629,7 +638,7 @@ class Plugin:
         # -------------------------
         # CSV CRITICALITY EXPORT (TOP 50)
         # -------------------------
-        with open(output_dir / "criticality_top.csv", "w", newline="") as csvfile:
+        with open(output_dir / "criticality_top.csv", "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([
                 "IP",
@@ -1758,7 +1767,7 @@ class Plugin:
     </html>
     """
 
-        with open(html_file, "w") as f:
+        with open(html_file, "w", encoding="utf-8") as f:
             f.write(html_content)
 
         console.print(f"[+] Advanced interactive map generated: {html_file}")
@@ -1899,7 +1908,7 @@ class Plugin:
         </html>
         """
 
-        with open(report_file, "w") as f:
+        with open(report_file, "w", encoding="utf-8") as f:
             f.write(html)
 
         console.print(f"[+] Executive report generated: {report_file}")
@@ -2080,7 +2089,7 @@ class Plugin:
                 target_file = client_folder / choice / "target.txt"
 
                 if target_file.exists():
-                    target = target_file.read_text().strip()
+                    target = target_file.read_text(encoding="utf-8").strip()
                 else:
                     target = choice
 
@@ -2104,7 +2113,7 @@ class Plugin:
 
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        (output_dir / "target.txt").write_text(target)
+        (output_dir / "target.txt").write_text(target, encoding="utf-8")
 
         xml_file = output_dir / "nmap.xml"
 
@@ -2167,7 +2176,7 @@ class Plugin:
             questionary.press_any_key_to_continue().ask()
             return
 
-        targets = sorted(os.listdir(self.results_base))
+        targets = sorted([p.name for p in self.results_base.iterdir() if p.is_dir()])
 
         if not targets:
             console.print("[yellow]No analyzed targets found.[/yellow]")
@@ -2195,11 +2204,13 @@ class Plugin:
             self.navigate_directory(target_path)
 
     def navigate_directory(self, path):
+        path = Path(path)
+
         while True:
             draw_header(f"Browsing: {path}")
 
             items = sorted(
-                os.listdir(path),
+                [p.name for p in path.iterdir()],
                 key=lambda x: (
                     not (path / x).is_dir(),
                     x.endswith(".txt"),
@@ -2278,20 +2289,52 @@ class Plugin:
         return runs
 
     def _find_recon_pdf_candidates(self, client_name: str, target_name: str):
-        project_results = Path("results")
         candidates = {
             "match": None,
-            "all_pdfs": []
+            "all_pdfs": [],
+            "searched_roots": []
         }
 
-        client_dir = project_results / client_name
-        if client_dir.exists() and client_dir.is_dir():
+        roots = []
+
+        # Project root inferred from this plugin path: <repo>/plugins/mapping/mapping.py
+        try:
+            roots.append(Path(__file__).resolve().parents[2] / "results")
+        except Exception:
+            pass
+
+        # Fallbacks for launches from other working directories.
+        roots.append(Path.cwd() / "results")
+        roots.append(Path("results").resolve())
+
+        unique_roots = []
+        seen_roots = set()
+        for r in roots:
+            rr = r.resolve()
+            key = str(rr).lower()
+            if key not in seen_roots:
+                seen_roots.add(key)
+                unique_roots.append(rr)
+
+        seen_pdf = set()
+
+        for results_root in unique_roots:
+            candidates["searched_roots"].append(str(results_root))
+
+            client_dir = results_root / client_name
+            if not (client_dir.exists() and client_dir.is_dir()):
+                continue
+
             direct = client_dir / target_name / "report.pdf"
-            if direct.exists():
+            if direct.exists() and candidates["match"] is None:
                 candidates["match"] = direct
 
             for pdf in client_dir.rglob("*.pdf"):
-                candidates["all_pdfs"].append(pdf)
+                p = pdf.resolve()
+                k = str(p).lower()
+                if k not in seen_pdf:
+                    seen_pdf.add(k)
+                    candidates["all_pdfs"].append(p)
 
         return candidates
 
@@ -2450,6 +2493,7 @@ class Plugin:
         cands = self._find_recon_pdf_candidates(client_name, target_name)
         match = cands["match"]
         all_pdfs = cands["all_pdfs"]
+        searched_roots = [Path(p) for p in cands.get("searched_roots", [])]
 
         recon_pdf = None
 
@@ -2466,17 +2510,31 @@ class Plugin:
         if recon_pdf is None:
             draw_header("Select Recon PDF")
             if not all_pdfs:
-                console.print(f"[red]No PDF found in results/{client_name}[/red]")
+                console.print(f"[red]No PDF found for client '{client_name}'.[/red]")
+                console.print("[yellow]Searched in:[/yellow]")
+                for root in searched_roots:
+                    console.print(f" - {root}")
                 questionary.press_any_key_to_continue().ask()
                 return
 
-            display = []
-            base = Path("results")
+            display_map = {}
             for p in all_pdfs:
-                try:
-                    display.append(str(p.relative_to(base)))
-                except Exception:
-                    display.append(str(p))
+                label = str(p)
+
+                for root in searched_roots:
+                    try:
+                        label = str(p.relative_to(root))
+                        break
+                    except Exception:
+                        pass
+
+                # Keep labels unique if same relative path exists in multiple roots.
+                if label in display_map:
+                    label = f"{label}  ({p})"
+
+                display_map[label] = p
+
+            display = list(display_map.keys())
 
             pick = questionary.select(
                 "Select a Recon PDF to attach cartography to:",
@@ -2487,7 +2545,7 @@ class Plugin:
             if pick == "⬅ Back":
                 return
 
-            recon_pdf = base / pick if (base / pick).exists() else Path(pick)
+            recon_pdf = display_map[pick]
 
         draw_header("Merging PDFs")
         console.print("[*] Recon PDF:", recon_pdf)
