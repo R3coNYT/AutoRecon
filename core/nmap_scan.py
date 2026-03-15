@@ -24,7 +24,7 @@ def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None):
 
     # scan classique si rien trouvé par masscan
     if not full_scan and not ports:
-        cmd += ["--top-ports", "1000"]
+        cmd += ["--top-ports", "200"]
 
     cmd += ["-oX", xml_path, host]
 
@@ -32,7 +32,7 @@ def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None):
         result = subprocess.check_output(
             cmd,
             stderr=subprocess.STDOUT,
-            timeout=400 if full_scan else 180
+            timeout=800 if full_scan else 180
         )
 
         txt_output = result.decode("utf-8", "ignore")
