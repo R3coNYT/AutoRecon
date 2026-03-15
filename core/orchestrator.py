@@ -402,7 +402,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
             log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             log.info("Starting host discovery (ping sweep)...")
 
-            alive_hosts = discover_hosts(hosts)
+            # Pass the CIDR range directly so nmap scans it in one optimised pass
+            alive_hosts = discover_hosts([target])
 
             if not alive_hosts:
                 log.warning("No alive hosts detected.")
