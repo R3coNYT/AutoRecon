@@ -32,7 +32,7 @@ def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None):
         result = subprocess.check_output(
             cmd,
             stderr=subprocess.STDOUT,
-            timeout=800 if full_scan else 180
+            timeout=400 if full_scan else 180
         )
 
         txt_output = result.decode("utf-8", "ignore")
