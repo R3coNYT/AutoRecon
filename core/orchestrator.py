@@ -264,7 +264,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                     product = p.get("product")
                     version = p.get("version_raw")
 
-                    if product:
+                    if product and product.strip().replace("?", ""):
                         name = product.lower().strip()
 
                         clean_version = None

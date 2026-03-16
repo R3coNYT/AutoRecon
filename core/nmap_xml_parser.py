@@ -1,5 +1,14 @@
 import xml.etree.ElementTree as ET
 
+
+def _clean(val):
+    """Return None when nmap emits an empty string or '?' for unknown fields."""
+    if val is None:
+        return None
+    val = val.strip()
+    return None if not val or not val.replace("?", "").strip() else val
+
+
 def parse_nmap_xml(xml_path):
 
     tree = ET.parse(xml_path)
@@ -42,8 +51,8 @@ def parse_nmap_xml(xml_path):
             "port": int(port.get("portid")),
             "proto": port.get("protocol"),
             "service": service.get("name") if service is not None else None,
-            "product": service.get("product") if service is not None else None,
-            "version": service.get("version") if service is not None else None
+            "product": _clean(service.get("product")) if service is not None else None,
+            "version": _clean(service.get("version")) if service is not None else None
         })
 
     return result
