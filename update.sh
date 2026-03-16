@@ -313,4 +313,5 @@ fi
 restore_user_data
 show_user_plugins
 update_deps
+chmod +x "$INSTALL_DIR/update.sh"
 print_summary "$UPDATED"
