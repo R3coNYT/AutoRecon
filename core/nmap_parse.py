@@ -49,7 +49,9 @@ def parse_nmap_text(nmap_text: str) -> Dict[str, Any]:
             port = int(lm.group("port"))
             proto = lm.group("proto").lower()
             service = lm.group("service").strip()
-            version_raw = (lm.group("version") or "").strip()
+            _raw = (lm.group("version") or "").strip()
+            # nmap uses "?" for unidentified services — treat as empty
+            version_raw = "" if not _raw.replace("?", "").strip() else _raw
 
             # tentative de split produit/version (best effort)
             product = None
