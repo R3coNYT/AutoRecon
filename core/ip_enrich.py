@@ -196,9 +196,71 @@ def mdns_hostname(ip: str, timeout: float = 2.0):
             if rtype == 12:   # PTR record
                 ptr_name, _ = _decode_dns_name(data, offset)
                 hostname = ptr_name.rstrip('.')
+                # Keep the full FQDN (e.g. livebox.home) — only strip .local
                 if hostname.endswith('.local'):
                     hostname = hostname[:-6]
-                return hostname.split('.')[0] if hostname else None
+                return hostname if hostname else None
+            offset += rdlen
+    except Exception:
+        pass
+
+    return None
+
+
+# ── Direct DNS PTR query to a specific nameserver ─────────────────────────────
+
+def _guess_gateway(ip: str):
+    """Derive the likely local gateway (x.x.x.1) from any LAN IP."""
+    parts = ip.split('.')
+    if len(parts) == 4:
+        return f"{parts[0]}.{parts[1]}.{parts[2]}.1"
+    return None
+
+
+def _dns_ptr_query(ip: str, nameserver: str, timeout: float = 2.0):
+    """
+    Send a raw UDP DNS PTR query directly to *nameserver* (port 53).
+    Bypasses the system resolver — useful when the local router serves a
+    private zone (.home, .lan, .local) that upstream DNS doesn't forward.
+    Returns the FQDN answer or None.
+    """
+    parts = ip.split('.')
+    query_name = '.'.join(reversed(parts)) + '.in-addr.arpa'
+
+    packet  = struct.pack('>HHHHHH', 0xAB01, 0x0100, 1, 0, 0, 0)
+    packet += _encode_dns_name(query_name)
+    packet += struct.pack('>HH', 12, 1)   # QTYPE=PTR, QCLASS=IN
+
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(timeout)
+        sock.sendto(packet, (nameserver, 53))
+        data, _ = sock.recvfrom(4096)
+        sock.close()
+    except Exception:
+        return None
+
+    try:
+        flags    = struct.unpack_from('>H', data, 2)[0]
+        an_count = struct.unpack_from('>H', data, 6)[0]
+        if not (flags & 0x8000) or an_count == 0:
+            return None
+
+        offset  = 12
+        qdcount = struct.unpack_from('>H', data, 4)[0]
+        for _ in range(qdcount):
+            _, offset = _decode_dns_name(data, offset)
+            offset += 4
+
+        for _ in range(an_count):
+            _, offset = _decode_dns_name(data, offset)
+            if offset + 10 > len(data):
+                break
+            rtype, _rclass, _ttl, rdlen = struct.unpack_from('>HHIH', data, offset)
+            offset += 10
+            if rtype == 12:   # PTR
+                ptr_name, _ = _decode_dns_name(data, offset)
+                return ptr_name.rstrip('.') or None
             offset += rdlen
     except Exception:
         pass
@@ -210,14 +272,27 @@ def mdns_hostname(ip: str, timeout: float = 2.0):
 
 def resolve_hostname(ip: str):
     """
-    Resolve a hostname for the given IP using three methods in order:
-      1. Reverse DNS  — fast, uses the system resolver / DNS server
-      2. NetBIOS (UDP 137) — reliable for Windows hosts with DHCP-only names
-      3. mDNS  (UDP 5353) — works on Windows 10+, Linux, macOS
+    Resolve a hostname for the given IP using four methods:
 
-    Returns the first successful result, or None if all three fail.
+      1. Reverse DNS (system resolver) — standard PTR lookup.
+      2. Direct PTR query to the local gateway (x.x.x.1, port 53) —
+         handles .home / .lan zones served by the local router/DHCP server
+         when the system resolver doesn't forward them, OR when the system
+         resolver returned only a bare name (no domain, e.g. via LLMNR).
+      3. NetBIOS Node Status (UDP 137) — Windows DHCP-only machines.
+      4. mDNS PTR (UDP 5353) — Windows 10+, Linux, macOS.
     """
     host = reverse_dns(ip)
+
+    # Prefer a FQDN from the gateway's DNS over a bare name from LLMNR/NetBIOS.
+    # Also covers the case where the system resolver returns nothing at all.
+    if not host or '.' not in host:
+        gateway = _guess_gateway(ip)
+        if gateway:
+            gw_host = _dns_ptr_query(ip, gateway)
+            if gw_host:
+                host = gw_host
+
     if host:
         return host
 
