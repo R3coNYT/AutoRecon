@@ -69,16 +69,29 @@ def netbios_hostname(ip: str, timeout: float = 2.0):
 
     # Response layout:
     #   Header:   12 bytes
-    #   Question: 34 bytes (name) + 4 bytes (type+class) = 38 bytes  → total 50
+    #   Question: 0 or 38 bytes depending on whether the device echoes it
+    #             (RFC 1002 mandates QDCOUNT=0, but many devices echo QDCOUNT=1)
     #   Answer name: 2-byte compression pointer OR 34-byte copy
     #   Then: type(2) + class(2) + ttl(4) + rdlength(2) = 10 bytes
     #   RDATA: num_names(1) + 18 bytes per name entry
     try:
-        if len(data) <= 50:
+        if len(data) < 12:
             return None
 
-        rr_name_len = 2 if (data[50] & 0xC0 == 0xC0) else 34
-        rdata_start = 50 + rr_name_len + 10   # skip answer-name + type/class/ttl/rdlen
+        qdcount_resp = struct.unpack_from('>H', data, 4)[0]
+        ancount_resp = struct.unpack_from('>H', data, 6)[0]
+        if ancount_resp == 0:
+            return None
+
+        # Skip optional question section (38 bytes when QDCOUNT=1)
+        ans_start = 12 + (38 if qdcount_resp > 0 else 0)
+
+        if ans_start >= len(data):
+            return None
+
+        # Answer name: 2-byte pointer (top 2 bits = 11) or full 34-byte encoded name
+        rr_name_len = 2 if (data[ans_start] & 0xC0) == 0xC0 else 34
+        rdata_start = ans_start + rr_name_len + 10   # skip answer-name + type/class/ttl/rdlen
 
         if rdata_start >= len(data):
             return None
