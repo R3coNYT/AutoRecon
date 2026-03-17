@@ -272,34 +272,37 @@ def _dns_ptr_query(ip: str, nameserver: str, timeout: float = 2.0):
 
 def resolve_hostname(ip: str):
     """
-    Resolve a hostname for the given IP using four methods:
+    Resolve a hostname for the given IP using four methods in strict priority:
 
-      1. Reverse DNS (system resolver) — standard PTR lookup.
+      1. Reverse DNS (system resolver) — standard PTR lookup via socket.gethostbyaddr.
+         If this returns a hostname, it is used immediately and no further
+         methods are tried.
       2. Direct PTR query to the local gateway (x.x.x.1, port 53) —
          handles .home / .lan zones served by the local router/DHCP server
-         when the system resolver doesn't forward them, OR when the system
-         resolver returned only a bare name (no domain, e.g. via LLMNR).
+         when the system resolver doesn't forward them.
       3. NetBIOS Node Status (UDP 137) — Windows DHCP-only machines.
       4. mDNS PTR (UDP 5353) — Windows 10+, Linux, macOS.
+
+    Methods 2-4 are only attempted when the standard reverse DNS returns None.
     """
+    # 1. Standard reverse DNS — original behaviour
     host = reverse_dns(ip)
-
-    # Prefer a FQDN from the gateway's DNS over a bare name from LLMNR/NetBIOS.
-    # Also covers the case where the system resolver returns nothing at all.
-    if not host or '.' not in host:
-        gateway = _guess_gateway(ip)
-        if gateway:
-            gw_host = _dns_ptr_query(ip, gateway)
-            if gw_host:
-                host = gw_host
-
     if host:
         return host
 
+    # 2. Direct PTR to the local gateway (covers .home / .lan private zones)
+    gateway = _guess_gateway(ip)
+    if gateway:
+        host = _dns_ptr_query(ip, gateway)
+        if host:
+            return host
+
+    # 3. NetBIOS Node Status
     host = netbios_hostname(ip)
     if host:
         return host
 
+    # 4. mDNS unicast PTR
     host = mdns_hostname(ip)
     if host:
         return host
