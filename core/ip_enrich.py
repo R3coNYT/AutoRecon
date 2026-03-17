@@ -96,7 +96,10 @@ def netbios_hostname(ip: str, timeout: float = 2.0):
 
             # type 0x00, unique (GROUP bit 0x8000 not set) → workstation name
             if name_type == 0x00 and not (flags & 0x8000):
-                name = raw_name.rstrip(b'\x00').rstrip(b' ').decode('ascii', errors='ignore').strip()
+                # Keep only printable ASCII bytes (0x20–0x7E) — drops nulls,
+                # control chars (\x1c, \x04, …) and any other garbage bytes.
+                name = bytes(b for b in raw_name if 0x20 <= b <= 0x7E)
+                name = name.decode('ascii', errors='ignore').strip()
                 return name if name else None
     except Exception:
         return None
