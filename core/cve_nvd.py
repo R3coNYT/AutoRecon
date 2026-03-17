@@ -1,6 +1,6 @@
 import requests
 
-def lookup_nvd(keyword: str, timeout: int = 12, limit: int = 8):
+def lookup_nvd(keyword: str, timeout: int = 30, limit: int = 200):
     url = "https://services.nvd.nist.gov/rest/json/cves/2.0"
     params = {"keywordSearch": keyword, "resultsPerPage": limit}
     try:
