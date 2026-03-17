@@ -400,7 +400,7 @@ def write_pdf(report: dict, pdf_path: Path):
 
             infra_table = [
                 ["IP", ip_info.get("ip")],
-                ["Reverse DNS", ip_info.get("reverse_dns")],
+                ["Hostname", ip_info.get("reverse_dns")],
                 ["Country", geo.get("country")],
                 ["Region", geo.get("region")],
                 ["City", geo.get("city")],

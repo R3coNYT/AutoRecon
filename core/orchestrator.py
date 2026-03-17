@@ -11,7 +11,7 @@ from core.tls_audit import tls_audit
 from core.cve_nvd import lookup_nvd
 from core.report_pdf import write_pdf
 from core.utils import is_ip, reverse_dns_lookup
-from core.ip_enrich import resolve_domain_to_ips, reverse_dns, rdap_ip_lookup, geo_ip_api
+from core.ip_enrich import resolve_domain_to_ips, reverse_dns, resolve_hostname, rdap_ip_lookup, geo_ip_api
 from core.nmap_parse import parse_nmap_text
 from core.risk_score import compute_risk_score
 from core.version_matcher import is_version_affected
@@ -73,7 +73,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         for ip in resolved_ips:
             ip_info = {
                 "ip": ip,
-                "reverse_dns": reverse_dns(ip),
+                "reverse_dns": resolve_hostname(ip),
                 "rdap": rdap_ip_lookup(ip),
                 "geo": geo_ip_api(ip)
             }
@@ -457,7 +457,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     report = {
         "input_target": target,
         "is_ip": is_ip(target),
-        "reverse_dns": domain if is_ip(target) else None,
+        "reverse_dns": resolve_hostname(target) if is_ip(target) else None,
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "subdomains": {}
     }
