@@ -325,8 +325,8 @@ def resolve_hostname(ip: str):
 
 def rdap_ip_lookup(ip: str, timeout: int = 10):
     """
-    RDAP: standard moderne (remplace WHOIS brut).
-    Renvoie infos réseau + org quand dispo.
+    RDAP: modern standard (replaces raw WHOIS).
+    Returns network info + org when available.
     """
     url = f"https://rdap.org/ip/{ip}"
     try:
@@ -347,9 +347,9 @@ def rdap_ip_lookup(ip: str, timeout: int = 10):
             "rdap_url": url,
         }
 
-        # Tentative d'extraction d'org/ASN-like depuis entities (souvent présent)
+        # Try to extract org/ASN-like info from entities (often present)
         entities = data.get("entities", [])
-        out["entities"] = entities[:10]  # on limite
+        out["entities"] = entities[:10]  # limit results
 
         return out
     except Exception as e:

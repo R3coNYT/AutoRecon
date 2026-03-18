@@ -1,4 +1,4 @@
-import subprocess
+﻿import subprocess
 import xml.etree.ElementTree as ET
 import json
 import csv
@@ -313,9 +313,9 @@ class Plugin:
     # ======================================================
     def compute_exposure_by_zone(self, assets):
         """
-        Surface d'exposition = somme pondérée des ports "sensibles" exposés
-        + nombre de services ouverts
-        (heuristique, mais très utile en stage)
+        Exposure surface = weighted sum of "sensitive" exposed ports
+        + number of open services
+        (heuristic, useful for recon stages)
         """
         risky_ports = {22, 3389, 445, 21, 25, 1433, 1521, 3306, 5432, 27017, 6379, 9200}
         exposure = {}
@@ -344,13 +344,13 @@ class Plugin:
 
             exposure[zone]["risky_ports_total"] += rp
 
-            # score simple : services ouverts + 3*risky_ports + bonus si DMZ
+            # score: open services + 3*risky_ports + bonus if not LAN
             score = len(svcs) + (3 * rp)
             if zone != "LAN":
                 score += 5
             exposure[zone]["exposure_score"] += score
 
-        # normalisation légère
+        # light normalization
         for z in exposure:
             h = max(exposure[z]["hosts"], 1)
             exposure[z]["exposure_score_avg"] = round(exposure[z]["exposure_score"] / h, 2)
@@ -363,8 +363,8 @@ class Plugin:
     # ======================================================
     def compute_criticality_matrix(self, assets, exposure_by_zone):
         """
-        Impact: basé sur classification (DC > DB > Servers > Workstation)
-        Exposure: basé sur score hôte + score zone
+        Impact: based on classification (DC > DB > Servers > Workstation)
+        Exposure: based on host score + zone score
         Output: Criticality level + matrix counters
         """
         # impact (1..5)
@@ -426,7 +426,7 @@ class Plugin:
                 "criticality_level": level
             })
 
-        # tri décroissant
+        # descending sort
         matrix["items"].sort(key=lambda x: x["criticality_score"], reverse=True)
         return matrix
 
@@ -436,18 +436,18 @@ class Plugin:
     # ======================================================
     def simulate_attack_paths(self, assets):
         """
-        On construit un graphe logique basé sur les liens déjà utilisés :
+        Build a logical graph based on known relationships:
         - DC -> Windows
         - Web -> DB
-        - (option) DMZ -> LAN : si DMZ host existe et LAN host existe, lien "pivot"
-        Puis on cherche des chemins "DMZ Web -> DB -> DC" etc.
+        - (option) DMZ -> LAN : if a DMZ host exists and a LAN host exists, add "pivot" edge
+        Then search for attack paths such as "DMZ Web -> DB -> DC" etc.
         """
         # index par type
         dc = [a for a in assets if a["classification"] == "Domain Controller"]
         win = [a for a in assets if a["classification"] == "Windows Server"]
         web = [a for a in assets if a["classification"] == "Web Server"]
 
-        # DB = host qui expose 3306/5432 (déduit des services)
+        # DB = host exposing port 3306/5432 (inferred from services)
         def is_db(a):
             for s in a.get("services", []):
                 try:
@@ -478,12 +478,12 @@ class Plugin:
                 add_edge(w["ip"], dbase["ip"], "Web → DB")
                 add_edge(dbase["ip"], w["ip"], "DB → Web (app dep)")
 
-        # pivot DMZ -> LAN (heuristique)
-        # si tu as au moins un host DMZ, on suppose qu’un pivot est possible vers des services admin exposés
-        # (ça simule un scénario de compromission web en DMZ puis accès interne)
+        # DMZ -> LAN pivot (heuristic)
+        # if at least one DMZ host exists, assume a pivot toward admin services is possible
+        # (simulates a web compromise in DMZ followed by internal access)
         for x in dmz:
             for y in lan:
-                # lien seulement si y expose ports "admin" (22/3389/445)
+                # only add edge if y exposes "admin" ports (22/3389/445)
                 admin_ports = {22, 3389, 445}
                 ok = False
                 for s in y.get("services", []):
@@ -516,7 +516,7 @@ class Plugin:
                         continue
 
                     for (nxt, reason) in adj.get(node, []):
-                        # éviter loops
+                        # avoid loops
                         if nxt in path:
                             continue
                         q.append((nxt, path + [nxt], reasons + [reason]))
@@ -1641,7 +1641,7 @@ class Plugin:
         const pairs = new Set();
         for (let i = 0; i < path.length - 1; i++) {{
             pairs.add(path[i] + "->" + path[i+1]);
-            pairs.add(path[i+1] + "->" + path[i]); // sécurité si edge inversé
+            pairs.add(path[i+1] + "->" + path[i]); // safety: handle reversed edge
         }}
 
         const updates = [];
@@ -1777,11 +1777,11 @@ class Plugin:
     # ======================================================
     def compute_global_score(self, assets, criticality):
         """
-        Score global sur 100
-        basé sur :
-        - moyenne risk_score
-        - % d'assets critiques
-        - exposition DMZ
+        Global score out of 100
+        based on:
+        - average risk_score
+        - % of critical assets
+        - DMZ exposure
         """
 
         if not assets:

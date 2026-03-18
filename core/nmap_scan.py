@@ -32,7 +32,7 @@ def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None):
     if ports:
         cmd += ["-p", ports]
 
-    # scan classique si rien trouvé par masscan
+    # fallback: classic scan if no ports found via masscan
     if not full_scan and not ports:
         cmd += ["--top-ports", "200"]
 
