@@ -17,19 +17,38 @@ RESULTS_DIR = BASE_DIR / "results"
 # =========================
 # OUVERTURE FICHIER
 # =========================
+
+# Extensions that can be displayed as text directly in the terminal
+_TEXT_EXTS = {'.txt', '.json', '.xml', '.nmap', '.gnmap', '.log', '.md', '.csv', '.html'}
+
 def open_file(path):
+    path_obj = Path(path)
+    ext = path_obj.suffix.lower()
 
-    path = str(path)
+    # Text files: display content inline — works in any terminal (including headless PTY)
+    if ext in _TEXT_EXTS:
+        try:
+            content = path_obj.read_text(encoding='utf-8', errors='replace')
+            console.print(f"\n[bold cyan]── {path_obj.name} ──[/bold cyan]\n")
+            console.print(content)
+        except Exception as exc:
+            console.print(f"[red]Cannot read file: {exc}[/red]")
+        input("\nPress Enter to continue…")
+        return
 
-    if platform.system() == "Windows":
-        import os
-        os.startfile(path)
-
-    elif platform.system() == "Darwin":
-        subprocess.run(["open", path])
-
-    else:
-        subprocess.run(["xdg-open", path])
+    # Binary / GUI files: try OS association, fall back gracefully if no desktop is available
+    try:
+        if platform.system() == "Windows":
+            import os
+            os.startfile(str(path))
+        elif platform.system() == "Darwin":
+            subprocess.run(["open", str(path)])
+        else:
+            subprocess.run(["xdg-open", str(path)])
+    except OSError:
+        console.print(f"\n[yellow]Cannot open [bold]{path_obj.name}[/bold] in a terminal session.[/yellow]")
+        console.print(f"[dim]File path: {path}[/dim]")
+        input("\nPress Enter to continue…")
 
 
 # =========================
