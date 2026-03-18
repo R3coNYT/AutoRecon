@@ -96,7 +96,7 @@ def _cover_page(canvas, doc):
     canvas.setFont("Helvetica", 14)
     canvas.drawCentredString(width/2, height - 17.2*cm, "Confidential Security Assessment Report")
 
-    # Nom personnalisé
+    # Custom name
     if name:
         canvas.setFont("Helvetica-Oblique", 12)
         canvas.drawCentredString(width/2, height - 18.2*cm, f"Prepared by {name}")
@@ -117,7 +117,7 @@ def _page_footer(canvas, doc):
     footer_y = 1.2 * cm
     line_y = 1.8 * cm
 
-    # Ligne séparation
+    # Separator line
     canvas.setStrokeColor(colors.lightgrey)
     canvas.setLineWidth(0.5)
     canvas.line(2*cm, line_y, width - 2*cm, line_y)
@@ -128,7 +128,7 @@ def _page_footer(canvas, doc):
         canvas.setFillColor(colors.grey)
         canvas.drawString(2*cm, footer_y, name)
 
-    # Logo centré (plus petit)
+    # Centered logo (smaller)
     if logo_path:
         try:
             logo_w = 0.9 * cm
@@ -343,7 +343,7 @@ def write_pdf(report: dict, pdf_path: Path):
         elements.append(Paragraph(f"<b>Target: {sub}</b>", styles["Heading2"]))
         elements.append(Spacer(1, 6))
 
-        # Risk score (coloré)
+        # Risk score (colored)
         risk = data.get("risk") or {}
         level = (risk.get("level") or "LOW").upper()
         score = risk.get("score")
@@ -375,7 +375,7 @@ def write_pdf(report: dict, pdf_path: Path):
                 elements.append(Paragraph(f"- {r}", styles["Normal"]))
         elements.append(Spacer(1, 10))
 
-        # --- Ports ouverts (table structurée) ---
+        # --- Open ports (structured table) ---
         nmap_s = data.get("nmap_structured", {}) or {}
         open_ports = nmap_s.get("open_ports", []) or []
         ip = nmap_s.get("ip")
@@ -459,7 +459,7 @@ def write_pdf(report: dict, pdf_path: Path):
                 elements.append(KeepTogether(chart))
                 elements.append(Spacer(1, 12))
         else:
-            # fallback: affiche brut si pas structuré
+            # fallback: display raw output if not structured
             nmap_raw = data.get("nmap_raw")
             if nmap_raw:
                 elements.append(Paragraph("<b>Nmap Results (raw)</b>", styles["Heading3"]))
@@ -670,7 +670,7 @@ def write_pdf(report: dict, pdf_path: Path):
 
                 original_sev = sev
 
-                # Déterminer la couleur réelle du severity
+                # Determine the actual severity color
                 if score_val >= 9:
                     real_color = "red"
                 elif score_val >= 7:

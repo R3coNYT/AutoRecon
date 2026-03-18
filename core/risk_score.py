@@ -26,7 +26,7 @@ def compute_risk_score(sub_report: dict):
         score += 25
         reasons.append(f"Sensitive ports exposed: {hit}")
 
-    # 🔎 Détection version manquante
+    # 🔎 Missing version detection
     for p in open_ports:
         product = p.get("product")
         version = extract_version(p.get("version_raw"))

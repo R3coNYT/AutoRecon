@@ -33,7 +33,7 @@ def is_version_affected(detected_version, cve_summary):
 
     detected_base = extract_base_version(detected_version)
     if not detected_base:
-        return True  # pas sûr → POTENTIAL
+        return True  # not sure → POTENTIAL
 
     try:
         detected_v = pkg_version.parse(detected_base)

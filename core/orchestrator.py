@@ -256,7 +256,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             with step_timer(f"CVE lookup {sub}"):
                 services = {}
 
-                # 1️⃣ Services détectés via Nmap
+                # 1️⃣ Services detected via Nmap
                 nmap_s = res.get("nmap_structured", {}) or {}
                 open_ports = nmap_s.get("open_ports", []) or []
 
@@ -273,7 +273,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                             # Exemple version_raw: "OpenSSH 10.0p2 Debian 1"
                             version_str = str(version)
 
-                            # On extrait la première version complète incluant suffixe pX
+                            # Extract the first full version including pX suffix
                             match = re.search(r"\d+\.\d+[a-zA-Z0-9\-]*", version_str)
                             if match:
                                 clean_version = match.group(0)
@@ -282,11 +282,11 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
 
                 log.info("Detected services for CVE search: %s", services)
 
-                # 2️⃣ Technologies Web détectées (CMS)
+                # 2️⃣ Web technologies detected (CMS)
                 for tech in res.get("cms", []) or []:
                     name = tech.lower().strip()
 
-                    # Nettoyage des préfixes inutiles
+                    # Strip unnecessary prefixes
                     if ":" in name:
                         name = name.split(":", 1)[1].strip()
 

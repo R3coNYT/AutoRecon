@@ -64,7 +64,7 @@ def get_icon(name, is_dir):
 
 
 # =========================
-# TRI FICHIERS
+# FILE SORTING
 # =========================
 def sort_items(path):
 
