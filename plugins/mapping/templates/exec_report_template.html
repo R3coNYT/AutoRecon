@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Executive Security Report</title>
+<style>
+:root {
+  --bg:         #08091a;
+  --surface:    #0d1028;
+  --surface2:   #111530;
+  --border:     rgba(255,255,255,0.07);
+  --accent:     #6c63ff;
+  --critical:   #ef4444;
+  --high:       #f59e0b;
+  --medium:     #84cc16;
+  --low:        #64748b;
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── HEADER ───────────────────────────────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, #0a0d22 0%, #131740 50%, #0a0d22 100%);
+  border-bottom: 1px solid rgba(108,99,255,.25);
+  padding: 32px 48px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 50%, rgba(108,99,255,.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.header-brand { display: flex; align-items: center; gap: 14px; }
+.header-icon {
+  font-size: 40px;
+  filter: drop-shadow(0 0 12px rgba(108,99,255,.6));
+}
+.header-title { font-size: 22px; font-weight: 700; letter-spacing: .5px; }
+.header-sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; letter-spacing: .3px; }
+.header-ts { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+
+/* ─── SCORE GAUGE ────────────────────────────────────────────────────── */
+.gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.gauge-wrap svg { overflow: visible; display: block; }
+.gauge-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+.gauge-score { font-size: 28px; font-weight: 800; line-height: 1; }
+.gauge-label { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.posture-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+.posture-good     { color: #4ade80; border-color: rgba(74,222,128,.35); background: rgba(74,222,128,.1); }
+.posture-moderate { color: var(--high); border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.1); }
+.posture-critical { color: var(--critical); border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.1); }
+
+/* ─── MAIN LAYOUT ───────────────────────────────────────────────────── */
+.main { padding: 36px 48px 60px; max-width: 1200px; }
+
+section { margin-bottom: 40px; }
+.section-title {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::before {
+  content: '';
+  width: 3px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ─── KPI GRID ──────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.kpi-card:hover { border-color: rgba(108,99,255,.3); transform: translateY(-2px); }
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.02) 0%, transparent 100%);
+  pointer-events: none;
+}
+.kpi-icon { font-size: 22px; margin-bottom: 10px; }
+.kpi-val  { font-size: 32px; font-weight: 800; line-height: 1; }
+.kpi-lbl  { font-size: 11px; color: var(--text-dim); margin-top: 4px; letter-spacing: .5px; }
+.kpi-card.kpi-total    { border-left: 3px solid var(--accent); }
+.kpi-card.kpi-critical { border-left: 3px solid var(--critical); }
+.kpi-card.kpi-critical .kpi-val { color: var(--critical); }
+.kpi-card.kpi-high     { border-left: 3px solid var(--high); }
+.kpi-card.kpi-high     .kpi-val { color: var(--high); }
+.kpi-card.kpi-medium   { border-left: 3px solid var(--medium);  }
+.kpi-card.kpi-medium   .kpi-val { color: var(--medium); }
+
+/* ─── RISK BREAKDOWN ────────────────────────────────────────────────── */
+.risk-breakdown {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+.risk-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 50px;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.risk-row:last-child { margin-bottom: 0; }
+.risk-label { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.risk-bar-wrap {
+  height: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.risk-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+.risk-count { font-size: 14px; font-weight: 700; text-align: right; }
+.bar-critical { background: linear-gradient(90deg, #ef4444, #f87171); }
+.bar-high     { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.bar-medium   { background: linear-gradient(90deg, #84cc16, #a3e635); }
+.bar-low      { background: linear-gradient(90deg, #64748b, #94a3b8); }
+
+/* ─── ZONE CARDS ─────────────────────────────────────────────────────── */
+.zone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.zone-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  transition: border-color .2s;
+}
+.zone-card:hover { border-color: rgba(108,99,255,.25); }
+.zone-name { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+.zone-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
+.zone-stat { text-align: center; }
+.zone-stat .val { font-size: 20px; font-weight: 700; }
+.zone-stat .lbl { font-size: 10px; color: var(--text-dim); letter-spacing: .5px; }
+.zone-bar-wrap {
+  height: 5px;
+  background: rgba(255,255,255,.05);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.zone-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  min-width: 3px;
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+
+/* ─── ASSET TABLE ───────────────────────────────────────────────────── */
+.asset-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+table.asset-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.asset-table thead tr {
+  background: rgba(255,255,255,.025);
+  border-bottom: 1px solid var(--border);
+}
+table.asset-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+table.asset-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: middle;
+}
+table.asset-table tbody tr:last-child td { border-bottom: none; }
+table.asset-table tbody tr:hover td { background: rgba(255,255,255,.025); }
+.ip-cell { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; color: var(--accent); }
+.score-cell {
+  display: inline-block;
+  min-width: 36px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,.05);
+}
+
+/* Risk badges */
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+  border: 1px solid;
+}
+.badge-critical { color: var(--critical); border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.1); }
+.badge-high     { color: var(--high);     border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.1); }
+.badge-medium   { color: var(--medium);   border-color: rgba(132,204,22,.35); background: rgba(132,204,22,.1); }
+.badge-low      { color: #94a3b8;         border-color: rgba(100,116,139,.35); background: rgba(100,116,139,.1); }
+
+/* ─── RECOMMENDATIONS ───────────────────────────────────────────────── */
+.reco-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+.reco-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: border-color .2s;
+}
+.reco-card:hover { border-color: rgba(108,99,255,.3); }
+.reco-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.reco-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.reco-text  { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+/* ─── FOOTER ────────────────────────────────────────────────────────── */
+.footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 18px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.footer a:hover { text-decoration: underline; }
+</style>
+</head>
+
+<body>
+
+<!-- ─── HEADER ═══════════════════════════════════════════════════════════════ -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="header-icon">🛡</div>
+      <div>
+        <div class="header-title">Information System Security</div>
+        <div class="header-sub">Executive Report — Mapping Analysis</div>
+        <div class="header-ts">Generated: %TIMESTAMP%</div>
+      </div>
+    </div>
+
+    <!-- Score gauge -->
+    <div class="gauge-wrap">
+      <svg width="110" height="110" viewBox="0 0 110 110">
+        <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="10"/>
+        <circle cx="55" cy="55" r="46" fill="none"
+          stroke="%SCORE_COLOR%"
+          stroke-width="10"
+          stroke-linecap="round"
+          stroke-dasharray="%SCORE_DASH% 289.02"
+          stroke-dashoffset="72.26"
+          style="filter:drop-shadow(0 0 6px %SCORE_COLOR%);"
+          transform="rotate(-90 55 55)"/>
+      </svg>
+      <div class="gauge-center">
+        <div class="gauge-score" style="color:%SCORE_COLOR%">%SCORE%</div>
+        <div class="gauge-label">/ 100</div>
+      </div>
+      <div class="posture-badge %POSTURE_CLASS%">%POSTURE%</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MAIN ══════════════════════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- KPI Cards -->
+  <section>
+    <div class="section-title">Overview</div>
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-total">
+        <div class="kpi-icon">🖥</div>
+        <div class="kpi-val">%TOTAL_ASSETS%</div>
+        <div class="kpi-lbl">Assets Discovered</div>
+      </div>
+      <div class="kpi-card kpi-critical">
+        <div class="kpi-icon">🔴</div>
+        <div class="kpi-val">%CRIT_CRITICAL%</div>
+        <div class="kpi-lbl">Critical Assets</div>
+      </div>
+      <div class="kpi-card kpi-high">
+        <div class="kpi-icon">🟠</div>
+        <div class="kpi-val">%CRIT_HIGH%</div>
+        <div class="kpi-lbl">High-Risk Assets</div>
+      </div>
+      <div class="kpi-card kpi-medium">
+        <div class="kpi-icon">🟡</div>
+        <div class="kpi-val">%CRIT_MEDIUM%</div>
+        <div class="kpi-lbl">Medium-Risk Assets</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Risk Breakdown -->
+  <section>
+    <div class="section-title">Risk Breakdown</div>
+    <div class="risk-breakdown">
+      <div class="risk-row">
+        <div class="risk-label" style="color:var(--critical)">🔴 Critical</div>
+        <div class="risk-bar-wrap"><div class="risk-bar-fill bar-critical" style="width:%CRIT_CRITICAL_PCT%%"></div></div>
+        <div class="risk-count" style="color:var(--critical)">%CRIT_CRITICAL%</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-label" style="color:var(--high)">🟠 High</div>
+        <div class="risk-bar-wrap"><div class="risk-bar-fill bar-high" style="width:%CRIT_HIGH_PCT%%"></div></div>
+        <div class="risk-count" style="color:var(--high)">%CRIT_HIGH%</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-label" style="color:var(--medium)">🟢 Medium</div>
+        <div class="risk-bar-wrap"><div class="risk-bar-fill bar-medium" style="width:%CRIT_MEDIUM_PCT%%"></div></div>
+        <div class="risk-count" style="color:var(--medium)">%CRIT_MEDIUM%</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-label" style="color:var(--low)">⚪ Low</div>
+        <div class="risk-bar-wrap"><div class="risk-bar-fill bar-low" style="width:%CRIT_LOW_PCT%%"></div></div>
+        <div class="risk-count" style="color:var(--low)">%CRIT_LOW%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Exposure by Zone -->
+  <section>
+    <div class="section-title">Exposure by Zone</div>
+    <div class="zone-grid">
+      %EXPOSURE_ROWS%
+    </div>
+  </section>
+
+  <!-- Top Critical Assets -->
+  <section>
+    <div class="section-title">Top Critical Assets</div>
+    <div class="asset-table-wrap">
+      <table class="asset-table">
+        <thead>
+          <tr>
+            <th>IP Address</th>
+            <th>Type</th>
+            <th>Zone</th>
+            <th>Score</th>
+            <th>Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          %ASSET_ROWS%
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Recommendations -->
+  <section>
+    <div class="section-title">Recommendations</div>
+    <div class="reco-grid">
+      <div class="reco-card">
+        <div class="reco-icon">🔒</div>
+        <div>
+          <div class="reco-title">Reduce Administrative Exposure</div>
+          <div class="reco-text">Restrict RDP, SSH, and SMB access. Allow only from known admin hosts via VPN or jump hosts. Firewall off public exposure.</div>
+        </div>
+      </div>
+      <div class="reco-card">
+        <div class="reco-icon">🏗</div>
+        <div>
+          <div class="reco-title">Network Segmentation</div>
+          <div class="reco-text">Implement strict DMZ–LAN separation using stateful firewalls. Web-facing assets must not directly reach internal file servers or domain controllers.</div>
+        </div>
+      </div>
+      <div class="reco-card">
+        <div class="reco-icon">🔄</div>
+        <div>
+          <div class="reco-title">Patch Management</div>
+          <div class="reco-text">Deploy a systematic patch cycle for all critical and high-risk assets. Prioritize CVEs with public exploits on internet-facing services.</div>
+        </div>
+      </div>
+      <div class="reco-card">
+        <div class="reco-icon">🧭</div>
+        <div>
+          <div class="reco-title">Monitor Lateral Movement</div>
+          <div class="reco-text">Enable detailed logging (Windows Event 4625/4768) and deploy EDR on workstations. Alert on uncommon east-west SMB or WMI connections.</div>
+        </div>
+      </div>
+      <div class="reco-card">
+        <div class="reco-icon">🗝</div>
+        <div>
+          <div class="reco-title">Credential Hygiene</div>
+          <div class="reco-text">Audit service accounts and domain admin memberships. Enforce MFA on all privileged accounts. Rotate secrets for exposed or default credentials.</div>
+        </div>
+      </div>
+      <div class="reco-card">
+        <div class="reco-icon">📊</div>
+        <div>
+          <div class="reco-title">Continuous Monitoring</div>
+          <div class="reco-text">Deploy SIEM correlation rules based on discovered attack paths. Re-run this mapping regularly to track exposure evolution over time.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /main -->
+
+<!-- ─── FOOTER ═════════════════════════════════════════════════════════════════ -->
+<div class="footer">
+  <span>🛡 SI Mapping — AutoRecon &nbsp;·&nbsp; %TIMESTAMP%</span>
+  <a href="topology.html" target="_blank">🗺 Open Interactive Topology Map →</a>
+</div>
+
+</body>
+</html>
