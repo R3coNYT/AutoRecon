@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SI Mapping — Network Topology</title>
+<script src="../../../static/vis-network.min.js"></script>
+<style>
+:root {
+  --bg:          #08091a;
+  --surface:     rgba(255,255,255,0.035);
+  --border:      rgba(255,255,255,0.07);
+  --accent:      #6c63ff;
+  --accent-glow: rgba(108,99,255,0.25);
+  --critical:    #ef4444;
+  --high:        #f59e0b;
+  --medium:      #84cc16;
+  --low:         #64748b;
+  --text:        #e2e8f0;
+  --text-dim:    #94a3b8;
+  --sidebar-w:   300px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── LAYOUT ────────────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  height: 100vh;
+}
+
+/* ─── SIDEBAR ───────────────────────────────────────────────────────── */
+.sidebar {
+  background: linear-gradient(180deg, #0c0e22 0%, #08091a 100%);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+}
+
+.sidebar-inner {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0 10px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: #1e293b transparent;
+}
+.sidebar-inner::-webkit-scrollbar { width: 4px; }
+.sidebar-inner::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+
+/* Brand */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: rgba(108,99,255,0.05);
+}
+.brand-icon { font-size: 26px; filter: drop-shadow(0 0 8px #6c63ff88); }
+.brand-title { font-size: 13px; font-weight: 700; letter-spacing: 1.8px; color: var(--accent); text-transform: uppercase; }
+.brand-sub   { font-size: 10px; color: var(--text-dim); letter-spacing: 0.3px; margin-top: 2px; }
+
+/* Search */
+.search-wrap { padding: 10px 0 4px; }
+.search-wrap input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px 7px 32px;
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+.search-wrap input::placeholder { color: var(--text-dim); }
+.search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-dim); letter-spacing: 0.5px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.dot-critical { background: var(--critical); box-shadow: 0 0 6px var(--critical); }
+.dot-high     { background: var(--high);     box-shadow: 0 0 6px var(--high); }
+.dot-medium   { background: var(--medium);   box-shadow: 0 0 4px var(--medium); }
+.dot-low      { background: #4caf50;         box-shadow: 0 0 4px #4caf50; }
+
+/* KPI cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px 0 10px;
+}
+.kpi-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 8px 6px;
+  text-align: center;
+  transition: border-color .2s;
+}
+.kpi-card:hover { border-color: rgba(255,255,255,0.12); }
+.kpi-val { font-size: 22px; font-weight: 700; line-height: 1; }
+.kpi-lbl { font-size: 9px; color: var(--text-dim); letter-spacing: 0.8px; text-transform: uppercase; margin-top: 3px; }
+.kpi-critical .kpi-val { color: var(--critical); text-shadow: 0 0 10px rgba(239,68,68,.4); }
+.kpi-high     .kpi-val { color: var(--high);     text-shadow: 0 0 10px rgba(245,158,11,.4); }
+.kpi-medium   .kpi-val { color: var(--medium);   }
+.kpi-low      .kpi-val { color: var(--low);      }
+
+/* Sections */
+.section { margin-bottom: 12px; }
+.section-title {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 7px;
+  padding: 6px 0 5px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  transition: color .2s;
+}
+.section-title:hover { color: var(--text); }
+.section-title::after { content: '▾'; font-size: 9px; transition: transform .2s; opacity: .6; }
+.section-title.collapsed::after { transform: rotate(-90deg); }
+.section-body { display: flex; flex-wrap: wrap; gap: 5px; }
+.section-body.hidden { display: none; }
+
+/* Buttons */
+.btn {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-dim);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn:hover {
+  background: rgba(108,99,255,0.15);
+  border-color: rgba(108,99,255,0.4);
+  color: #b5b0ff;
+}
+.btn.active {
+  background: rgba(108,99,255,0.22);
+  border-color: var(--accent);
+  color: #c4c0ff;
+}
+.btn-danger:hover {
+  background: rgba(239,68,68,.15);
+  border-color: rgba(239,68,68,.5);
+  color: var(--critical);
+}
+.btn-full { width: 100%; text-align: center; }
+
+/* Selects */
+select {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 6px 8px;
+  font-size: 11px;
+  outline: none;
+  margin-bottom: 5px;
+}
+select:focus { border-color: var(--accent); }
+
+/* Data tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.data-table th {
+  color: var(--text-dim);
+  font-weight: 600;
+  text-align: left;
+  padding: 4px 4px 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: .5px;
+}
+.data-table td {
+  padding: 5px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+.data-table tr:hover td { background: rgba(255,255,255,0.025); }
+
+/* Node detail panel */
+#nodeDetail {
+  border: 1px solid rgba(108,99,255,.3);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 10px;
+  background: rgba(10,12,28,.95);
+  backdrop-filter: blur(12px);
+  animation: fadeIn .2s ease;
+}
+#nodeDetail.hidden { display: none; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: translateY(0); } }
+#nodeDetail .nd-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+#nodeDetail .nd-icon { font-size: 22px; }
+#nodeDetail .nd-ip { font-size: 14px; font-weight: 700; color: var(--accent); }
+#nodeDetail .nd-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 11px;
+}
+#nodeDetail .nd-row:last-child { border: none; }
+#nodeDetail .nd-label { color: var(--text-dim); }
+#nodeDetail .nd-val   { font-weight: 600; max-width: 160px; text-align: right; word-break: break-all; }
+
+/* Risk badges */
+.risk-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; letter-spacing: .5px;
+}
+.risk-critical { background: rgba(239,68,68,.15); color: var(--critical); border: 1px solid rgba(239,68,68,.3); }
+.risk-high     { background: rgba(245,158,11,.15); color: var(--high);     border: 1px solid rgba(245,158,11,.3); }
+.risk-medium   { background: rgba(132,204,22,.15); color: var(--medium);   border: 1px solid rgba(132,204,22,.3); }
+.risk-low      { background: rgba(100,116,139,.15); color: #94a3b8;        border: 1px solid rgba(100,116,139,.3); }
+
+/* ─── CANVAS ────────────────────────────────────────────────────────── */
+#network {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(108,99,255,.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(6,182,212,.04) 0%, transparent 50%),
+    #08091a;
+}
+
+/* Red team mode */
+body.redteam { --bg: #100808; }
+body.redteam #network {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(239,68,68,.08) 0%, transparent 60%),
+    #100808;
+}
+body.redteam .sidebar { background: linear-gradient(180deg, #160a0a 0%, #100808 100%); }
+body.redteam .btn:hover { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.4); color: var(--critical); }
+body.redteam .brand { background: rgba(239,68,68,.06); }
+
+/* Vis navigation */
+.vis-navigation .vis-button {
+  border-radius: 10px !important;
+  background: rgba(10,12,30,.8) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  backdrop-filter: blur(8px) !important;
+  transition: transform .15s, box-shadow .15s !important;
+}
+.vis-navigation .vis-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(108,99,255,.35) !important;
+}
+.vis-tooltip {
+  background: rgba(10,12,30,.95) !important;
+  border: 1px solid rgba(108,99,255,.3) !important;
+  color: #e2e8f0 !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  backdrop-filter: blur(10px) !important;
+  padding: 8px 12px !important;
+  white-space: pre !important;
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── SIDEBAR ──────────────────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="brand">
+    <span class="brand-icon">🗺</span>
+    <div>
+      <div class="brand-title">SI Mapping</div>
+      <div class="brand-sub">Network Topology Viewer</div>
+    </div>
+  </div>
+
+  <div class="sidebar-inner">
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <input id="nodeSearch" type="text" placeholder="Search host by IP or type…" oninput="searchNode(this.value)">
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><span class="dot dot-critical"></span> Critical</div>
+      <div class="legend-item"><span class="dot dot-high"></span> High</div>
+      <div class="legend-item"><span class="dot dot-medium"></span> Medium</div>
+      <div class="legend-item"><span class="dot dot-low"></span> Low</div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-critical"><div class="kpi-val">%CRIT_CRITICAL%</div><div class="kpi-lbl">Critical</div></div>
+      <div class="kpi-card kpi-high"><div class="kpi-val">%CRIT_HIGH%</div><div class="kpi-lbl">High</div></div>
+      <div class="kpi-card kpi-medium"><div class="kpi-val">%CRIT_MEDIUM%</div><div class="kpi-lbl">Medium</div></div>
+      <div class="kpi-card kpi-low"><div class="kpi-val">%CRIT_LOW%</div><div class="kpi-lbl">Low</div></div>
+    </div>
+
+    <!-- Node Filters -->
+    <div class="section">
+      <div class="section-title" onclick="toggleSection(this)">Node Filters</div>
+      <div class="section-body">
+        <button class="btn active" onclick="filterType('all',this)">All</button>
+        <button class="btn" onclick="filterType('Domain Controller',this)">DC</button>
+        <button class="btn" onclick="filterType('Windows Server',this)">Win Server</button>
+        <button class="btn" onclick="filterType('Windows',this)">Windows</button>
+        <button class="btn" onclick="filterType('Web Server',this)">Web</button>
+        <button class="btn" onclick="filterType('Database Server',this)">DB</button>
+        <button class="btn" onclick="filterType('Linux Server',this)">Linux</button>
+        <button class="btn" onclick="filterType('Router / Gateway',this)">Router</button>
+      </div>
+    </div>
+
+    <!-- Link Filters -->
+    <div class="section">
+      <div class="section-title" onclick="toggleSection(this)">Link Filters</div>
+      <div class="section-body">
+        <button class="btn btn-full" onclick="toggleAllLinks()" id="allLinksBtn">Show All Links</button>
+        <button class="btn" onclick="toggleLink('TR')">TraceRoute</button>
+        <button class="btn" onclick="toggleLink('AD')">AD</button>
+        <button class="btn" onclick="toggleLink('DB')">DB</button>
+        <button class="btn" onclick="toggleLink('DNS')">DNS</button>
+        <button class="btn" onclick="toggleLink('HTTP')">HTTP</button>
+        <button class="btn" onclick="toggleLink('SMB')">SMB</button>
+        <button class="btn" onclick="toggleLink('SSH')">SSH</button>
+        <button class="btn" onclick="toggleLink('RDP')">RDP</button>
+      </div>
+    </div>
+
+    <!-- Visuals -->
+    <div class="section">
+      <div class="section-title" onclick="toggleSection(this)">Visuals</div>
+      <div class="section-body">
+        <button class="btn" onclick="toggleTeamMode()" id="teamBtn">🔵 Blue Team</button>
+        <button class="btn" onclick="toggleHeatmap()" id="heatToggleBtn">🌡 Heatmap</button>
+        <button class="btn" onclick="clusterZone('LAN')">Collapse LAN</button>
+        <button class="btn" onclick="clusterZone('DMZ / External')">Collapse DMZ</button>
+        <button class="btn" onclick="expandAllClusters()">Expand All</button>
+        <button class="btn" onclick="exportPNG()">📷 PNG</button>
+      </div>
+    </div>
+
+    <!-- Attack Simulation -->
+    <div class="section">
+      <div class="section-title" onclick="toggleSection(this)">⚡ Attack Simulation</div>
+      <div class="section-body" style="flex-direction:column;gap:5px;">
+        <select id="attackStart"></select>
+        <div style="display:flex;gap:5px;">
+          <button class="btn btn-danger" style="flex:1;" onclick="startAttackSim()">▶ Start</button>
+          <button class="btn" style="flex:1;" onclick="stopAttackSim()">■ Stop</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Traceroute -->
+    <div class="section">
+      <div class="section-title" onclick="toggleSection(this)">🛤 Traceroute</div>
+      <div class="section-body" style="flex-direction:column;gap:5px;">
+        <select id="traceTarget"></select>
+        <div style="display:flex;gap:5px;">
+          <button class="btn" style="flex:1;" onclick="showTraceToTarget()">Show</button>
+          <button class="btn" style="flex:1;" onclick="hideAllTraceroutes()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exposure -->
+    <div class="section">
+      <div class="section-title" onclick="toggleSection(this)">Exposure by Zone</div>
+      <div class="section-body" style="flex-direction:column;width:100%;">
+        <table class="data-table" id="exposureTable"></table>
+      </div>
+    </div>
+
+    <!-- Criticality -->
+    <div class="section">
+      <div class="section-title" onclick="toggleSection(this)">Criticality Matrix</div>
+      <div class="section-body" style="flex-direction:column;width:100%;">
+        <table class="data-table" id="critTable"></table>
+      </div>
+    </div>
+
+    <!-- Attack Paths -->
+    <div class="section">
+      <div class="section-title" onclick="toggleSection(this)">Attack Paths</div>
+      <div class="section-body" style="flex-direction:column;gap:5px;">
+        <select id="pathSelect" onchange="selectPath()"></select>
+        <button class="btn" onclick="clearPath()">Clear Highlight</button>
+      </div>
+    </div>
+
+    <!-- Node Detail (shown on click) -->
+    <div id="nodeDetail" class="hidden">
+      <div class="nd-header">
+        <span class="nd-icon" id="nd-icon">🖥</span>
+        <span class="nd-ip" id="nd-ip"></span>
+      </div>
+      <div class="nd-row"><span class="nd-label">Type</span><span class="nd-val" id="nd-type"></span></div>
+      <div class="nd-row"><span class="nd-label">Zone</span><span class="nd-val" id="nd-zone"></span></div>
+      <div class="nd-row"><span class="nd-label">Risk</span><span class="nd-val" id="nd-risk"></span></div>
+      <div class="nd-row"><span class="nd-label">Open Ports</span><span class="nd-val" id="nd-ports"></span></div>
+    </div>
+
+  </div><!-- /sidebar-inner -->
+</aside>
+
+<!-- ─── CANVAS ────────────────────────────────────────────────────────────── -->
+<div id="network"></div>
+
+</div><!-- /layout -->
+
+<script>
+/* ── DATA ──────────────────────────────────────────────────────────────────── */
+function svgDataUri(svg) { return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); }
+
+const ICONS = {
+  dc: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <rect x="4"  y="6"  width="26" height="24" rx="3" fill="#818cf8"/>
+    <rect x="34" y="6"  width="26" height="24" rx="3" fill="#6366f1"/>
+    <rect x="4"  y="34" width="26" height="24" rx="3" fill="#6366f1"/>
+    <rect x="34" y="34" width="26" height="24" rx="3" fill="#4f46e5"/>
+    <rect x="27" y="4"  width="10" height="56" rx="2" fill="rgba(0,0,0,0.2)"/>
+  </svg>`),
+  windows: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <rect x="4"  y="6"  width="26" height="24" rx="3" fill="#38bdf8"/>
+    <rect x="34" y="6"  width="26" height="24" rx="3" fill="#0ea5e9"/>
+    <rect x="4"  y="34" width="26" height="24" rx="3" fill="#0ea5e9"/>
+    <rect x="34" y="34" width="26" height="24" rx="3" fill="#0284c7"/>
+  </svg>`),
+  linux: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="19" rx="12" ry="13" fill="#f1f5f9"/>
+    <ellipse cx="32" cy="43" rx="17" ry="15" fill="#334155"/>
+    <circle cx="27" cy="18" r="2.5" fill="#0f172a"/>
+    <circle cx="37" cy="18" r="2.5" fill="#0f172a"/>
+    <path d="M26 25 Q32 30 38 25" stroke="#fbbf24" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <line x1="21" y1="52" x2="17" y2="60" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="43" y1="52" x2="47" y2="60" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>`),
+  router: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <rect x="8" y="24" width="48" height="18" rx="7" fill="#475569"/>
+    <circle cx="19" cy="33" r="3" fill="#4ade80"/>
+    <circle cx="30" cy="33" r="3" fill="#fde047"/>
+    <circle cx="41" cy="33" r="3" fill="#f87171"/>
+    <path d="M19 24 C21 12 28 9 32 7"  stroke="#94a3b8" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M45 24 C43 12 36 9 32 7"  stroke="#94a3b8" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <line x1="14" y1="42" x2="14" y2="56" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+    <line x1="50" y1="42" x2="50" y2="56" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  </svg>`),
+  web: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <rect x="6" y="8" width="52" height="48" rx="8" fill="#164e63"/>
+    <rect x="6" y="8" width="52" height="16" rx="8" fill="#0e7490"/>
+    <circle cx="16" cy="16" r="3" fill="#f87171"/>
+    <circle cx="26" cy="16" r="3" fill="#fde047"/>
+    <circle cx="36" cy="16" r="3" fill="#4ade80"/>
+    <rect x="14" y="32" width="36" height="3" rx="1.5" fill="#22d3ee" opacity="0.7"/>
+    <rect x="14" y="40" width="28" height="3" rx="1.5" fill="#22d3ee" opacity="0.5"/>
+    <rect x="14" y="48" width="20" height="3" rx="1.5" fill="#22d3ee" opacity="0.3"/>
+  </svg>`),
+  db: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="15" rx="22" ry="8" fill="#fbbf24"/>
+    <rect x="10" y="15" width="44" height="28" fill="#d97706"/>
+    <ellipse cx="32" cy="43" rx="22" ry="8" fill="#fbbf24"/>
+    <ellipse cx="32" cy="27" rx="22" ry="7" fill="#f59e0b" opacity="0.6"/>
+  </svg>`),
+  hop: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="20" fill="none" stroke="#64748b" stroke-width="2.5" stroke-dasharray="5 4"/>
+    <circle cx="32" cy="32" r="6" fill="#64748b"/>
+  </svg>`),
+  unknown: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <rect x="10" y="14" width="44" height="32" rx="6" fill="#334155"/>
+    <rect x="26" y="48" width="12" height="6" fill="#475569"/>
+    <rect x="18" y="56" width="28" height="4" rx="2" fill="#475569"/>
+    <text x="32" y="38" font-size="20" text-anchor="middle" fill="#94a3b8" font-family="monospace">?</text>
+  </svg>`)
+};
+
+const TYPE_ICONS_MAP = {
+  "Domain Controller": "🏛",
+  "Windows Server": "🖥",
+  "Windows": "💻",
+  "Linux Server": "🐧",
+  "Web Server": "🌐",
+  "Database Server": "🗄",
+  "Router / Gateway": "🔌",
+  "Router / Hop": "◎",
+};
+function emojiForType(t) { return TYPE_ICONS_MAP[t] || "❓"; }
+
+function iconForType(t) {
+  if (t === "Domain Controller") return ICONS.dc;
+  if (t === "Windows" || t === "Windows Server") return ICONS.windows;
+  if (t === "Linux Server") return ICONS.linux;
+  if (t === "Router / Gateway") return ICONS.router;
+  if (t === "Web Server") return ICONS.web;
+  if (t === "Database Server") return ICONS.db;
+  if (t === "Router / Hop") return ICONS.hop;
+  return ICONS.unknown;
+}
+
+var allNodes    = %NODES%;
+var allEdges    = %EDGES%;
+var exposure    = %EXPOSURE%;
+var criticality = %CRITICALITY%;
+var attackPaths = %ATTACK_PATHS%;
+var tracePaths  = %TRACE_PATHS%;
+
+allNodes = allNodes.map(n => {
+  n.shape = "image";
+  n.image = iconForType(n.type);
+  n.size  = 28;
+  n.borderWidth = 2;
+  n.borderWidthSelected = 5;
+  return n;
+});
+
+/* ── VIS SETUP ─────────────────────────────────────────────────────────────── */
+var container = document.getElementById('network');
+var nodesDS   = new vis.DataSet(allNodes);
+var edgesDS   = new vis.DataSet(allEdges);
+var data      = { nodes: nodesDS, edges: edgesDS };
+
+var options = {
+  layout: { improvedLayout: true, randomSeed: 42 },
+  physics: {
+    enabled: true,
+    solver: "forceAtlas2Based",
+    forceAtlas2Based: {
+      gravitationalConstant: -60, centralGravity: 0.005,
+      springLength: 120, springConstant: 0.04, damping: 0.92, avoidOverlap: 1,
+    },
+    stabilization: { iterations: 1800 },
+  },
+  interaction: {
+    hover: true, dragNodes: true, dragView: true, zoomView: true,
+    navigationButtons: true,
+    keyboard: { enabled: true, speed: { x:10, y:10, zoom:0.02 }, bindToWindow: false },
+    zoomSpeed: 0.6,
+    tooltipDelay: 80,
+  },
+  nodes: {
+    shape: "dot", size: 22,
+    font: { color: "#e2e8f0", size: 13, strokeWidth: 3, strokeColor: "#000" },
+  },
+  edges: {
+    smooth: { type: "dynamic" }, width: 1.5,
+    font: { color: "#94a3b8", size: 11, strokeWidth: 2, strokeColor: "#000" },
+  },
+  groups: {
+    "LAN":            { color: { background:"#1e3a5f", border:"#2563eb" } },
+    "DMZ / External": { color: { background:"#5f1e1e", border:"#dc2626" } },
+    "PATH":           { color: { background:"#1e2a40", border:"#4b5563" } },
+  },
+};
+
+var network = new vis.Network(container, data, options);
+
+/* hide all edges initially */
+edgesDS.update(allEdges.filter(e => e.id).map(e => ({ id:e.id, hidden:true })));
+
+network.once("stabilizationIterationsDone", () => network.setOptions({ physics: false }));
+network.on("hoverNode", () => { container.style.cursor = "pointer"; });
+network.on("blurNode",  () => { container.style.cursor = "grab"; });
+
+/* ── Node click → detail panel ─────────────────────────────────────────────── */
+network.on("click", function(params) {
+  if (params.nodes.length > 0) {
+    var nid = params.nodes[0];
+    var n   = allNodes.find(x => x.id === nid);
+    if (!n) return;
+    document.getElementById("nodeDetail").classList.remove("hidden");
+    document.getElementById("nd-icon").textContent = emojiForType(n.type);
+    document.getElementById("nd-ip").textContent   = n.label;
+    document.getElementById("nd-type").textContent = n.type  || "Unknown";
+    document.getElementById("nd-zone").textContent = n.group || "—";
+    var lvl = n.risk >= 7 ? "critical" : n.risk >= 4 ? "high" : n.risk >= 2 ? "medium" : "low";
+    document.getElementById("nd-risk").innerHTML   = `<span class="risk-badge risk-${lvl}">${n.risk} — ${lvl.toUpperCase()}</span>`;
+    document.getElementById("nd-ports").textContent = (n.services || []).join(", ") || "—";
+  } else {
+    document.getElementById("nodeDetail").classList.add("hidden");
+  }
+});
+
+/* ── Collapsible sections ───────────────────────────────────────────────────── */
+function toggleSection(titleEl) {
+  titleEl.classList.toggle("collapsed");
+  var body = titleEl.nextElementSibling;
+  if (body) body.classList.toggle("hidden");
+}
+
+/* ── Search ────────────────────────────────────────────────────────────────── */
+function searchNode(val) {
+  val = val.toLowerCase().trim();
+  if (!val) { filterType(currentFilter, null); return; }
+  var matched = new Set();
+  allNodes.forEach(n => {
+    if (n.id.toLowerCase().includes(val) || (n.type||"").toLowerCase().includes(val)) matched.add(n.id);
+  });
+  nodesDS.update(allNodes.map(n => ({ id:n.id, hidden: !matched.has(n.id) })));
+  edgesDS.update(allEdges.map(e => ({ id:e.id, hidden: !(matched.has(e.from) && matched.has(e.to)) })));
+  setTimeout(() => network.fit({ animation:{ duration:400, easingFunction:"easeInOutQuad" } }), 100);
+}
+
+/* ── Node filter ────────────────────────────────────────────────────────────── */
+var currentFilter = "all";
+function filterType(type, btnEl) {
+  currentFilter = type;
+  document.querySelectorAll(".section-body .btn").forEach(b => b.classList.remove("active"));
+  if (btnEl) btnEl.classList.add("active");
+  var visibleIds = new Set();
+  allNodes.forEach(n => { if (type === "all" || n.type === type) visibleIds.add(n.id); });
+  nodesDS.update(allNodes.map(n => ({ id:n.id, hidden: !visibleIds.has(n.id) })));
+  edgesDS.update(allEdges.map(e => ({ id:e.id, hidden: !(visibleIds.has(e.from) && visibleIds.has(e.to)) })));
+  setTimeout(() => network.fit({ animation:{ duration:500, easingFunction:"easeInOutQuad" } }), 200);
+}
+
+/* ── Link toggles ───────────────────────────────────────────────────────────── */
+var allLinksVisible = false;
+function toggleAllLinks() {
+  allLinksVisible = !allLinksVisible;
+  edgesDS.update(allEdges.filter(e => e.id).map(e => ({ id:e.id, hidden:!allLinksVisible })));
+  document.getElementById("allLinksBtn").textContent = allLinksVisible ? "Hide All Links" : "Show All Links";
+}
+function toggleLink(label) {
+  var vis = false;
+  allEdges.forEach(e => { if (e.label === label) { var c = edgesDS.get(e.id); if (c && !c.hidden) vis = true; } });
+  edgesDS.update(allEdges.filter(e => e.label === label).map(e => ({ id:e.id, hidden:vis })));
+}
+
+/* ── Team mode ──────────────────────────────────────────────────────────────── */
+var redTeam = false;
+function toggleTeamMode() {
+  redTeam = !redTeam;
+  document.body.classList.toggle("redteam", redTeam);
+  document.getElementById("teamBtn").textContent = redTeam ? "🔴 Red Team" : "🔵 Blue Team";
+}
+
+/* ── Heatmap ────────────────────────────────────────────────────────────────── */
+var heatmapOn = false;
+var baseColors = {};
+allNodes.forEach(n => baseColors[n.id] = n.color);
+function riskColor(r) { return r >= 7 ? "#ef4444" : r >= 4 ? "#f59e0b" : "#4ade80"; }
+function toggleHeatmap() {
+  heatmapOn = !heatmapOn;
+  nodesDS.update(allNodes.map(n => ({ id:n.id, color: heatmapOn ? riskColor(n.risk||0) : (baseColors[n.id]||n.color) })));
+  document.getElementById("heatToggleBtn").textContent = heatmapOn ? "🌡 Heatmap: ON" : "🌡 Heatmap";
+}
+
+/* ── Cluster ────────────────────────────────────────────────────────────────── */
+var clustered = { "LAN": false, "DMZ / External": false };
+function clusterZone(z) {
+  if (clustered[z]) return;
+  network.cluster({
+    joinCondition: n => n.group === z,
+    clusterNodeProperties: {
+      id: "cluster_" + z, label: z + "\n(cluster)", shape: "database",
+      color: { background:"#111827", border:"#374151" }, font: { color:"white" },
+    },
+  });
+  clustered[z] = true;
+}
+function expandAllClusters() {
+  Object.keys(clustered).forEach(z => {
+    const cid = "cluster_" + z;
+    if (network.isCluster(cid)) network.openCluster(cid);
+    clustered[z] = false;
+  });
+}
+
+/* ── Tables ─────────────────────────────────────────────────────────────────── */
+function renderExposure() {
+  var h = "<tr><th>Zone</th><th>Hosts</th><th>Risky</th><th>Avg</th></tr>";
+  Object.keys(exposure).forEach(z => {
+    var v = exposure[z];
+    var zc = z !== "LAN" ? "color:#f87171" : "color:#60a5fa";
+    h += `<tr><td style="${zc}">${z}</td><td>${v.hosts}</td><td>${v.risky_ports_total}</td><td>${v.exposure_score_avg}</td></tr>`;
+  });
+  document.getElementById("exposureTable").innerHTML = h;
+}
+function renderCriticalTop() {
+  var h = "<tr><th>IP</th><th>Type</th><th>Score</th></tr>";
+  criticality.items.slice(0,8).forEach(it => {
+    var c = it.criticality_level === "critical" ? "#ef4444" : it.criticality_level === "high" ? "#f59e0b" : it.criticality_level === "medium" ? "#84cc16" : "#64748b";
+    h += `<tr><td>${it.ip}</td><td style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#94a3b8">${it.classification}</td><td style="color:${c};font-weight:700">${it.criticality_score}</td></tr>`;
+  });
+  document.getElementById("critTable").innerHTML = h;
+}
+function fillPathSelect() {
+  var sel = document.getElementById("pathSelect");
+  sel.innerHTML = "";
+  var idx = 0;
+  attackPaths.forEach(sc => {
+    sc.paths.forEach(p => {
+      var o = document.createElement("option");
+      o.value = idx;
+      o.textContent = sc.name + " | " + p.path.join(" → ");
+      o.dataset.path = JSON.stringify(p.path);
+      sel.appendChild(o);
+      idx++;
+    });
+  });
+  if (!sel.options.length) { var o = document.createElement("option"); o.textContent = "No paths found"; sel.appendChild(o); }
+}
+
+renderExposure(); renderCriticalTop(); fillPathSelect();
+
+/* ── Dropdowns ──────────────────────────────────────────────────────────────── */
+setTimeout(() => {
+  var sel = document.getElementById("attackStart");
+  allNodes.forEach(n => {
+    var o = document.createElement("option");
+    o.value = n.id; o.textContent = n.id + " (" + n.type + ")"; sel.appendChild(o);
+  });
+}, 100);
+setTimeout(() => {
+  var sel = document.getElementById("traceTarget");
+  allNodes.filter(n => n.type !== "Router / Hop").forEach(n => {
+    var o = document.createElement("option");
+    o.value = n.id; o.textContent = n.id + " (" + n.type + ")"; sel.appendChild(o);
+  });
+}, 120);
+
+/* ── Attack simulation ──────────────────────────────────────────────────────── */
+var attackTimers = [], attackRunning = false, highlightedEdgeIds = [];
+function stopAttackSim() {
+  attackRunning = false;
+  attackTimers.forEach(t => clearTimeout(t));
+  attackTimers = [];
+  clearPath();
+}
+function startAttackSim() {
+  stopAttackSim(); attackRunning = true;
+  var start = document.getElementById("attackStart").value;
+  if (!start) return;
+  var visibleNodes = new Set();
+  allNodes.forEach(n => { if (currentFilter === "all" || n.type === currentFilter) visibleNodes.add(n.id); });
+  var adj = {};
+  allEdges.forEach(e => {
+    if (visibleNodes.has(e.from) && visibleNodes.has(e.to) && !e.hidden) {
+      (adj[e.from] = adj[e.from] || []).push({ n:e.to,   id:e.id });
+      (adj[e.to]   = adj[e.to]   || []).push({ n:e.from, id:e.id });
+    }
+  });
+  var visited = new Set([start]), q = [{node:start}], step = 0;
+  function hiNode(id) { nodesDS.update({ id, borderWidth:6, color:"#ef4444" }); }
+  function hiEdge(id) { edgesDS.update({ id, color:{color:"#ef4444"}, width:4, dashes:false, hidden:false }); highlightedEdgeIds.push(id); }
+  hiNode(start);
+  network.focus(start, { scale:1.25, animation:true });
+  while (q.length) {
+    var cur = q.shift(), neigh = adj[cur.node] || [];
+    neigh.forEach(x => {
+      if (visited.has(x.n)) return;
+      visited.add(x.n); q.push({node:x.n});
+      var t = setTimeout(() => { if (!attackRunning) return; hiEdge(x.id); hiNode(x.n); }, step * 450);
+      attackTimers.push(t); step++;
+    });
+  }
+}
+
+/* ── Traceroute ─────────────────────────────────────────────────────────────── */
+function hideAllTraceroutes() {
+  edgesDS.update(allEdges.filter(e => e.label === "TR").map(e => ({ id:e.id, hidden:true })));
+}
+function showTraceToTarget() {
+  var target = document.getElementById("traceTarget").value;
+  if (!target) return;
+  hideAllTraceroutes();
+  var path = tracePaths[target];
+  if (!path || path.length < 2) { alert("No traceroute path for this target."); return; }
+  var pairs = new Set();
+  for (var i = 0; i < path.length-1; i++) { pairs.add(path[i]+"->"+path[i+1]); pairs.add(path[i+1]+"->"+path[i]); }
+  edgesDS.update(allEdges.filter(e => e.label === "TR" && pairs.has(e.from+"->"+e.to)).map(e => ({ id:e.id, hidden:false, width:3, dashes:false, color:{color:"#f97316"} })));
+  network.focus(target, { scale:1.2, animation:true });
+}
+
+/* ── Export PNG ─────────────────────────────────────────────────────────────── */
+function exportPNG() {
+  network.fit();
+  setTimeout(() => {
+    var link = document.createElement("a");
+    link.href = document.querySelector("canvas").toDataURL("image/png");
+    link.download = "si_topology.png";
+    link.click();
+  }, 400);
+}
+
+/* ── Path highlight ─────────────────────────────────────────────────────────── */
+function clearPath() {
+  highlightedEdgeIds.forEach(eid => edgesDS.update({ id:eid, color:{color:"#888"}, width:1.5, dashes:true }));
+  highlightedEdgeIds = [];
+  allNodes.forEach(n => nodesDS.update({ id:n.id, borderWidth:2, color:baseColors[n.id]||n.color }));
+}
+function selectPath() {
+  clearPath();
+  var sel = document.getElementById("pathSelect");
+  if (!sel.value) return;
+  var path = JSON.parse(sel.options[sel.selectedIndex].dataset.path);
+  for (var i = 0; i < path.length-1; i++) {
+    var u = path[i], v = path[i+1];
+    allEdges.forEach(e => {
+      if ((e.from===u&&e.to===v)||(e.from===v&&e.to===u)) {
+        highlightedEdgeIds.push(e.id);
+        edgesDS.update({ id:e.id, color:{color:"#ef4444"}, width:4, dashes:false, hidden:false });
+      }
+    });
+  }
+  network.focus(path[0], { scale:1.2, animation:true });
+}
+</script>
+</body>
+</html>

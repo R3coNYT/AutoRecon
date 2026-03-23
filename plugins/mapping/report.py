@@ -162,57 +162,89 @@ def generate_executive_report(
     global_score: float,
     output_dir:   Path,
 ) -> None:
-    output_dir  = Path(output_dir)
-    report_file = output_dir / "executive_report.html"
-    top5        = criticality["items"][:5]
+    from datetime import datetime
 
-    html = f"""<html>
-<head>
-<title>Executive Security Report</title>
-<style>
-body {{ font-family: Arial; background:#0f111a; color:white; padding:40px; }}
-h1   {{ color:#ff4c4c; }}
-.score {{ font-size:28px; margin:20px 0; }}
-table {{ width:100%; border-collapse:collapse; margin-top:20px; }}
-td, th {{ border-bottom:1px solid #333; padding:8px; }}
-</style>
-</head>
-<body>
-<h1>Information System Security Executive Report</h1>
-<div class="score">Global Security Score: <b>{global_score}/100</b></div>
-<h2>Summary</h2>
-<ul>
-  <li>Total assets discovered: {len(assets)}</li>
-  <li>Critical assets: {criticality['critical']}</li>
-  <li>High risk assets: {criticality['high']}</li>
-  <li>Medium risk assets: {criticality['medium']}</li>
-  <li>Low risk assets: {criticality['low']}</li>
-</ul>
-<h2>Top 5 Critical Assets</h2>
-<table>
-<tr><th>IP</th><th>Type</th><th>Zone</th><th>Criticality Score</th></tr>
-"""
-    for item in top5:
-        html += (
-            f"<tr><td>{item['ip']}</td><td>{item['classification']}</td>"
-            f"<td>{item['zone']}</td><td>{item['criticality_score']}</td></tr>\n"
+    output_dir   = Path(output_dir)
+    report_file  = output_dir / "executive_report.html"
+    plugin_base  = Path(__file__).parent
+    template_file = plugin_base / "templates" / "exec_report_template.html"
+
+    top10  = criticality["items"][:10]
+    total  = max(len(assets), 1)
+    _ts    = datetime.now().strftime("%Y-%m-%d  %H:%M")
+
+    # ── Score gauge ────────────────────────────────────────────────────────────
+    _circ         = 289.02
+    _dash         = round(global_score / 100 * _circ, 2)
+    _score_color  = "#ef4444" if global_score < 50 else "#f59e0b" if global_score < 70 else "#4ade80"
+    _posture      = "CRITICAL" if global_score < 50 else "MODERATE" if global_score < 70 else "GOOD"
+    _posture_cls  = "posture-critical" if global_score < 50 else "posture-moderate" if global_score < 70 else "posture-good"
+
+    # ── Criticality percentages ────────────────────────────────────────────────
+    def _pct(n): return min(100, round(n / total * 100))
+    _cc = _pct(criticality.get("critical", 0))
+    _ch = _pct(criticality.get("high",     0))
+    _cm = _pct(criticality.get("medium",   0))
+    _cl = _pct(criticality.get("low",      0))
+
+    # ── Exposure zone cards ────────────────────────────────────────────────────
+    _exposure_rows = ""
+    for z, v in exposure.items():
+        z_color = "#f87171" if z != "LAN" else "#60a5fa"
+        _max_score = 100
+        _bar_w     = min(100, v.get("exposure_score_avg", 0))
+        _exposure_rows += (
+            f'<div class="zone-card">'
+            f'<div class="zone-name" style="color:{z_color}">{z}</div>'
+            f'<div class="zone-stats">'
+            f'<div class="zone-stat"><div class="val">{v["hosts"]}</div><div class="lbl">Hosts</div></div>'
+            f'<div class="zone-stat"><div class="val">{v["risky_ports_total"]}</div><div class="lbl">Risky Ports</div></div>'
+            f'<div class="zone-stat"><div class="val">{v["exposure_score_avg"]}</div><div class="lbl">Avg Score</div></div>'
+            f'</div>'
+            f'<div class="zone-bar-wrap"><div class="zone-bar-fill" style="width:{_bar_w}%;background:{z_color}"></div></div>'
+            f'</div>'
         )
 
-    html += """</table>
-<h2>Recommendations</h2>
-<ul>
-  <li>Reduce exposed administrative services (RDP, SSH, SMB).</li>
-  <li>Segment DMZ from LAN strictly.</li>
-  <li>Apply patch management on high critical assets.</li>
-  <li>Restrict lateral movement paths.</li>
-</ul>
-</body>
-</html>
-"""
+    # ── Top assets rows ────────────────────────────────────────────────────────
+    _asset_rows = ""
+    for item in top10:
+        lvl = item["criticality_level"]
+        cls = {"critical": "badge-critical", "high": "badge-high",
+               "medium":   "badge-medium",   "low":  "badge-low"}.get(lvl, "badge-low")
+        _asset_rows += (
+            f'<tr>'
+            f'<td class="ip-cell">{item["ip"]}</td>'
+            f'<td>{item["classification"]}</td>'
+            f'<td>{item["zone"]}</td>'
+            f'<td><div class="score-cell">{item["criticality_score"]}</div></td>'
+            f'<td><span class="badge {cls}">{lvl.upper()}</span></td>'
+            f'</tr>'
+        )
 
-    with open(report_file, "w", encoding="utf-8") as f:
-        f.write(html)
+    # ── Render template ────────────────────────────────────────────────────────
+    html = template_file.read_text("utf-8")
+    html = (
+        html
+        .replace("%TIMESTAMP%",         _ts)
+        .replace("%SCORE%",             str(int(global_score)))
+        .replace("%SCORE_COLOR%",       _score_color)
+        .replace("%SCORE_DASH%",        str(_dash))
+        .replace("%POSTURE%",           _posture)
+        .replace("%POSTURE_CLASS%",     _posture_cls)
+        .replace("%TOTAL_ASSETS%",      str(len(assets)))
+        .replace("%CRIT_CRITICAL%",     str(criticality.get("critical", 0)))
+        .replace("%CRIT_HIGH%",         str(criticality.get("high",     0)))
+        .replace("%CRIT_MEDIUM%",       str(criticality.get("medium",   0)))
+        .replace("%CRIT_LOW%",          str(criticality.get("low",      0)))
+        .replace("%CRIT_CRITICAL_PCT%", str(_cc))
+        .replace("%CRIT_HIGH_PCT%",     str(_ch))
+        .replace("%CRIT_MEDIUM_PCT%",   str(_cm))
+        .replace("%CRIT_LOW_PCT%",      str(_cl))
+        .replace("%EXPOSURE_ROWS%",     _exposure_rows)
+        .replace("%ASSET_ROWS%",        _asset_rows)
+    )
 
+    report_file.write_text(html, "utf-8")
     console.print(f"[+] Executive HTML report: {report_file}")
 
 
