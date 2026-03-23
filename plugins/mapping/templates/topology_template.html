@@ -447,7 +447,195 @@ body.redteam .brand { background: rgba(239,68,68,.06); }
 </div><!-- /layout -->
 
 <script>
-/* ── DATA ──────────────────────────────────────────────────────────────────── */
+/* ── ICON FACTORY — canvas → PNG data URI (always works in Vis-Network) ─────── */
+function makeIconPNG(drawFn, size) {
+  size = size || 80;
+  var c = document.createElement('canvas');
+  c.width = c.height = size;
+  drawFn(c.getContext('2d'), size);
+  return c.toDataURL('image/png');
+}
+
+var _iconCache = {};
+function riskBd(r) { return r >= 7 ? '#ef4444' : r >= 4 ? '#f59e0b' : '#4ade80'; }
+function riskBg(r) { return r >= 7 ? '#1a0505' : r >= 4 ? '#1a1005' : '#041208'; }
+
+function drawIconForType(type, riskColor) {
+  return makeIconPNG(function(ctx, S) {
+    var R = S/2, cx = R, cy = R, pad = S*0.08;
+    // ── Glow ring ─────────────────────────────────────────────────────────────
+    var grd = ctx.createRadialGradient(cx,cy,R*0.55,cx,cy,R);
+    grd.addColorStop(0, riskColor+'22');
+    grd.addColorStop(1, riskColor+'00');
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fillStyle=grd; ctx.fill();
+    // ── Background disk ───────────────────────────────────────────────────────
+    ctx.beginPath(); ctx.arc(cx,cy,R-pad,0,Math.PI*2);
+    ctx.fillStyle = '#111827';
+    ctx.fill();
+    ctx.strokeStyle = riskColor; ctx.lineWidth = S*0.045;
+    ctx.stroke();
+    // ── Per-type drawing ──────────────────────────────────────────────────────
+    var ic = (R-pad)*0.72;
+    var x0 = cx-ic, y0 = cy-ic, iw = ic*2, ih = ic*2;
+    ctx.save(); ctx.translate(cx-ic, cy-ic);
+    if (type === 'Domain Controller') {
+      // Crown / tower
+      ctx.fillStyle = '#a78bfa';
+      var bw=iw*0.18, bh=ih*0.55, gap=iw*0.08;
+      var totalW=3*bw+2*gap, ox=(iw-totalW)/2, oy=ih*0.35;
+      // base
+      ctx.fillRect(ox,oy,totalW,ih*0.05);
+      ctx.fillRect(ox,oy+ih*0.05,totalW,ih*0.4);
+      // turrets
+      [[ox,oy-ih*0.22],[ox+bw+gap,oy-ih*0.32],[ox+2*(bw+gap),oy-ih*0.22]].forEach(function(p){
+        ctx.fillRect(p[0],p[1],bw,ih*0.22+bh*0.05);
+        ctx.fillRect(p[0]-bw*0.15,p[1]-ih*0.1,bw*1.3,ih*0.1);
+      });
+      // star
+      ctx.fillStyle = '#fbbf24';
+      var ssz=ih*0.12, sx=iw/2, sy=ih*0.12;
+      ctx.beginPath();
+      for(var i=0;i<5;i++){
+        var a=Math.PI/2+i*Math.PI*2/5, b=a+Math.PI/5;
+        if(i===0)ctx.moveTo(sx+Math.cos(a)*ssz,sy+Math.sin(a)*ssz);
+        else ctx.lineTo(sx+Math.cos(a)*ssz,sy+Math.sin(a)*ssz);
+        ctx.lineTo(sx+Math.cos(b)*ssz*0.42,sy+Math.sin(b)*ssz*0.42);
+      }
+      ctx.closePath(); ctx.fill();
+    } else if (type === 'Windows' || type === 'Windows Server') {
+      // Windows logo — 4 panels
+      var panelColor = type === 'Windows Server' ? '#38bdf8' : '#60a5fa';
+      ctx.fillStyle = panelColor;
+      var hw=iw*0.38, hh=ih*0.38, g=iw*0.08;
+      ctx.fillRect(0,      0,      hw, hh);
+      ctx.fillRect(hw+g,   0,      hw, hh);
+      ctx.fillRect(0,      hh+g,   hw, hh);
+      ctx.fillRect(hw+g,   hh+g,   hw, hh);
+      if (type === 'Windows Server') {
+        // small rack indicator at bottom
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(0, hh*2+g*1.5, iw, hh*0.18);
+        ctx.fillRect(0, hh*2+g*1.5+hh*0.25, iw, hh*0.18);
+      }
+    } else if (type === 'Linux Server' || type === 'Linux') {
+      // Tux penguin (simplified)
+      ctx.fillStyle = '#fbbf24';
+      // body
+      ctx.beginPath();
+      ctx.ellipse(iw/2,ih*0.62,iw*0.3,ih*0.32,0,0,Math.PI*2); ctx.fill();
+      // white belly
+      ctx.fillStyle = '#f1f5f9';
+      ctx.beginPath();
+      ctx.ellipse(iw/2,ih*0.67,iw*0.18,ih*0.22,0,0,Math.PI*2); ctx.fill();
+      // head
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.ellipse(iw/2,ih*0.28,iw*0.22,ih*0.2,0,0,Math.PI*2); ctx.fill();
+      // eyes
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath(); ctx.arc(iw*0.41,ih*0.24,iw*0.04,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(iw*0.59,ih*0.24,iw*0.04,0,Math.PI*2); ctx.fill();
+      // beak
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.moveTo(iw*0.42,ih*0.31); ctx.lineTo(iw*0.58,ih*0.31); ctx.lineTo(iw*0.5,ih*0.38);
+      ctx.closePath(); ctx.fill();
+      // feet
+      ctx.strokeStyle='#f97316'; ctx.lineWidth=iw*0.06; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(iw*0.38,ih*0.93); ctx.lineTo(iw*0.28,ih*1.0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(iw*0.38,ih*0.93); ctx.lineTo(iw*0.45,ih*1.0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(iw*0.62,ih*0.93); ctx.lineTo(iw*0.55,ih*1.0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(iw*0.62,ih*0.93); ctx.lineTo(iw*0.72,ih*1.0); ctx.stroke();
+    } else if (type === 'Web Server') {
+      // Globe with lines
+      ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = iw*0.07; ctx.fillStyle='transparent';
+      // outer circle
+      ctx.beginPath(); ctx.arc(iw/2,ih/2,ih*0.46,0,Math.PI*2); ctx.stroke();
+      // horizontal lines
+      ctx.lineWidth = iw*0.055;
+      [-0.28,0,0.28].forEach(function(dy){
+        var y=ih/2+ih*dy, hw2=Math.sqrt(Math.max(0,(ih*0.46)*(ih*0.46)-(ih*dy)*(ih*dy)));
+        ctx.beginPath(); ctx.moveTo(iw/2-hw2,y); ctx.lineTo(iw/2+hw2,y); ctx.stroke();
+      });
+      // equator oval (vertical)
+      ctx.beginPath();
+      ctx.ellipse(iw/2,ih/2,iw*0.18,ih*0.46,0,0,Math.PI*2); ctx.stroke();
+      // vertical center line
+      ctx.beginPath(); ctx.moveTo(iw/2,ih*0.04); ctx.lineTo(iw/2,ih*0.96); ctx.stroke();
+    } else if (type === 'Database Server') {
+      // Cylinder
+      ctx.fillStyle = '#fbbf24';
+      ctx.strokeStyle= '#d97706'; ctx.lineWidth=iw*0.06;
+      // body
+      ctx.beginPath();
+      ctx.ellipse(iw/2,ih*0.72,iw*0.44,ih*0.14,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#d97706';
+      ctx.fillRect(iw*0.06,ih*0.28,iw*0.88,ih*0.44);
+      ctx.fillStyle='#fbbf24';
+      ctx.beginPath();
+      ctx.ellipse(iw/2,ih*0.28,iw*0.44,ih*0.14,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      // sheen line
+      ctx.strokeStyle='#fef08a'; ctx.lineWidth=iw*0.04;
+      ctx.beginPath();
+      ctx.ellipse(iw/2,ih*0.28,iw*0.44,ih*0.14,0,Math.PI*0.1,Math.PI*0.9); ctx.stroke();
+    } else if (type === 'Router / Gateway') {
+      // Router box + wifi waves
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.roundRect(iw*0.1,ih*0.42,iw*0.8,ih*0.38,iw*0.1); ctx.fill();
+      ctx.strokeStyle='#64748b'; ctx.lineWidth=iw*0.05;
+      ctx.stroke();
+      // LEDs
+      [[0.28,0.61,'#4ade80'],[0.42,0.61,'#fbbf24'],[0.56,0.61,'#f87171']].forEach(function(l){
+        ctx.fillStyle=l[2];
+        ctx.beginPath(); ctx.arc(iw*l[0],ih*l[1],iw*0.05,0,Math.PI*2); ctx.fill();
+      });
+      // wifi arcs
+      ctx.strokeStyle='#94a3b8'; ctx.lineWidth=iw*0.055; ctx.lineCap='round';
+      [0.18,0.28,0.38].forEach(function(r2){
+        ctx.beginPath();
+        ctx.arc(iw/2,ih*0.44,ih*r2,-Math.PI*0.75,-Math.PI*0.25); ctx.stroke();
+      });
+    } else if (type === 'Router / Hop') {
+      // Dashed ring
+      ctx.strokeStyle='#64748b'; ctx.lineWidth=iw*0.08; ctx.setLineDash([iw*0.12,iw*0.1]);
+      ctx.beginPath(); ctx.arc(iw/2,ih/2,iw*0.35,0,Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='#64748b';
+      ctx.beginPath(); ctx.arc(iw/2,ih/2,iw*0.12,0,Math.PI*2); ctx.fill();
+    } else {
+      // Unknown — screen monitor
+      ctx.fillStyle = '#475569';
+      ctx.beginPath(); ctx.roundRect(iw*0.04,ih*0.12,iw*0.92,ih*0.62,iw*0.08); ctx.fill();
+      ctx.strokeStyle='#334155'; ctx.lineWidth=iw*0.05; ctx.stroke();
+      ctx.fillStyle='#1e293b';
+      ctx.beginPath(); ctx.roundRect(iw*0.1,ih*0.18,iw*0.8,ih*0.5,iw*0.04); ctx.fill();
+      // stand
+      ctx.fillStyle='#475569';
+      ctx.fillRect(iw*0.4,ih*0.74,iw*0.2,ih*0.14);
+      ctx.beginPath(); ctx.roundRect(iw*0.25,ih*0.88,iw*0.5,ih*0.08,iw*0.04); ctx.fill();
+      // ?
+      ctx.fillStyle='#94a3b8'; ctx.font='bold '+(ih*0.36)+'px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('?',iw/2,ih*0.44);
+    }
+    ctx.restore();
+  }, 80);
+}
+
+/* ── ICON CACHE (build once) ───────────────────────────────────────────────── */
+var HOST_TYPES = [
+  'Domain Controller','Windows Server','Windows',
+  'Linux Server','Linux','Web Server','Database Server',
+  'Router / Gateway','Router / Hop'
+];
+var ICON_CACHE = {};
+var RISK_COLORS = ['#ef4444','#f59e0b','#4ade80'];
+function riskIdx(r) { return r>=7?0:r>=4?1:2; }
+HOST_TYPES.forEach(function(t) {
+  RISK_COLORS.forEach(function(c,i) { ICON_CACHE[t+'|'+i] = drawIconForType(t,c); });
+});
+['unknown|0','unknown|1','unknown|2'].forEach(function(k,i){ ICON_CACHE[k]=drawIconForType('',RISK_COLORS[i]); });
+
 const TYPE_ICONS_MAP = {
   "Domain Controller":   "🏛",
   "Windows Server":      "🖥",
@@ -460,25 +648,6 @@ const TYPE_ICONS_MAP = {
 };
 function emojiForType(t) { return TYPE_ICONS_MAP[t] || "❓"; }
 
-/* risk → visual helpers */
-function riskBg(r)  { return r >= 7 ? "rgba(239,68,68,0.22)"   : r >= 4 ? "rgba(245,158,11,0.22)" : "rgba(74,222,128,0.18)"; }
-function riskBd(r)  { return r >= 7 ? "#ef4444"                : r >= 4 ? "#f59e0b"               : "#4ade80"; }
-/* size by importance */
-function nodeSize(t, r) {
-  if (t === "Domain Controller") return 30;
-  if (t === "Router / Hop")      return 10;
-  if (r >= 7)                    return 26;
-  return 20;
-}
-/* shape by type */
-function nodeShape(t) {
-  if (t === "Router / Gateway")  return "triangle";
-  if (t === "Router / Hop")      return "dot";
-  if (t === "Database Server")   return "square";
-  if (t === "Domain Controller") return "star";
-  return "dot";
-}
-
 var allNodes    = %NODES%;
 var allEdges    = %EDGES%;
 var exposure    = %EXPOSURE%;
@@ -486,19 +655,24 @@ var criticality = %CRITICALITY%;
 var attackPaths = %ATTACK_PATHS%;
 var tracePaths  = %TRACE_PATHS%;
 
-allNodes = allNodes.map(n => {
-  var isHop = n.type === "Router / Hop";
-  n.shape       = nodeShape(n.type);
-  n.size        = nodeSize(n.type, n.risk || 0);
+allNodes = allNodes.map(function(n) {
+  var ri   = riskIdx(n.risk || 0);
+  var kHost = HOST_TYPES.indexOf(n.type) >= 0 ? n.type : 'unknown';
+  var imgSrc = ICON_CACHE[kHost+'|'+ri] || ICON_CACHE['unknown|'+ri];
+  var isHop  = n.type === 'Router / Hop';
+  n.shape       = 'circularImage';
+  n.image       = imgSrc;
+  n.brokenImage = ICON_CACHE['unknown|'+ri];
+  n.size        = isHop ? 12 : (n.type === 'Domain Controller' ? 34 : 26);
   n.borderWidth = 2;
   n.borderWidthSelected = 5;
   n.color = {
-    background: isHop ? "rgba(100,116,139,0.15)" : riskBg(n.risk || 0),
-    border:     isHop ? "#64748b"                 : riskBd(n.risk || 0),
-    highlight:  { background: isHop ? "rgba(100,116,139,0.3)" : riskBg(n.risk || 0), border: "#a78bfa" },
-    hover:      { background: isHop ? "rgba(100,116,139,0.3)" : riskBg(n.risk || 0), border: "#c4b5fd" },
+    border:    RISK_COLORS[ri],
+    background:'#111827',
+    highlight: { border:'#a78bfa', background:'#111827' },
+    hover:     { border:'#c4b5fd', background:'#111827' },
   };
-  n.font = { color: "#e2e8f0", size: isHop ? 10 : 12, strokeWidth: 3, strokeColor: "#000" };
+  n.font = { color:'#e2e8f0', size: isHop?10:12, strokeWidth:3, strokeColor:'#000' };
   return n;
 });
 
@@ -542,6 +716,32 @@ var options = {
 };
 
 var network = new vis.Network(container, data, options);
+
+/* ── Navigation button icons ───────────────────────────────────────────────── */
+var NAV_LABELS = {
+  'vis-up':         '↑',
+  'vis-down':       '↓',
+  'vis-left':       '←',
+  'vis-right':      '→',
+  'vis-zoomIn':     '+',
+  'vis-zoomOut':    '−',
+  'vis-zoomExtends':'⤢',
+};
+function injectNavIcons() {
+  Object.keys(NAV_LABELS).forEach(function(cls) {
+    var el = container.querySelector('.'+cls);
+    if (!el) return;
+    el.innerHTML = '<span style="font-size:18px;color:#c4b5fd;line-height:1;user-select:none;">'+NAV_LABELS[cls]+'</span>';
+    el.style.cssText += ';display:flex!important;align-items:center;justify-content:center;';
+  });
+}
+/* Use MutationObserver so we catch when Vis adds the buttons */
+var _navObserver = new MutationObserver(function(muts) {
+  var found = container.querySelector('.vis-up');
+  if (found) { injectNavIcons(); _navObserver.disconnect(); }
+});
+_navObserver.observe(container, { childList:true, subtree:true });
+setTimeout(function() { injectNavIcons(); _navObserver.disconnect(); }, 1500);
 
 /* hide all edges initially */
 edgesDS.update(allEdges.filter(e => e.id).map(e => ({ id:e.id, hidden:true })));
@@ -626,16 +826,18 @@ function toggleTeamMode() {
 /* ── Heatmap ────────────────────────────────────────────────────────────────── */
 var heatmapOn = false;
 var baseColors = {};
-allNodes.forEach(n => baseColors[n.id] = n.color);  // n.color is already an object
-function riskColorHeat(r) { return r >= 7 ? "#ef4444" : r >= 4 ? "#f59e0b" : "#4ade80"; }
+allNodes.forEach(function(n) { baseColors[n.id] = { border: n.color.border, background: n.color.background }; });
 function toggleHeatmap() {
   heatmapOn = !heatmapOn;
-  nodesDS.update(allNodes.map(n => ({
-    id: n.id,
-    color: heatmapOn
-      ? { background: riskColorHeat(n.risk||0)+"44", border: riskColorHeat(n.risk||0), highlight: { background: riskColorHeat(n.risk||0)+"66", border: "#a78bfa" } }
-      : (baseColors[n.id] || n.color)
-  })));
+  nodesDS.update(allNodes.map(function(n) {
+    var ri = riskIdx(n.risk||0);
+    return {
+      id: n.id,
+      color: heatmapOn
+        ? { border: RISK_COLORS[ri], background:'#111827', highlight:{ border:'#a78bfa', background:'#111827' } }
+        : (baseColors[n.id] || n.color)
+    };
+  }));
   document.getElementById("heatToggleBtn").textContent = heatmapOn ? "🌡 Heatmap: ON" : "🌡 Heatmap";
 }
 
@@ -779,9 +981,11 @@ function exportPNG() {
 
 /* ── Path highlight ─────────────────────────────────────────────────────────── */
 function clearPath() {
-  highlightedEdgeIds.forEach(eid => edgesDS.update({ id:eid, color:{color:"#888"}, width:1.5, dashes:true }));
+  highlightedEdgeIds.forEach(function(eid) { edgesDS.update({ id:eid, color:{color:'#888'}, width:1.5, dashes:true }); });
   highlightedEdgeIds = [];
-  allNodes.forEach(n => nodesDS.update({ id:n.id, borderWidth:2, color: baseColors[n.id] || n.color }));
+  allNodes.forEach(function(n) {
+    nodesDS.update({ id:n.id, borderWidth:2, color: baseColors[n.id] || n.color });
+  });
 }
 function selectPath() {
   clearPath();
