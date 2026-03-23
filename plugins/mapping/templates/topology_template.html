@@ -254,6 +254,8 @@ select:focus { border-color: var(--accent); }
 
 /* ─── CANVAS ────────────────────────────────────────────────────────── */
 #network {
+  width: 100%;
+  height: 100vh;
   background:
     radial-gradient(ellipse at 30% 20%, rgba(108,99,255,.06) 0%, transparent 60%),
     radial-gradient(ellipse at 70% 80%, rgba(6,182,212,.04) 0%, transparent 50%),
@@ -446,90 +448,35 @@ body.redteam .brand { background: rgba(239,68,68,.06); }
 
 <script>
 /* ── DATA ──────────────────────────────────────────────────────────────────── */
-function svgDataUri(svg) { return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); }
-
-const ICONS = {
-  dc: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-    <rect x="4"  y="6"  width="26" height="24" rx="3" fill="#818cf8"/>
-    <rect x="34" y="6"  width="26" height="24" rx="3" fill="#6366f1"/>
-    <rect x="4"  y="34" width="26" height="24" rx="3" fill="#6366f1"/>
-    <rect x="34" y="34" width="26" height="24" rx="3" fill="#4f46e5"/>
-    <rect x="27" y="4"  width="10" height="56" rx="2" fill="rgba(0,0,0,0.2)"/>
-  </svg>`),
-  windows: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-    <rect x="4"  y="6"  width="26" height="24" rx="3" fill="#38bdf8"/>
-    <rect x="34" y="6"  width="26" height="24" rx="3" fill="#0ea5e9"/>
-    <rect x="4"  y="34" width="26" height="24" rx="3" fill="#0ea5e9"/>
-    <rect x="34" y="34" width="26" height="24" rx="3" fill="#0284c7"/>
-  </svg>`),
-  linux: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-    <ellipse cx="32" cy="19" rx="12" ry="13" fill="#f1f5f9"/>
-    <ellipse cx="32" cy="43" rx="17" ry="15" fill="#334155"/>
-    <circle cx="27" cy="18" r="2.5" fill="#0f172a"/>
-    <circle cx="37" cy="18" r="2.5" fill="#0f172a"/>
-    <path d="M26 25 Q32 30 38 25" stroke="#fbbf24" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-    <line x1="21" y1="52" x2="17" y2="60" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
-    <line x1="43" y1="52" x2="47" y2="60" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
-  </svg>`),
-  router: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-    <rect x="8" y="24" width="48" height="18" rx="7" fill="#475569"/>
-    <circle cx="19" cy="33" r="3" fill="#4ade80"/>
-    <circle cx="30" cy="33" r="3" fill="#fde047"/>
-    <circle cx="41" cy="33" r="3" fill="#f87171"/>
-    <path d="M19 24 C21 12 28 9 32 7"  stroke="#94a3b8" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <path d="M45 24 C43 12 36 9 32 7"  stroke="#94a3b8" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <line x1="14" y1="42" x2="14" y2="56" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
-    <line x1="50" y1="42" x2="50" y2="56" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
-  </svg>`),
-  web: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-    <rect x="6" y="8" width="52" height="48" rx="8" fill="#164e63"/>
-    <rect x="6" y="8" width="52" height="16" rx="8" fill="#0e7490"/>
-    <circle cx="16" cy="16" r="3" fill="#f87171"/>
-    <circle cx="26" cy="16" r="3" fill="#fde047"/>
-    <circle cx="36" cy="16" r="3" fill="#4ade80"/>
-    <rect x="14" y="32" width="36" height="3" rx="1.5" fill="#22d3ee" opacity="0.7"/>
-    <rect x="14" y="40" width="28" height="3" rx="1.5" fill="#22d3ee" opacity="0.5"/>
-    <rect x="14" y="48" width="20" height="3" rx="1.5" fill="#22d3ee" opacity="0.3"/>
-  </svg>`),
-  db: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-    <ellipse cx="32" cy="15" rx="22" ry="8" fill="#fbbf24"/>
-    <rect x="10" y="15" width="44" height="28" fill="#d97706"/>
-    <ellipse cx="32" cy="43" rx="22" ry="8" fill="#fbbf24"/>
-    <ellipse cx="32" cy="27" rx="22" ry="7" fill="#f59e0b" opacity="0.6"/>
-  </svg>`),
-  hop: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-    <circle cx="32" cy="32" r="20" fill="none" stroke="#64748b" stroke-width="2.5" stroke-dasharray="5 4"/>
-    <circle cx="32" cy="32" r="6" fill="#64748b"/>
-  </svg>`),
-  unknown: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-    <rect x="10" y="14" width="44" height="32" rx="6" fill="#334155"/>
-    <rect x="26" y="48" width="12" height="6" fill="#475569"/>
-    <rect x="18" y="56" width="28" height="4" rx="2" fill="#475569"/>
-    <text x="32" y="38" font-size="20" text-anchor="middle" fill="#94a3b8" font-family="monospace">?</text>
-  </svg>`)
-};
-
 const TYPE_ICONS_MAP = {
-  "Domain Controller": "🏛",
-  "Windows Server": "🖥",
-  "Windows": "💻",
-  "Linux Server": "🐧",
-  "Web Server": "🌐",
-  "Database Server": "🗄",
-  "Router / Gateway": "🔌",
-  "Router / Hop": "◎",
+  "Domain Controller":   "🏛",
+  "Windows Server":      "🖥",
+  "Windows":             "💻",
+  "Linux Server":        "🐧",
+  "Web Server":          "🌐",
+  "Database Server":     "🗄",
+  "Router / Gateway":    "🔌",
+  "Router / Hop":        "◎",
 };
 function emojiForType(t) { return TYPE_ICONS_MAP[t] || "❓"; }
 
-function iconForType(t) {
-  if (t === "Domain Controller") return ICONS.dc;
-  if (t === "Windows" || t === "Windows Server") return ICONS.windows;
-  if (t === "Linux Server") return ICONS.linux;
-  if (t === "Router / Gateway") return ICONS.router;
-  if (t === "Web Server") return ICONS.web;
-  if (t === "Database Server") return ICONS.db;
-  if (t === "Router / Hop") return ICONS.hop;
-  return ICONS.unknown;
+/* risk → visual helpers */
+function riskBg(r)  { return r >= 7 ? "rgba(239,68,68,0.22)"   : r >= 4 ? "rgba(245,158,11,0.22)" : "rgba(74,222,128,0.18)"; }
+function riskBd(r)  { return r >= 7 ? "#ef4444"                : r >= 4 ? "#f59e0b"               : "#4ade80"; }
+/* size by importance */
+function nodeSize(t, r) {
+  if (t === "Domain Controller") return 30;
+  if (t === "Router / Hop")      return 10;
+  if (r >= 7)                    return 26;
+  return 20;
+}
+/* shape by type */
+function nodeShape(t) {
+  if (t === "Router / Gateway")  return "triangle";
+  if (t === "Router / Hop")      return "dot";
+  if (t === "Database Server")   return "square";
+  if (t === "Domain Controller") return "star";
+  return "dot";
 }
 
 var allNodes    = %NODES%;
@@ -540,11 +487,18 @@ var attackPaths = %ATTACK_PATHS%;
 var tracePaths  = %TRACE_PATHS%;
 
 allNodes = allNodes.map(n => {
-  n.shape = "image";
-  n.image = iconForType(n.type);
-  n.size  = 28;
+  var isHop = n.type === "Router / Hop";
+  n.shape       = nodeShape(n.type);
+  n.size        = nodeSize(n.type, n.risk || 0);
   n.borderWidth = 2;
   n.borderWidthSelected = 5;
+  n.color = {
+    background: isHop ? "rgba(100,116,139,0.15)" : riskBg(n.risk || 0),
+    border:     isHop ? "#64748b"                 : riskBd(n.risk || 0),
+    highlight:  { background: isHop ? "rgba(100,116,139,0.3)" : riskBg(n.risk || 0), border: "#a78bfa" },
+    hover:      { background: isHop ? "rgba(100,116,139,0.3)" : riskBg(n.risk || 0), border: "#c4b5fd" },
+  };
+  n.font = { color: "#e2e8f0", size: isHop ? 10 : 12, strokeWidth: 3, strokeColor: "#000" };
   return n;
 });
 
@@ -573,17 +527,17 @@ var options = {
     tooltipDelay: 80,
   },
   nodes: {
-    shape: "dot", size: 22,
-    font: { color: "#e2e8f0", size: 13, strokeWidth: 3, strokeColor: "#000" },
+    shape: "dot", size: 20,
+    font: { color: "#e2e8f0", size: 12, strokeWidth: 3, strokeColor: "#000" },
   },
   edges: {
     smooth: { type: "dynamic" }, width: 1.5,
     font: { color: "#94a3b8", size: 11, strokeWidth: 2, strokeColor: "#000" },
   },
   groups: {
-    "LAN":            { color: { background:"#1e3a5f", border:"#2563eb" } },
-    "DMZ / External": { color: { background:"#5f1e1e", border:"#dc2626" } },
-    "PATH":           { color: { background:"#1e2a40", border:"#4b5563" } },
+    "LAN":            { },
+    "DMZ / External": { },
+    "PATH":           { },
   },
 };
 
@@ -672,11 +626,16 @@ function toggleTeamMode() {
 /* ── Heatmap ────────────────────────────────────────────────────────────────── */
 var heatmapOn = false;
 var baseColors = {};
-allNodes.forEach(n => baseColors[n.id] = n.color);
-function riskColor(r) { return r >= 7 ? "#ef4444" : r >= 4 ? "#f59e0b" : "#4ade80"; }
+allNodes.forEach(n => baseColors[n.id] = n.color);  // n.color is already an object
+function riskColorHeat(r) { return r >= 7 ? "#ef4444" : r >= 4 ? "#f59e0b" : "#4ade80"; }
 function toggleHeatmap() {
   heatmapOn = !heatmapOn;
-  nodesDS.update(allNodes.map(n => ({ id:n.id, color: heatmapOn ? riskColor(n.risk||0) : (baseColors[n.id]||n.color) })));
+  nodesDS.update(allNodes.map(n => ({
+    id: n.id,
+    color: heatmapOn
+      ? { background: riskColorHeat(n.risk||0)+"44", border: riskColorHeat(n.risk||0), highlight: { background: riskColorHeat(n.risk||0)+"66", border: "#a78bfa" } }
+      : (baseColors[n.id] || n.color)
+  })));
   document.getElementById("heatToggleBtn").textContent = heatmapOn ? "🌡 Heatmap: ON" : "🌡 Heatmap";
 }
 
@@ -822,7 +781,7 @@ function exportPNG() {
 function clearPath() {
   highlightedEdgeIds.forEach(eid => edgesDS.update({ id:eid, color:{color:"#888"}, width:1.5, dashes:true }));
   highlightedEdgeIds = [];
-  allNodes.forEach(n => nodesDS.update({ id:n.id, borderWidth:2, color:baseColors[n.id]||n.color }));
+  allNodes.forEach(n => nodesDS.update({ id:n.id, borderWidth:2, color: baseColors[n.id] || n.color }));
 }
 function selectPath() {
   clearPath();
