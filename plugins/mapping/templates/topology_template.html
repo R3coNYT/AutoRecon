@@ -370,6 +370,8 @@ body.redteam .brand { background: rgba(239,68,68,.06); }
       <div class="section-body">
         <button class="btn" onclick="toggleTeamMode()" id="teamBtn">🔵 Blue Team</button>
         <button class="btn" onclick="toggleHeatmap()" id="heatToggleBtn">🌡 Heatmap</button>
+        <button class="btn active" onclick="applyRadialLayout()" id="radialBtn">🔵 Radial</button>
+        <button class="btn" onclick="applyForceLayout()" id="forceBtn">🌀 Force</button>
         <button class="btn" onclick="clusterZone('LAN')">Collapse LAN</button>
         <button class="btn" onclick="clusterZone('DMZ / External')">Collapse DMZ</button>
         <button class="btn" onclick="expandAllClusters()">Expand All</button>
@@ -683,16 +685,8 @@ var edgesDS   = new vis.DataSet(allEdges);
 var data      = { nodes: nodesDS, edges: edgesDS };
 
 var options = {
-  layout: { improvedLayout: true, randomSeed: 42 },
-  physics: {
-    enabled: true,
-    solver: "forceAtlas2Based",
-    forceAtlas2Based: {
-      gravitationalConstant: -60, centralGravity: 0.005,
-      springLength: 120, springConstant: 0.04, damping: 0.92, avoidOverlap: 1,
-    },
-    stabilization: { iterations: 1800 },
-  },
+  layout: { improvedLayout: false, randomSeed: 42 },
+  physics: { enabled: false },
   interaction: {
     hover: true, dragNodes: true, dragView: true, zoomView: true,
     navigationButtons: true,
@@ -746,7 +740,9 @@ setTimeout(function() { injectNavIcons(); _navObserver.disconnect(); }, 1500);
 /* hide all edges initially */
 edgesDS.update(allEdges.filter(e => e.id).map(e => ({ id:e.id, hidden:true })));
 
-network.once("stabilizationIterationsDone", () => network.setOptions({ physics: false }));
+/* apply radial layout immediately */
+applyRadialLayout();
+
 network.on("hoverNode", () => { container.style.cursor = "pointer"; });
 network.on("blurNode",  () => { container.style.cursor = "grab"; });
 
@@ -767,6 +763,122 @@ network.on("click", function(params) {
   } else {
     document.getElementById("nodeDetail").classList.add("hidden");
   }
+});
+
+/* ── RADIAL LAYOUT ─────────────────────────────────────────────────────────── */
+var RING_DEFS = [
+  { label: "Domain Controllers", types: ["Domain Controller"],                  radius: 170, color: "rgba(167,139,250,0.10)", stroke: "rgba(167,139,250,0.40)" },
+  { label: "Windows",            types: ["Windows Server","Windows"],           radius: 330, color: "rgba(96,165,250,0.07)",  stroke: "rgba(96,165,250,0.35)"  },
+  { label: "Linux",              types: ["Linux Server","Linux"],               radius: 490, color: "rgba(251,191,36,0.07)",  stroke: "rgba(251,191,36,0.35)"  },
+  { label: "Web / DB",           types: ["Web Server","Database Server"],       radius: 650, color: "rgba(34,211,238,0.06)",  stroke: "rgba(34,211,238,0.30)"  },
+  { label: "Network Hops",       types: ["Router / Hop"],                       radius: 810, color: "rgba(100,116,139,0.05)", stroke: "rgba(100,116,139,0.25)" },
+];
+var _radialActive = true;
+
+function applyRadialLayout() {
+  _radialActive = true;
+  network.setOptions({ physics: { enabled: false } });
+  document.getElementById('radialBtn').classList.add('active');
+  document.getElementById('forceBtn').classList.remove('active');
+
+  /* find main gateway router */
+  var routerNode = allNodes.find(function(n) { return n.type === 'Router / Gateway'; });
+  var centerId   = routerNode ? routerNode.id : null;
+
+  /* group nodes by ring */
+  var ringMap  = {};
+  var assigned = new Set();
+  RING_DEFS.forEach(function(_, ri) { ringMap[ri] = []; });
+  ringMap['extra'] = [];
+  if (centerId) assigned.add(centerId);
+
+  RING_DEFS.forEach(function(ring, ri) {
+    allNodes.forEach(function(n) {
+      if (assigned.has(n.id)) return;
+      if (ring.types.indexOf(n.type) >= 0) {
+        ringMap[ri].push(n.id);
+        assigned.add(n.id);
+      }
+    });
+  });
+  allNodes.forEach(function(n) { if (!assigned.has(n.id)) ringMap['extra'].push(n.id); });
+
+  var updates = [];
+  if (centerId) updates.push({ id: centerId, x: 0, y: 0 });
+
+  RING_DEFS.forEach(function(ring, ri) {
+    var ids = ringMap[ri];
+    if (!ids.length) return;
+    ids.forEach(function(id, i) {
+      var angle = -Math.PI / 2 + (2 * Math.PI * i) / ids.length;
+      updates.push({ id: id, x: Math.round(ring.radius * Math.cos(angle)), y: Math.round(ring.radius * Math.sin(angle)) });
+    });
+  });
+  var extraIds = ringMap['extra'];
+  if (extraIds.length) {
+    var outerR = RING_DEFS[RING_DEFS.length - 1].radius + 160;
+    extraIds.forEach(function(id, i) {
+      var angle = -Math.PI / 2 + (2 * Math.PI * i) / extraIds.length;
+      updates.push({ id: id, x: Math.round(outerR * Math.cos(angle)), y: Math.round(outerR * Math.sin(angle)) });
+    });
+  }
+
+  nodesDS.update(updates);
+  setTimeout(function() { network.fit({ animation: { duration: 600, easingFunction: 'easeInOutQuad' } }); }, 80);
+}
+
+function applyForceLayout() {
+  _radialActive = false;
+  document.getElementById('forceBtn').classList.add('active');
+  document.getElementById('radialBtn').classList.remove('active');
+  network.setOptions({
+    physics: {
+      enabled: true,
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: { gravitationalConstant: -60, centralGravity: 0.005, springLength: 120, springConstant: 0.04, damping: 0.92, avoidOverlap: 1 },
+      stabilization: { iterations: 1200 },
+    }
+  });
+  network.once('stabilizationIterationsDone', function() {
+    network.setOptions({ physics: { enabled: false } });
+    document.getElementById('forceBtn').textContent = '🌀 Force';
+  });
+  document.getElementById('forceBtn').textContent = '⏳ Running…';
+}
+
+/* ── Ring decorations (drawn every frame in network-coordinate space) ────────── */
+network.on('afterDrawing', function(ctx) {
+  if (!_radialActive) return;
+  var routerNode = allNodes.find(function(n) { return n.type === 'Router / Gateway'; });
+  if (!routerNode) return;
+  var pos   = network.getPosition(routerNode.id);
+  var scale = network.getScale();
+  RING_DEFS.forEach(function(ring) {
+    /* skip rings with no nodes */
+    var hasNodes = allNodes.some(function(n) { return ring.types.indexOf(n.type) >= 0; });
+    if (!hasNodes) return;
+    /* filled area */
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, ring.radius, 0, Math.PI * 2);
+    ctx.fillStyle = ring.color;
+    ctx.fill();
+    /* dashed border */
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, ring.radius, 0, Math.PI * 2);
+    ctx.strokeStyle = ring.stroke;
+    ctx.lineWidth   = 1.5 / scale;
+    ctx.setLineDash([6 / scale, 5 / scale]);
+    ctx.stroke();
+    /* label at top */
+    ctx.setLineDash([]);
+    ctx.fillStyle    = ring.stroke;
+    ctx.font         = 'bold ' + Math.max(9, Math.round(11 / scale)) + 'px Segoe UI, sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(ring.label, pos.x, pos.y - ring.radius - 4 / scale);
+    ctx.restore();
+  });
 });
 
 /* ── Collapsible sections ───────────────────────────────────────────────────── */
