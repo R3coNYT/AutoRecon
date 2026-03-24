@@ -776,11 +776,19 @@ var GROUP_DEFS = [
 var _radialActive  = true;
 var _radialGroups  = [];   /* populated by applyRadialLayout, read by afterDrawing */
 
+/* Returns the minimum orbit radius so N nodes of nodeR diameter don't overlap */
+function minOrbitRadius(N, nodeR) {
+  if (N <= 1) return 0;
+  return Math.ceil((nodeR + 15) / Math.sin(Math.PI / N)) + 5;
+}
+
 function applyRadialLayout() {
   _radialActive = true;
   network.setOptions({ physics: { enabled: false } });
   document.getElementById('radialBtn').classList.add('active');
   document.getElementById('forceBtn').classList.remove('active');
+
+  var NODE_R = 32; /* visual radius of a standard node (size=26 + border + glow) */
 
   /* ── find the gateway router as center ───────────────────────────── */
   var routerNode = allNodes.find(function(n) { return n.type === 'Router / Gateway'; });
@@ -788,7 +796,7 @@ function applyRadialLayout() {
   var assigned   = new Set();
   if (centerId) assigned.add(centerId);
 
-  /* ── build active groups (only where members exist) ─────────────── */
+  /* ── build active groups ─────────────────────────────────────────── */
   var groups = [];
   GROUP_DEFS.forEach(function(def) {
     var members = allNodes.filter(function(n) {
@@ -798,7 +806,6 @@ function applyRadialLayout() {
     members.forEach(function(n) { assigned.add(n.id); });
     groups.push({ def: def, members: members });
   });
-  /* leftover nodes */
   var extras = allNodes.filter(function(n) { return !assigned.has(n.id); });
   if (extras.length) {
     groups.push({
@@ -807,26 +814,43 @@ function applyRadialLayout() {
     });
   }
 
-  /* ── position each group around the center ───────────────────────── */
-  var updates     = [];
-  var groupRadius = 400;   /* distance from router to group center   */
-  var nodeSpread  = 85;    /* spread radius of nodes inside a group  */
+  /* ── compute per-group spread radius (no node overlap inside bubble) */
+  groups.forEach(function(g) {
+    var m = g.members.length;
+    g.spread = m <= 1 ? 0 : Math.max(minOrbitRadius(m, NODE_R), 70);
+    /* bubble half-width used to avoid inter-group collisions */
+    g.halfW  = g.spread + NODE_R + 50;
+  });
+
+  /* ── compute groupRadius so bubbles don't overlap each other ──────── */
+  var N = groups.length;
+  var maxHalf = Math.max.apply(null, groups.map(function(g) { return g.halfW; }));
+  /* minimum groupRadius: adjacent bubbles must not touch                */
+  /* chord between adjacent group centers = 2*groupRadius*sin(π/N) ≥ 2*maxHalf */
+  var groupRadius = N <= 1 ? 0 : Math.max(
+    Math.ceil(maxHalf / Math.sin(Math.PI / N)) + 40,
+    250
+  );
+
+  /* ── place nodes ─────────────────────────────────────────────────── */
+  var updates = [];
   if (centerId) updates.push({ id: centerId, x: 0, y: 0 });
 
   groups.forEach(function(g, gi) {
-    var angle = -Math.PI / 2 + (2 * Math.PI * gi) / groups.length;
+    var angle = -Math.PI / 2 + (2 * Math.PI * gi) / Math.max(N, 1);
     var gcx   = Math.round(groupRadius * Math.cos(angle));
     var gcy   = Math.round(groupRadius * Math.sin(angle));
     var m     = g.members.length;
     g.members.forEach(function(node, ni) {
       var a2 = m === 1 ? 0 : -Math.PI / 2 + (2 * Math.PI * ni) / m;
-      var r2 = m === 1 ? 0 : nodeSpread * (m <= 3 ? 0.55 : 0.85);
       updates.push({
         id: node.id,
-        x:  Math.round(gcx + r2 * Math.cos(a2)),
-        y:  Math.round(gcy + r2 * Math.sin(a2)),
+        x:  Math.round(gcx + g.spread * Math.cos(a2)),
+        y:  Math.round(gcy + g.spread * Math.sin(a2)),
       });
     });
+    g.cx = gcx;
+    g.cy = gcy;
   });
 
   _radialGroups = groups;
@@ -858,39 +882,57 @@ function applyForceLayout() {
 network.on('afterDrawing', function(ctx) {
   if (!_radialActive || !_radialGroups.length) return;
   var scale = network.getScale();
-  var pad   = 60;   /* padding around bounding box */
+  var pad_h = 55;  /* horizontal padding around bounding box */
+  var pad_v = 45;  /* vertical padding  */
+  var min_rx = 70, min_ry = 55;
+
+  /* center point: router position or canvas origin */
+  var routerNode = allNodes.find(function(n) { return n.type === 'Router / Gateway'; });
+  var centerPos  = routerNode ? network.getPosition(routerNode.id) : { x: 0, y: 0 };
 
   _radialGroups.forEach(function(g) {
-    /* collect actual positions (nodes may have been dragged) */
     var positions = g.members.map(function(n) { return network.getPosition(n.id); });
     var xs = positions.map(function(p) { return p.x; });
     var ys = positions.map(function(p) { return p.y; });
     var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
     var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
-
-    var cx = (minX + maxX) / 2;
-    var cy = (minY + maxY) / 2;
-    var rx = Math.max((maxX - minX) / 2 + pad, 90);
-    var ry = Math.max((maxY - minY) / 2 + pad * 0.75, 70);
+    var cx  = (minX + maxX) / 2;
+    var cy  = (minY + maxY) / 2;
+    var rx  = Math.max((maxX - minX) / 2 + pad_h, min_rx);
+    var ry  = Math.max((maxY - minY) / 2 + pad_v, min_ry);
 
     ctx.save();
+
+    /* dashed line from center (router) to bubble */
+    ctx.beginPath();
+    ctx.moveTo(centerPos.x, centerPos.y);
+    ctx.lineTo(cx, cy);
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth   = 1.5 / scale;
+    ctx.setLineDash([6 / scale, 5 / scale]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
     /* filled bubble */
     ctx.beginPath();
     ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
     ctx.fillStyle = g.def.fill;
     ctx.fill();
-    /* border */
+
+    /* bubble border */
     ctx.beginPath();
     ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
     ctx.strokeStyle = g.def.stroke;
     ctx.lineWidth   = 2 / scale;
     ctx.stroke();
-    /* label above bubble */
+
+    /* group label above bubble */
     ctx.fillStyle    = g.def.stroke;
     ctx.font         = 'bold ' + Math.max(10, Math.round(13 / scale)) + 'px Segoe UI, sans-serif';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText(g.def.label, cx, cy - ry - 5 / scale);
+    ctx.fillText(g.def.label, cx, cy - ry - 6 / scale);
+
     ctx.restore();
   });
 });
