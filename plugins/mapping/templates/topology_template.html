@@ -765,15 +765,22 @@ network.on("click", function(params) {
   }
 });
 
-/* ── RADIAL LAYOUT ─────────────────────────────────────────────────────────── */
-var RING_DEFS = [
-  { label: "Domain Controllers", types: ["Domain Controller"],                  radius: 170, color: "rgba(167,139,250,0.10)", stroke: "rgba(167,139,250,0.40)" },
-  { label: "Windows",            types: ["Windows Server","Windows"],           radius: 330, color: "rgba(96,165,250,0.07)",  stroke: "rgba(96,165,250,0.35)"  },
-  { label: "Linux",              types: ["Linux Server","Linux"],               radius: 490, color: "rgba(251,191,36,0.07)",  stroke: "rgba(251,191,36,0.35)"  },
-  { label: "Web / DB",           types: ["Web Server","Database Server"],       radius: 650, color: "rgba(34,211,238,0.06)",  stroke: "rgba(34,211,238,0.30)"  },
-  { label: "Network Hops",       types: ["Router / Hop"],                       radius: 810, color: "rgba(100,116,139,0.05)", stroke: "rgba(100,116,139,0.25)" },
+/* ── CLUSTER LAYOUT (router au centre, groupes en bulles autour) ─────────────── */
+var GROUP_DEFS = [
+  { label: "Domain Controllers", types: ["Domain Controller"],              stroke: "#a78bfa", fill: "rgba(167,139,250,0.08)" },
+  { label: "Windows",            types: ["Windows Server","Windows"],       stroke: "#60a5fa", fill: "rgba(96,165,250,0.08)"  },
+  { label: "Linux",              types: ["Linux Server","Linux"],           stroke: "#fbbf24", fill: "rgba(251,191,36,0.08)"  },
+  { label: "Web / DB",           types: ["Web Server","Database Server"],   stroke: "#f472b6", fill: "rgba(244,114,182,0.08)" },
+  { label: "Network Hops",       types: ["Router / Hop"],                   stroke: "#94a3b8", fill: "rgba(100,116,139,0.06)" },
 ];
-var _radialActive = true;
+var _radialActive  = true;
+var _radialGroups  = [];   /* populated by applyRadialLayout, read by afterDrawing */
+
+/* Returns the minimum orbit radius so N nodes of nodeR diameter don't overlap */
+function minOrbitRadius(N, nodeR) {
+  if (N <= 1) return 0;
+  return Math.ceil((nodeR + 15) / Math.sin(Math.PI / N)) + 5;
+}
 
 function applyRadialLayout() {
   _radialActive = true;
@@ -781,54 +788,79 @@ function applyRadialLayout() {
   document.getElementById('radialBtn').classList.add('active');
   document.getElementById('forceBtn').classList.remove('active');
 
-  /* find main gateway router */
+  var NODE_R = 32; /* visual radius of a standard node (size=26 + border + glow) */
+
+  /* ── find the gateway router as center ───────────────────────────── */
   var routerNode = allNodes.find(function(n) { return n.type === 'Router / Gateway'; });
   var centerId   = routerNode ? routerNode.id : null;
-
-  /* group nodes by ring */
-  var ringMap  = {};
-  var assigned = new Set();
-  RING_DEFS.forEach(function(_, ri) { ringMap[ri] = []; });
-  ringMap['extra'] = [];
+  var assigned   = new Set();
   if (centerId) assigned.add(centerId);
 
-  RING_DEFS.forEach(function(ring, ri) {
-    allNodes.forEach(function(n) {
-      if (assigned.has(n.id)) return;
-      if (ring.types.indexOf(n.type) >= 0) {
-        ringMap[ri].push(n.id);
-        assigned.add(n.id);
-      }
+  /* ── build active groups ─────────────────────────────────────────── */
+  var groups = [];
+  GROUP_DEFS.forEach(function(def) {
+    var members = allNodes.filter(function(n) {
+      return !assigned.has(n.id) && def.types.indexOf(n.type) >= 0;
     });
+    if (!members.length) return;
+    members.forEach(function(n) { assigned.add(n.id); });
+    groups.push({ def: def, members: members });
   });
-  allNodes.forEach(function(n) { if (!assigned.has(n.id)) ringMap['extra'].push(n.id); });
-
-  var updates = [];
-  if (centerId) updates.push({ id: centerId, x: 0, y: 0 });
-
-  RING_DEFS.forEach(function(ring, ri) {
-    var ids = ringMap[ri];
-    if (!ids.length) return;
-    ids.forEach(function(id, i) {
-      var angle = -Math.PI / 2 + (2 * Math.PI * i) / ids.length;
-      updates.push({ id: id, x: Math.round(ring.radius * Math.cos(angle)), y: Math.round(ring.radius * Math.sin(angle)) });
-    });
-  });
-  var extraIds = ringMap['extra'];
-  if (extraIds.length) {
-    var outerR = RING_DEFS[RING_DEFS.length - 1].radius + 160;
-    extraIds.forEach(function(id, i) {
-      var angle = -Math.PI / 2 + (2 * Math.PI * i) / extraIds.length;
-      updates.push({ id: id, x: Math.round(outerR * Math.cos(angle)), y: Math.round(outerR * Math.sin(angle)) });
+  var extras = allNodes.filter(function(n) { return !assigned.has(n.id); });
+  if (extras.length) {
+    groups.push({
+      def: { label: "Other", types: [], stroke: "#475569", fill: "rgba(71,85,105,0.06)" },
+      members: extras,
     });
   }
 
+  /* ── compute per-group spread radius (no node overlap inside bubble) */
+  groups.forEach(function(g) {
+    var m = g.members.length;
+    g.spread = m <= 1 ? 0 : Math.max(minOrbitRadius(m, NODE_R), 70);
+    /* bubble half-width used to avoid inter-group collisions */
+    g.halfW  = g.spread + NODE_R + 50;
+  });
+
+  /* ── compute groupRadius so bubbles don't overlap each other ──────── */
+  var N = groups.length;
+  var maxHalf = Math.max.apply(null, groups.map(function(g) { return g.halfW; }));
+  /* minimum groupRadius: adjacent bubbles must not touch                */
+  /* chord between adjacent group centers = 2*groupRadius*sin(π/N) ≥ 2*maxHalf */
+  var groupRadius = N <= 1 ? 0 : Math.max(
+    Math.ceil(maxHalf / Math.sin(Math.PI / N)) + 40,
+    250
+  );
+
+  /* ── place nodes ─────────────────────────────────────────────────── */
+  var updates = [];
+  if (centerId) updates.push({ id: centerId, x: 0, y: 0 });
+
+  groups.forEach(function(g, gi) {
+    var angle = -Math.PI / 2 + (2 * Math.PI * gi) / Math.max(N, 1);
+    var gcx   = Math.round(groupRadius * Math.cos(angle));
+    var gcy   = Math.round(groupRadius * Math.sin(angle));
+    var m     = g.members.length;
+    g.members.forEach(function(node, ni) {
+      var a2 = m === 1 ? 0 : -Math.PI / 2 + (2 * Math.PI * ni) / m;
+      updates.push({
+        id: node.id,
+        x:  Math.round(gcx + g.spread * Math.cos(a2)),
+        y:  Math.round(gcy + g.spread * Math.sin(a2)),
+      });
+    });
+    g.cx = gcx;
+    g.cy = gcy;
+  });
+
+  _radialGroups = groups;
   nodesDS.update(updates);
   setTimeout(function() { network.fit({ animation: { duration: 600, easingFunction: 'easeInOutQuad' } }); }, 80);
 }
 
 function applyForceLayout() {
   _radialActive = false;
+  _radialGroups = [];
   document.getElementById('forceBtn').classList.add('active');
   document.getElementById('radialBtn').classList.remove('active');
   network.setOptions({
@@ -846,37 +878,61 @@ function applyForceLayout() {
   document.getElementById('forceBtn').textContent = '⏳ Running…';
 }
 
-/* ── Ring decorations (drawn every frame in network-coordinate space) ────────── */
+/* ── Bubble decorations: ellipse around each group ───────────────────────────── */
 network.on('afterDrawing', function(ctx) {
-  if (!_radialActive) return;
-  var routerNode = allNodes.find(function(n) { return n.type === 'Router / Gateway'; });
-  if (!routerNode) return;
-  var pos   = network.getPosition(routerNode.id);
+  if (!_radialActive || !_radialGroups.length) return;
   var scale = network.getScale();
-  RING_DEFS.forEach(function(ring) {
-    /* skip rings with no nodes */
-    var hasNodes = allNodes.some(function(n) { return ring.types.indexOf(n.type) >= 0; });
-    if (!hasNodes) return;
-    /* filled area */
+  var pad_h = 55;  /* horizontal padding around bounding box */
+  var pad_v = 45;  /* vertical padding  */
+  var min_rx = 70, min_ry = 55;
+
+  /* center point: router position or canvas origin */
+  var routerNode = allNodes.find(function(n) { return n.type === 'Router / Gateway'; });
+  var centerPos  = routerNode ? network.getPosition(routerNode.id) : { x: 0, y: 0 };
+
+  _radialGroups.forEach(function(g) {
+    var positions = g.members.map(function(n) { return network.getPosition(n.id); });
+    var xs = positions.map(function(p) { return p.x; });
+    var ys = positions.map(function(p) { return p.y; });
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var cx  = (minX + maxX) / 2;
+    var cy  = (minY + maxY) / 2;
+    var rx  = Math.max((maxX - minX) / 2 + pad_h, min_rx);
+    var ry  = Math.max((maxY - minY) / 2 + pad_v, min_ry);
+
     ctx.save();
+
+    /* dashed line from center (router) to bubble */
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, ring.radius, 0, Math.PI * 2);
-    ctx.fillStyle = ring.color;
-    ctx.fill();
-    /* dashed border */
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, ring.radius, 0, Math.PI * 2);
-    ctx.strokeStyle = ring.stroke;
+    ctx.moveTo(centerPos.x, centerPos.y);
+    ctx.lineTo(cx, cy);
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
     ctx.lineWidth   = 1.5 / scale;
     ctx.setLineDash([6 / scale, 5 / scale]);
     ctx.stroke();
-    /* label at top */
     ctx.setLineDash([]);
-    ctx.fillStyle    = ring.stroke;
-    ctx.font         = 'bold ' + Math.max(9, Math.round(11 / scale)) + 'px Segoe UI, sans-serif';
+
+    /* filled bubble */
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fillStyle = g.def.fill;
+    ctx.fill();
+
+    /* bubble border */
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = g.def.stroke;
+    ctx.lineWidth   = 2 / scale;
+    ctx.stroke();
+
+    /* group label above bubble */
+    ctx.fillStyle    = g.def.stroke;
+    ctx.font         = 'bold ' + Math.max(10, Math.round(13 / scale)) + 'px Segoe UI, sans-serif';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText(ring.label, pos.x, pos.y - ring.radius - 4 / scale);
+    ctx.fillText(g.def.label, cx, cy - ry - 6 / scale);
+
     ctx.restore();
   });
 });
