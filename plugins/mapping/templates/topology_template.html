@@ -336,7 +336,7 @@ body.redteam .brand { background: rgba(239,68,68,.06); }
     <!-- Node Filters -->
     <div class="section">
       <div class="section-title" onclick="toggleSection(this)">Node Filters</div>
-      <div class="section-body">
+      <div class="section-body" id="nodeFiltersBody">
         <button class="btn active" onclick="filterType('all',this)">All</button>
         <button class="btn" onclick="filterType('Domain Controller',this)">DC</button>
         <button class="btn" onclick="filterType('Windows Server',this)">Win Server</button>
@@ -740,9 +740,6 @@ setTimeout(function() { injectNavIcons(); _navObserver.disconnect(); }, 1500);
 /* hide all edges initially */
 edgesDS.update(allEdges.filter(e => e.id).map(e => ({ id:e.id, hidden:true })));
 
-/* apply radial layout immediately */
-applyRadialLayout();
-
 network.on("hoverNode", () => { container.style.cursor = "pointer"; });
 network.on("blurNode",  () => { container.style.cursor = "grab"; });
 
@@ -776,10 +773,13 @@ var GROUP_DEFS = [
 var _radialActive  = true;
 var _radialGroups  = [];   /* populated by applyRadialLayout, read by afterDrawing */
 
+/* ── Radial layout: trigger AFTER GROUP_DEFS and functions are defined ────── */
+setTimeout(applyRadialLayout, 0);
+
 /* Returns the minimum orbit radius so N nodes of nodeR diameter don't overlap */
 function minOrbitRadius(N, nodeR) {
   if (N <= 1) return 0;
-  return Math.ceil((nodeR + 15) / Math.sin(Math.PI / N)) + 5;
+  return Math.ceil((nodeR + 20) / Math.sin(Math.PI / N)) + 10;
 }
 
 function applyRadialLayout() {
@@ -817,9 +817,9 @@ function applyRadialLayout() {
   /* ── compute per-group spread radius (no node overlap inside bubble) */
   groups.forEach(function(g) {
     var m = g.members.length;
-    g.spread = m <= 1 ? 0 : Math.max(minOrbitRadius(m, NODE_R), 70);
+    g.spread = m <= 1 ? 0 : Math.max(minOrbitRadius(m, NODE_R), 90);
     /* bubble half-width used to avoid inter-group collisions */
-    g.halfW  = g.spread + NODE_R + 50;
+    g.halfW  = g.spread + NODE_R + 80;
   });
 
   /* ── compute groupRadius so bubbles don't overlap each other ──────── */
@@ -828,8 +828,8 @@ function applyRadialLayout() {
   /* minimum groupRadius: adjacent bubbles must not touch                */
   /* chord between adjacent group centers = 2*groupRadius*sin(π/N) ≥ 2*maxHalf */
   var groupRadius = N <= 1 ? 0 : Math.max(
-    Math.ceil(maxHalf / Math.sin(Math.PI / N)) + 40,
-    250
+    Math.ceil(maxHalf / Math.sin(Math.PI / N)) + 80,
+    350
   );
 
   /* ── place nodes ─────────────────────────────────────────────────── */
@@ -863,19 +863,26 @@ function applyForceLayout() {
   _radialGroups = [];
   document.getElementById('forceBtn').classList.add('active');
   document.getElementById('radialBtn').classList.remove('active');
+  document.getElementById('forceBtn').textContent = '⏳ Running…';
+  /* timeout fallback: reset button if stabilization event never fires */
+  var _forceTimeout = setTimeout(function() {
+    network.setOptions({ physics: { enabled: false } });
+    document.getElementById('forceBtn').textContent = '🌀 Force';
+  }, 8000);
+  network.once('stabilizationIterationsDone', function() {
+    clearTimeout(_forceTimeout);
+    network.setOptions({ physics: { enabled: false } });
+    document.getElementById('forceBtn').textContent = '🌀 Force';
+  });
   network.setOptions({
     physics: {
       enabled: true,
       solver: 'forceAtlas2Based',
-      forceAtlas2Based: { gravitationalConstant: -60, centralGravity: 0.005, springLength: 120, springConstant: 0.04, damping: 0.92, avoidOverlap: 1 },
-      stabilization: { iterations: 1200 },
+      forceAtlas2Based: { gravitationalConstant: -80, centralGravity: 0.01, springLength: 150, springConstant: 0.05, damping: 0.9, avoidOverlap: 1 },
+      stabilization: { enabled: true, iterations: 800, updateInterval: 25 },
     }
   });
-  network.once('stabilizationIterationsDone', function() {
-    network.setOptions({ physics: { enabled: false } });
-    document.getElementById('forceBtn').textContent = '🌀 Force';
-  });
-  document.getElementById('forceBtn').textContent = '⏳ Running…';
+  network.startSimulation();
 }
 
 /* ── Bubble decorations: ellipse around each group ───────────────────────────── */
@@ -961,7 +968,9 @@ function searchNode(val) {
 var currentFilter = "all";
 function filterType(type, btnEl) {
   currentFilter = type;
-  document.querySelectorAll(".section-body .btn").forEach(b => b.classList.remove("active"));
+  /* only reset active on filter buttons, not on layout/visual buttons */
+  var filterBtns = document.querySelectorAll('#nodeFiltersBody .btn');
+  filterBtns.forEach(b => b.classList.remove("active"));
   if (btnEl) btnEl.classList.add("active");
   var visibleIds = new Set();
   allNodes.forEach(n => { if (type === "all" || n.type === type) visibleIds.add(n.id); });
