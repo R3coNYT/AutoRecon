@@ -21,6 +21,8 @@ from core.nmap_xml_parser import parse_nmap_xml
 from core.masscan_scan import run_masscan
 from core.httpx_probe import run_httpx
 from core.nuclei_scan import run_nuclei
+from core.xss_scan import scan_xss
+from core.sqli_scan import scan_sqli
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from tqdm import tqdm
@@ -44,7 +46,7 @@ def risk_badge(level, score):
     else:
         return f"[ {level} ] ({score})"
 
-def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False):
+def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True):
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     with step_timer(f"Full analysis for {sub}"):
         res = {"subdomain": sub}
@@ -248,6 +250,34 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                     sub,
                     len(res["login_forms"]))
 
+        # 7b) XSS scan (reflected) on crawled pages
+        res["xss_findings"] = []
+        if do_xss and pages:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"XSS scan ({sub})"):
+                xss = scan_xss(pages, timeout=timeout)
+            res["xss_findings"] = xss
+            if xss:
+                log.info("XSS findings on %s → %d potential reflected XSS", sub, len(xss))
+            else:
+                log.info("No reflected XSS found on %s", sub)
+        elif not pages:
+            log.info("XSS scan skipped for %s — no crawled pages", sub)
+
+        # 7c) SQL injection scan (SQLmap) on crawled pages
+        res["sqli_findings"] = []
+        if do_sqli and pages:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"SQLi scan ({sub})"):
+                sqli = scan_sqli(pages, output_dir=base_dir, timeout=timeout)
+            res["sqli_findings"] = sqli
+            if sqli:
+                log.info("SQLi findings on %s → %d injection(s) confirmed", sub, len(sqli))
+            else:
+                log.info("No SQL injection found on %s", sub)
+        elif not pages:
+            log.info("SQLi scan skipped for %s — no crawled pages", sub)
+
         # 8) CVE lookup (NVD) from detected services
         res["cves"] = []
 
@@ -367,7 +397,7 @@ def file_size_mb(path):
 
 def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeout: int,
               use_nvd: bool, do_crawl: bool, generate_pdf: bool, write_json: bool,
-              full_scan=False , output_dir=None):
+              full_scan=False, do_xss=True, do_sqli=True, output_dir=None):
 
     if output_dir:
         base_dir = Path(output_dir)
@@ -469,12 +499,12 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     with ThreadPoolExecutor(max_workers=max(2, threads)) as ex:
         if subs:
             futures = [
-                ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan)
+                ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan, do_xss, do_sqli)
                 for s in subs
             ]
         else:
             futures = [
-                ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan)
+                ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan, do_xss, do_sqli)
                 for s in subsip
             ]
 
@@ -496,6 +526,10 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     cve_count = len(data.get("cves", []))
                     total_cve_found += cve_count
                     tqdm.write(f"🔎 CVE found for {sub}: {cve_count} (Total: {total_cve_found})")
+                    xss_count  = len(data.get("xss_findings", []))
+                    sqli_count = len(data.get("sqli_findings", []))
+                    if xss_count:  tqdm.write(f"⚠  XSS findings for {sub}: {xss_count}")
+                    if sqli_count: tqdm.write(f"💉 SQLi findings for {sub}: {sqli_count}")
 
                     # ✅ Report save
                     report["subdomains"][sub] = {
@@ -507,6 +541,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                         "waf": data.get("waf", []),
                         "pages": data.get("pages", []),
                         "login_forms": data.get("login_forms", []),
+                        "xss_findings": data.get("xss_findings", []),
+                        "sqli_findings": data.get("sqli_findings", []),
                         "cves": data.get("cves", []),
                         "risk": data.get("risk"),
                         "httpx": data.get("httpx", []),
@@ -565,6 +601,10 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     cve_count = len(data.get("cves", []))
                     total_cve_found += cve_count
                     tqdm.write(f"🔎 CVE found for {sub}: {cve_count} (Total: {total_cve_found})")
+                    xss_count  = len(data.get("xss_findings", []))
+                    sqli_count = len(data.get("sqli_findings", []))
+                    if xss_count:  tqdm.write(f"⚠  XSS findings for {sub}: {xss_count}")
+                    if sqli_count: tqdm.write(f"💉 SQLi findings for {sub}: {sqli_count}")
 
                     # ✅ Report save
                     report["subdomains"][sub] = {
@@ -576,6 +616,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                         "waf": data.get("waf", []),
                         "pages": data.get("pages", []),
                         "login_forms": data.get("login_forms", []),
+                        "xss_findings": data.get("xss_findings", []),
+                        "sqli_findings": data.get("sqli_findings", []),
                         "cves": data.get("cves", []),
                         "risk": data.get("risk"),
                         "httpx": data.get("httpx", []),

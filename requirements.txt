@@ -11,6 +11,7 @@ tqdm
 rich
 pypdf
 questionary
+sqlmap
 
 # Sublist3r
 argparse
