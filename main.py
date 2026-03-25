@@ -14,6 +14,8 @@ def build_parser():
     p.add_argument("--timeout", type=int, default=7, help="HTTP timeout seconds (default: 7)")
     p.add_argument("--no-nvd", action="store_true", help="Disable NVD CVE lookup")
     p.add_argument("--no-crawl", action="store_true", help="Disable crawling")
+    p.add_argument("--no-xss", action="store_true", help="Disable reflected XSS scanning")
+    p.add_argument("--no-sqli", action="store_true", help="Disable SQL injection scanning (SQLmap)")
     p.add_argument("--pdf", action="store_true", help="Generate PDF report")
     p.add_argument("--json", action="store_true", help="Always write JSON report")
     p.add_argument("--full", action="store_true", help="Run full Nmap scan (all ports)")
@@ -35,6 +37,8 @@ def main(cli_args=None):
         timeout=args.timeout,
         use_nvd=(not args.no_nvd),
         do_crawl=(not args.no_crawl),
+        do_xss=(not args.no_xss),
+        do_sqli=(not args.no_sqli),
         generate_pdf=args.pdf,
         write_json=(args.json or True),
         full_scan=args.full,
