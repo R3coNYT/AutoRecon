@@ -16,6 +16,13 @@ def build_parser():
     p.add_argument("--no-crawl", action="store_true", help="Disable crawling")
     p.add_argument("--no-xss", action="store_true", help="Disable reflected XSS scanning")
     p.add_argument("--no-sqli", action="store_true", help="Disable SQL injection scanning (SQLmap)")
+    p.add_argument("--no-dir-bruteforce", action="store_true", help="Disable directory brute-forcing")
+    p.add_argument("--no-dns-audit", action="store_true", help="Disable DNS security audit (AXFR, SPF/DMARC)")
+    p.add_argument("--no-service-checks", action="store_true", help="Disable service-specific checks (FTP, SSH, Redis...)")
+    p.add_argument("--no-takeover", action="store_true", help="Disable subdomain takeover detection")
+    p.add_argument("--no-screenshot", action="store_true", help="Disable web screenshots (gowitness)")
+    p.add_argument("--scan-rate-delay", type=float, default=0.0, metavar="SECONDS",
+                   help="Delay in seconds between parallel scan submissions (default: 0.0)")
     p.add_argument("--pdf", action="store_true", help="Generate PDF report")
     p.add_argument("--json", action="store_true", help="Always write JSON report")
     p.add_argument("--full", action="store_true", help="Run full Nmap scan (all ports)")
@@ -39,6 +46,12 @@ def main(cli_args=None):
         do_crawl=(not args.no_crawl),
         do_xss=(not args.no_xss),
         do_sqli=(not args.no_sqli),
+        do_dir_bruteforce=(not args.no_dir_bruteforce),
+        do_dns_audit=(not args.no_dns_audit),
+        do_service_checks=(not args.no_service_checks),
+        do_takeover=(not args.no_takeover),
+        do_screenshot=(not args.no_screenshot),
+        scan_rate_delay=args.scan_rate_delay,
         generate_pdf=args.pdf,
         write_json=(args.json or True),
         full_scan=args.full,
