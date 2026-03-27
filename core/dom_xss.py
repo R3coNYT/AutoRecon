@@ -75,7 +75,7 @@ def scan_dom_xss(pages: list[dict], timeout: int = 15) -> list[dict]:
     ]
     """
     if not _playwright_available():
-        log.warning("playwright not installed — skipping DOM XSS (pip install playwright && playwright install chromium)")
+        log.debug("playwright not installed — skipping DOM XSS")
         return []
 
     from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout

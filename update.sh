@@ -259,7 +259,59 @@ update_deps() {
     fi
 
     "$pip" install -r "$INSTALL_DIR/requirements.txt" --upgrade --quiet
+
+    # Ensure Playwright browser is installed/updated
+    local python_bin
+    for py_candidate in \
+        "$INSTALL_DIR/autorecon_env/bin/python3" \
+        "$INSTALL_DIR/autorecon_env/bin/python"; do
+        if [ -f "$py_candidate" ]; then python_bin="$py_candidate"; break; fi
+    done
+    if [ -n "${python_bin:-}" ]; then
+        "$python_bin" -m playwright install chromium 2>/dev/null || \
+            warn "playwright install chromium failed (DOM XSS scanning will be skipped)"
+    fi
+
     ok "Python dependencies updated"
+}
+
+# ── Ensure optional binary tools are present ───────────────────────────────────
+
+update_optional_tools() {
+    # Go-based tools
+    if command -v go &>/dev/null; then
+        for tool_spec in \
+            "gowitness:github.com/sensepost/gowitness@latest" \
+            "subfinder:github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest" \
+            "gobuster:github.com/OJ/gobuster/v3@latest"; do
+            local name="${tool_spec%%:*}"
+            local module="${tool_spec##*:}"
+            if ! command -v "$name" &>/dev/null; then
+                log "Installing $name"
+                go install "$module" || warn "$name install failed (optional)"
+            else
+                ok "$name already installed"
+            fi
+        done
+    else
+        warn "Go not found — skipping gowitness / subfinder / gobuster check"
+    fi
+
+    # theHarvester
+    if ! command -v theHarvester &>/dev/null && ! command -v theharvester &>/dev/null; then
+        log "Installing theHarvester"
+        if [ "$PLATFORM" = "linux" ]; then
+            ${SUDO:-} apt-get install -y theharvester 2>/dev/null || \
+                (command -v pipx &>/dev/null && pipx install theharvester) || \
+                warn "theHarvester not installed — run: sudo apt install theharvester"
+        else
+            brew install theharvester 2>/dev/null || \
+                (command -v pipx &>/dev/null && pipx install theharvester) || \
+                warn "theHarvester not installed — run: brew install theharvester"
+        fi
+    else
+        ok "theHarvester already installed"
+    fi
 }
 
 # ── Summary banner ─────────────────────────────────────────────────────────────
@@ -313,5 +365,6 @@ fi
 restore_user_data
 show_user_plugins
 update_deps
+update_optional_tools
 chmod +x "$INSTALL_DIR/update.sh"
 print_summary "$UPDATED"

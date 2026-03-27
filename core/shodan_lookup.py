@@ -39,11 +39,11 @@ def run_shodan_lookup(ips: list[str], api_key: str | None = None) -> dict:
     key = api_key or os.environ.get("SHODAN_API_KEY", "")
 
     if not _SHODAN_AVAILABLE:
-        log.warning("shodan package not installed — skipping Shodan lookup (pip install shodan)")
+        log.debug("shodan package not installed — skipping Shodan lookup")
         return {}
 
     if not key:
-        log.warning("SHODAN_API_KEY not set — skipping Shodan lookup")
+        log.debug("SHODAN_API_KEY not set — skipping Shodan lookup")
         return {}
 
     api = shodan_lib.Shodan(key)

@@ -336,8 +336,59 @@ create_venv() {
     retry 3 pip install --upgrade pip
     retry 3 pip install -r requirements.txt
 
+    # Install Playwright browser (required for DOM XSS scanning)
+    if python3 -c "import playwright" &>/dev/null 2>&1; then
+        log "Installing Playwright Chromium browser"
+        playwright install chromium --with-deps 2>/dev/null || \
+            warn "playwright install chromium failed (DOM XSS scanning will be skipped)"
+    fi
+
     deactivate
     ok "Python environment ready"
+}
+
+install_optional_tools() {
+    # Go-based tools — Go must already be installed at this point
+    if ! command -v go &>/dev/null; then
+        warn "Go not found — skipping gowitness, subfinder, gobuster installation"
+    else
+        if ! command -v gowitness &>/dev/null; then
+            log "Installing gowitness (screenshot tool)"
+            go install github.com/sensepost/gowitness@latest || warn "gowitness install failed (screenshots will be skipped)"
+        else
+            ok "gowitness already installed"
+        fi
+
+        if ! command -v subfinder &>/dev/null; then
+            log "Installing subfinder (subdomain discovery)"
+            go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest || warn "subfinder install failed"
+        else
+            ok "subfinder already installed"
+        fi
+
+        if ! command -v gobuster &>/dev/null; then
+            log "Installing gobuster (directory brute-force)"
+            go install github.com/OJ/gobuster/v3@latest || warn "gobuster install failed"
+        else
+            ok "gobuster already installed"
+        fi
+    fi
+
+    # theHarvester — try apt on Linux, brew on macOS, fallback to pipx
+    if ! command -v theHarvester &>/dev/null && ! command -v theharvester &>/dev/null; then
+        log "Installing theHarvester (OSINT)"
+        if [ "$PLATFORM" = "linux" ]; then
+            $SUDO apt-get install -y theharvester 2>/dev/null || \
+                (command -v pipx &>/dev/null && pipx install theharvester) || \
+                warn "theHarvester install failed — install manually: sudo apt install theharvester"
+        else
+            brew install theharvester 2>/dev/null || \
+                (command -v pipx &>/dev/null && pipx install theharvester) || \
+                warn "theHarvester install failed — install manually: brew install theharvester"
+        fi
+    else
+        ok "theHarvester already installed"
+    fi
 }
 
 create_global_command_linux() {
@@ -414,6 +465,7 @@ main() {
     update_nuclei_templates
     install_sublist3r
     create_venv
+    install_optional_tools
 
     if [ "$PLATFORM" = "linux" ]; then
         create_global_command_linux

@@ -17,3 +17,12 @@ sqlmap
 argparse
 dnspython
 requests
+
+# Shodan integration
+shodan
+
+#DOM XSS via headless browser
+playwright
+
+# Parameter discovery
+arjun

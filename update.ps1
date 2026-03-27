@@ -240,6 +240,43 @@ function Update-Dependencies {
     } else {
         Write-Ok "Python dependencies updated"
     }
+
+    # Ensure Playwright browser is installed/updated
+    $pyExe = Join-Path $InstallDir "autorecon_env\Scripts\python.exe"
+    if (Test-Path $pyExe) {
+        & $pyExe -m playwright install chromium 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warn "playwright install chromium failed (DOM XSS scanning will be skipped)"
+        }
+    }
+}
+
+function Update-OptionalTools {
+    # Ensure Go bin folder is on PATH
+    $env:Path = "$env:Path;$env:USERPROFILE\go\bin;C:\Program Files\Go\bin"
+
+    if (!(Get-Command go -ErrorAction SilentlyContinue)) {
+        Write-Warn "Go not found — skipping gowitness / subfinder / gobuster check"
+    } else {
+        $goTools = @(
+            @{ Name = "gowitness"; Module = "github.com/sensepost/gowitness@latest" },
+            @{ Name = "subfinder"; Module = "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest" },
+            @{ Name = "gobuster"; Module = "github.com/OJ/gobuster/v3@latest" }
+        )
+        foreach ($tool in $goTools) {
+            if (Get-Command $tool.Name -ErrorAction SilentlyContinue) {
+                Write-Ok "$($tool.Name) already installed"
+            } else {
+                Write-Info "Installing $($tool.Name)"
+                go install $tool.Module
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Warn "$($tool.Name) install failed (optional)"
+                } else {
+                    Write-Ok "$($tool.Name) installed"
+                }
+            }
+        }
+    }
 }
 
 # --- Summary banner -----------------------------------------------------------
@@ -289,5 +326,6 @@ Restore-UserData -InstallDir $installDir
 Show-UserPlugins -InstallDir $installDir
 
 Update-Dependencies -InstallDir $installDir
+Update-OptionalTools
 
 Show-Summary -InstallDir $installDir -Updated $updated
