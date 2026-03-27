@@ -32,10 +32,14 @@ from urllib.parse import urlparse, parse_qs
 
 log = logging.getLogger("recon-audit")
 
-# SQLmap binary — searches PATH first, then common installation locations.
+# Resolve the AutoRecon project root (core/../)
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# SQLmap binary — searches PATH first, then the bundled sqlmap-dev clone, then common locations.
 _SQLMAP_CANDIDATES = [
     "sqlmap",
     "sqlmap.py",
+    str(_PROJECT_ROOT / "sqlmap-dev" / "sqlmap.py"),
     "C:/Tools/sqlmap/sqlmap.py",
     "/usr/bin/sqlmap",
     "/usr/local/bin/sqlmap",

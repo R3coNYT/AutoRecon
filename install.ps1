@@ -224,6 +224,15 @@ if (!(Test-Path "$InstallDir\Sublist3r")) {
     Write-Ok "Sublist3r already present"
 }
 
+if (!(Test-Path "$InstallDir\sqlmap-dev")) {
+    Write-Info "Cloning sqlmap"
+    Invoke-Retry -Attempts 3 -Script {
+        git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git "$InstallDir\sqlmap-dev"
+    }
+} else {
+    Write-Ok "sqlmap already present"
+}
+
 Write-Info "Creating Python virtual environment"
 Set-Location $InstallDir
 

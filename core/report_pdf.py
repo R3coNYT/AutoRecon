@@ -978,6 +978,78 @@ def write_pdf(report: dict, pdf_path: Path):
             elements.append(db_table)
             elements.append(Spacer(1, 8))
 
+        # --- XSS Findings ---
+        xss_findings = data.get("xss_findings", []) or []
+        if xss_findings:
+            elements.append(Paragraph("<b>XSS Findings (Reflected)</b>", styles["Heading3"]))
+            xss_table_data = [["URL", "Parameter", "Payload", "Evidence"]]
+            for f in xss_findings[:30]:
+                xss_table_data.append([
+                    Paragraph(str(f.get("url", ""))[:60], styles["Normal"]),
+                    Paragraph(str(f.get("parameter", "")), styles["Normal"]),
+                    Paragraph(str(f.get("payload", ""))[:40], styles["Code"]),
+                    Paragraph(str(f.get("evidence", "")), styles["Normal"]),
+                ])
+            xss_t = Table(xss_table_data, colWidths=[5.5*cm, 2.5*cm, 4*cm, 4*cm])
+            xss_t.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#c0392b")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#fdf2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 7),
+            ]))
+            elements.append(xss_t)
+            elements.append(Spacer(1, 8))
+
+        # --- SQLi Findings ---
+        sqli_findings = data.get("sqli_findings", []) or []
+        if sqli_findings:
+            elements.append(Paragraph("<b>SQL Injection Findings (sqlmap)</b>", styles["Heading3"]))
+            sqli_table_data = [["URL", "Parameter", "Method", "Technique", "DBMS"]]
+            for f in sqli_findings[:30]:
+                sqli_table_data.append([
+                    Paragraph(str(f.get("url", ""))[:50], styles["Normal"]),
+                    Paragraph(str(f.get("parameter", "")), styles["Normal"]),
+                    Paragraph(str(f.get("method", "")), styles["Normal"]),
+                    Paragraph(str(f.get("technique", ""))[:40], styles["Normal"]),
+                    Paragraph(str(f.get("db_type", "") or "—"), styles["Normal"]),
+                ])
+            sqli_t = Table(sqli_table_data, colWidths=[5*cm, 2.5*cm, 1.5*cm, 4.5*cm, 2.5*cm])
+            sqli_t.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#922b21")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#fdf2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 7),
+            ]))
+            elements.append(sqli_t)
+            elements.append(Spacer(1, 8))
+
+        # --- Login Forms ---
+        login_forms = data.get("login_forms", []) or []
+        if login_forms:
+            elements.append(Paragraph("<b>Login Forms Detected</b>", styles["Heading3"]))
+            lf_table_data = [["Source URL", "Action", "Method"]]
+            for lf in login_forms[:20]:
+                lf_table_data.append([
+                    Paragraph(str(lf.get("url", ""))[:55], styles["Normal"]),
+                    Paragraph(str(lf.get("action", "") or "—")[:40], styles["Normal"]),
+                    Paragraph(str(lf.get("method", "get")).upper(), styles["Normal"]),
+                ])
+            lf_t = Table(lf_table_data, colWidths=[7*cm, 6*cm, 3*cm])
+            lf_t.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+            ]))
+            elements.append(lf_t)
+            elements.append(Spacer(1, 8))
+
         # --- Screenshots ---
         screenshots = data.get("screenshots", []) or []
         if screenshots:
