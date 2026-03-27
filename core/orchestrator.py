@@ -1,4 +1,5 @@
 import json
+import time
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from core.subdomains import run_sublist3r
@@ -23,6 +24,18 @@ from core.httpx_probe import run_httpx
 from core.nuclei_scan import run_nuclei
 from core.xss_scan import scan_xss
 from core.sqli_scan import scan_sqli
+from core.security_headers import analyze_security_headers
+from core.cookie_audit import analyze_cookies
+from core.cors_check import run_cors_checks
+from core.dns_audit import run_dns_audit
+from core.service_checks import run_service_checks
+from core.takeover import check_subdomain_takeover
+from core.robots_sitemap import get_seed_urls
+from core.http_methods import run_http_method_tests
+from core.open_redirect import scan_open_redirects
+from core.js_secrets import scan_js_secrets
+from core.dir_bruteforce import run_dir_bruteforce
+from core.screenshot import run_screenshots
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from tqdm import tqdm
@@ -47,7 +60,7 @@ def risk_badge(level, score):
     else:
         return f"[ {level} ] ({score})"
 
-def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True):
+def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True, do_dir_bruteforce=True, do_dns_audit=True, do_service_checks=True, do_takeover=True, do_screenshot=True):
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     with step_timer(f"Full analysis for {sub}"):
         res = {"subdomain": sub}
@@ -89,6 +102,25 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         if resolved_ips:
             log.info("Enriching IPs: %s", ", ".join(resolved_ips))
 
+        # DNS audit (zone transfer, SPF/DMARC/DKIM, wildcard)
+        res["dns_audit"] = {}
+        if do_dns_audit and not is_ip(sub):
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"DNS audit ({sub})"):
+                res["dns_audit"] = run_dns_audit(sub)
+            axfr = res["dns_audit"].get("zone_transfer", {})
+            if axfr.get("vulnerable"):
+                log.info("AXFR zone transfer VULNERABLE on %s", sub)
+
+        # Subdomain takeover check
+        res["takeover"] = {}
+        if do_takeover and not is_ip(sub):
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"Takeover check ({sub})"):
+                res["takeover"] = check_subdomain_takeover(sub)
+            if res["takeover"].get("vulnerable"):
+                log.info("Potential takeover on %s → %s", sub, res["takeover"].get("warning"))
+
         # 1) Masscan (fast port scan)
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         with step_timer(f"Masscan scan {sub}"):
@@ -129,6 +161,17 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                     [p.get("port") for p in open_ports])
         else:
             log.info("No open ports detected on %s", sub)
+
+        # Service-specific checks (FTP, SSH, SMTP, Redis, MongoDB, SMB)
+        res["service_checks"] = {}
+        if do_service_checks and open_ports:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"Service checks ({sub})"):
+                host_for_checks = resolved_ips[0] if resolved_ips else sub
+                res["service_checks"] = run_service_checks(host_for_checks, open_ports)
+            warnings = [v.get("warning") for v in res["service_checks"].values() if isinstance(v, dict) and v.get("warning")]
+            for w in warnings:
+                log.info("Service vuln on %s → %s", sub, w)
 
         # HTTPX probe (fast web detection)
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -242,7 +285,34 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                     sub,
                     res["tls"].get("protocol"))
 
-        # 6) Crawl pages — on all web ports found by httpx
+        # Security headers analysis
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        with step_timer(f"Security headers ({sub})"):
+            res["security_headers"] = analyze_security_headers(headers)
+        missing_h = [m["short"] for m in res["security_headers"].get("missing", [])]
+        if missing_h:
+            log.info("Missing security headers on %s: %s", sub, missing_h)
+
+        # Cookie security audit
+        with step_timer(f"Cookie audit ({sub})"):
+            res["cookies"] = analyze_cookies(headers)
+        if res["cookies"]:
+            log.info("Insecure cookies on %s: %d", sub, len(res["cookies"]))
+
+        # robots.txt / sitemap (seed URLs discovery)
+        res["robots_sitemap"] = {}
+        seed_urls = []
+        if httpx_results:
+            primary_web_url = web_urls[0] if web_urls else f"{scheme}://{sub}/"
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"robots.txt / sitemap ({sub})"):
+                robots_data = get_seed_urls(primary_web_url, timeout)
+            res["robots_sitemap"] = robots_data
+            seed_urls = robots_data.get("seed_urls", [])
+            if seed_urls:
+                log.info("robots.txt/sitemap seeded %d URLs on %s", len(seed_urls), sub)
+
+        # 6) Crawl pages — on all web ports found by httpx, seeded with robots/sitemap, seeded with robots/sitemap
         pages = []
         if do_crawl:
             crawl_targets = [
@@ -258,6 +328,12 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                     log.info("Crawling %s ...", crawl_url)
                     sub_pages = crawl_site(crawl_url, depth=crawl_depth, max_pages=max_pages, timeout=timeout)
                     pages.extend(sub_pages)
+                # Also crawl seed URLs from robots/sitemap not already covered
+                crawled_origins = {urlparse(p.get("url", "")).netloc for p in pages}
+                for seed_url in seed_urls[:20]:
+                    if urlparse(seed_url).netloc not in crawled_origins:
+                        sub_pages = crawl_site(seed_url, depth=1, max_pages=20, timeout=timeout)
+                        pages.extend(sub_pages)
         res["pages"] = pages
 
         log.info("Crawl finished on %s - %d pages found",
@@ -303,6 +379,67 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                 log.info("No SQL injection found on %s", sub)
         elif not pages:
             log.info("SQLi scan skipped for %s — no crawled pages", sub)
+
+        # 7d) CORS misconfiguration checks
+        res["cors_findings"] = []
+        if pages:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"CORS check ({sub})"):
+                res["cors_findings"] = run_cors_checks(pages, timeout=timeout)
+            if res["cors_findings"]:
+                log.info("CORS misconfig on %s → %d findings", sub, len(res["cors_findings"]))
+
+        # 7e) HTTP dangerous methods
+        res["http_methods"] = []
+        if pages:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"HTTP methods ({sub})"):
+                res["http_methods"] = run_http_method_tests(pages, timeout=timeout)
+            if res["http_methods"]:
+                log.info("Dangerous HTTP methods on %s → %d", sub, len(res["http_methods"]))
+
+        # 7f) Open redirect scan
+        res["open_redirects"] = []
+        if pages:
+            with step_timer(f"Open redirect ({sub})"):
+                res["open_redirects"] = scan_open_redirects(pages, timeout=timeout)
+            if res["open_redirects"]:
+                log.info("Open redirects on %s → %d", sub, len(res["open_redirects"]))
+
+        # 7g) JavaScript secrets extraction
+        res["js_secrets"] = []
+        if pages:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"JS secrets ({sub})"):
+                res["js_secrets"] = scan_js_secrets(pages, timeout=timeout)
+            if res["js_secrets"]:
+                log.info("JS secrets found on %s → %d", sub, len(res["js_secrets"]))
+
+        # 7h) Directory brute-force
+        res["dir_bruteforce"] = []
+        if do_dir_bruteforce and httpx_results:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            dirbust_dir = base_dir / "dirbust"
+            all_dirbust = []
+            for httpx_r in httpx_results[:5]:  # Limit to 5 endpoints
+                target_url = httpx_r.get("url", "")
+                if target_url:
+                    with step_timer(f"Dir bruteforce {target_url}"):
+                        hits = run_dir_bruteforce(target_url, output_dir=dirbust_dir, timeout=120)
+                    all_dirbust.extend(hits)
+            res["dir_bruteforce"] = all_dirbust
+            if all_dirbust:
+                log.info("Dir bruteforce on %s → %d paths found", sub, len(all_dirbust))
+
+        # 7i) Screenshots
+        res["screenshots"] = []
+        if do_screenshot and httpx_results:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            screenshot_urls = [r.get("url") for r in httpx_results if r.get("url")]
+            with step_timer(f"Screenshots ({sub})"):
+                res["screenshots"] = run_screenshots(screenshot_urls, base_dir / "screenshots")
+            if res["screenshots"]:
+                log.info("Screenshots captured for %s → %d", sub, len(res["screenshots"]))
 
         # 8) CVE lookup (NVD) from detected services
         res["cves"] = []
@@ -423,7 +560,9 @@ def file_size_mb(path):
 
 def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeout: int,
               use_nvd: bool, do_crawl: bool, generate_pdf: bool, write_json: bool,
-              full_scan=False, do_xss=True, do_sqli=True, output_dir=None):
+              full_scan=False, do_xss=True, do_sqli=True, output_dir=None,
+              scan_rate_delay=0.0, do_dir_bruteforce=True, do_dns_audit=True,
+              do_service_checks=True, do_takeover=True, do_screenshot=True):
 
     if output_dir:
         base_dir = Path(output_dir)
@@ -523,16 +662,25 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     total_cve_found = 0
 
     with ThreadPoolExecutor(max_workers=max(2, threads)) as ex:
+        _extra_kwargs = dict(
+            do_dir_bruteforce=do_dir_bruteforce,
+            do_dns_audit=do_dns_audit,
+            do_service_checks=do_service_checks,
+            do_takeover=do_takeover,
+            do_screenshot=do_screenshot,
+        )
         if subs:
-            futures = [
-                ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan, do_xss, do_sqli)
-                for s in subs
-            ]
+            futures = []
+            for s in subs:
+                futures.append(ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan, do_xss, do_sqli, **_extra_kwargs))
+                if scan_rate_delay > 0:
+                    time.sleep(scan_rate_delay)
         else:
-            futures = [
-                ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan, do_xss, do_sqli)
-                for s in subsip
-            ]
+            futures = []
+            for s in subsip:
+                futures.append(ex.submit(_analyze_subdomain, s, timeout, crawl_depth, max_pages, do_crawl, use_nvd, base_dir, full_scan, do_xss, do_sqli, **_extra_kwargs))
+                if scan_rate_delay > 0:
+                    time.sleep(scan_rate_delay)
 
         if subs:
             for sub, fut in zip(
@@ -556,6 +704,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     sqli_count = len(data.get("sqli_findings", []))
                     if xss_count:  tqdm.write(f"⚠  XSS findings for {sub}: {xss_count}")
                     if sqli_count: tqdm.write(f"💉 SQLi findings for {sub}: {sqli_count}")
+                    js_count = len(data.get("js_secrets", []))
+                    if js_count:   tqdm.write(f"🔑 JS secrets for {sub}: {js_count}")
 
                     # ✅ Report save
                     report["subdomains"][sub] = {
@@ -576,6 +726,18 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                         "masscan": data.get("masscan", {}),
                         "nmap_raw": data.get("nmap_raw"),
                         "nmap_structured": data.get("nmap_structured"),
+                        "security_headers": data.get("security_headers", {}),
+                        "cookies": data.get("cookies", []),
+                        "cors_findings": data.get("cors_findings", []),
+                        "dns_audit": data.get("dns_audit", {}),
+                        "service_checks": data.get("service_checks", {}),
+                        "takeover": data.get("takeover", {}),
+                        "robots_sitemap": data.get("robots_sitemap", {}),
+                        "http_methods": data.get("http_methods", []),
+                        "open_redirects": data.get("open_redirects", []),
+                        "js_secrets": data.get("js_secrets", []),
+                        "dir_bruteforce": data.get("dir_bruteforce", []),
+                        "screenshots": data.get("screenshots", []),
                     }
 
                     safe_sub = sub.replace("/", "_").replace(":", "_")
@@ -623,7 +785,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                 try:
                     data = fut.result()
 
-                    # ✅ LIVE CVE COUNTER
+                    # ✅ LIVE CVE COUNTER (subsip loop)
                     cve_count = len(data.get("cves", []))
                     total_cve_found += cve_count
                     tqdm.write(f"🔎 CVE found for {sub}: {cve_count} (Total: {total_cve_found})")
@@ -631,6 +793,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                     sqli_count = len(data.get("sqli_findings", []))
                     if xss_count:  tqdm.write(f"⚠  XSS findings for {sub}: {xss_count}")
                     if sqli_count: tqdm.write(f"💉 SQLi findings for {sub}: {sqli_count}")
+                    js_count = len(data.get("js_secrets", []))
+                    if js_count:   tqdm.write(f"🔑 JS secrets for {sub}: {js_count}")
 
                     # ✅ Report save
                     report["subdomains"][sub] = {
@@ -651,6 +815,18 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                         "masscan": data.get("masscan", {}),
                         "nmap_raw": data.get("nmap_raw"),
                         "nmap_structured": data.get("nmap_structured"),
+                        "security_headers": data.get("security_headers", {}),
+                        "cookies": data.get("cookies", []),
+                        "cors_findings": data.get("cors_findings", []),
+                        "dns_audit": data.get("dns_audit", {}),
+                        "service_checks": data.get("service_checks", {}),
+                        "takeover": data.get("takeover", {}),
+                        "robots_sitemap": data.get("robots_sitemap", {}),
+                        "http_methods": data.get("http_methods", []),
+                        "open_redirects": data.get("open_redirects", []),
+                        "js_secrets": data.get("js_secrets", []),
+                        "dir_bruteforce": data.get("dir_bruteforce", []),
+                        "screenshots": data.get("screenshots", []),
                     }
 
                     safe_sub = sub.replace("/", "_").replace(":", "_")

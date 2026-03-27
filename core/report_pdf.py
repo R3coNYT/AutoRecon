@@ -1,3 +1,4 @@
+import os
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib import colors
@@ -335,6 +336,35 @@ def write_pdf(report: dict, pdf_path: Path):
         f"based on exposed services, TLS state, and CVE severity.",
         styles["Normal"]
     ))
+
+    # --- Risk Matrix 2x2 ---
+    elements.append(Spacer(1, 14))
+    elements.append(Paragraph("<b>Risk Matrix</b>", styles["Heading3"]))
+    elements.append(Spacer(1, 6))
+    _risk_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0, "POTENTIAL": 0}
+    for d in subs.values():
+        lvl = (d.get("risk") or {}).get("level", "LOW")
+        _risk_counts[lvl] = _risk_counts.get(lvl, 0) + 1
+
+    matrix_data = [
+        ["", "High Impact", "Low Impact"],
+        ["High Likelihood",
+            Paragraph(f"<font color='red'><b>HIGH ({_risk_counts['HIGH']})</b></font>", styles["Normal"]),
+            Paragraph(f"<font color='orange'><b>MEDIUM ({_risk_counts['MEDIUM']})</b></font>", styles["Normal"])],
+        ["Low Likelihood",
+            Paragraph(f"<font color='purple'><b>POTENTIAL ({_risk_counts['POTENTIAL']})</b></font>", styles["Normal"]),
+            Paragraph(f"<font color='green'><b>LOW ({_risk_counts['LOW']})</b></font>", styles["Normal"])],
+    ]
+    matrix_table = Table(matrix_data, colWidths=[4*cm, 5.5*cm, 5.5*cm])
+    matrix_table.setStyle(TableStyle([
+        ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+        ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
+        ("BACKGROUND", (0,0), (0,-1), colors.lightgrey),
+        ("ALIGN", (1,1), (-1,-1), "CENTER"),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("FONTSIZE", (0,0), (-1,-1), 9),
+    ]))
+    elements.append(matrix_table)
 
     elements.append(PageBreak())
 
@@ -732,10 +762,266 @@ def write_pdf(report: dict, pdf_path: Path):
 
                 # elements.append(Spacer(1, 10))
 
+        # --- Security Headers ---
+        sec_hdrs = data.get("security_headers", {}) or {}
+        missing_hdrs = sec_hdrs.get("missing", [])
+        leaky_hdrs = sec_hdrs.get("leaky", [])
+        if missing_hdrs or leaky_hdrs:
+            elements.append(Paragraph("<b>Security Headers</b>", styles["Heading3"]))
+            hdr_table_data = [["Header", "Status", "Severity"]]
+            for h in missing_hdrs:
+                hdr_table_data.append([h["header"], "MISSING", h.get("severity", "MEDIUM")])
+            for h in leaky_hdrs:
+                hdr_table_data.append([h["header"], f"EXPOSED: {h.get('value','')[:50]}", "INFO"])
+            hdr_table = Table(hdr_table_data, colWidths=[7*cm, 7*cm, 3*cm])
+            hdr_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (2, 0), (2, -1), "CENTER"),
+            ]))
+            elements.append(hdr_table)
+            elements.append(Spacer(1, 8))
+
+        # --- Cookie Security ---
+        cookies = data.get("cookies", []) or []
+        if cookies:
+            elements.append(Paragraph("<b>Cookie Security</b>", styles["Heading3"]))
+            ck_table_data = [["Cookie Name", "Missing Flags", "Severity"]]
+            for ck in cookies:
+                flags = ", ".join(ck.get("missing_flags", []))
+                ck_table_data.append([ck.get("name", "?"), flags or "—", ck.get("severity", "LOW")])
+            ck_table = Table(ck_table_data, colWidths=[6*cm, 8*cm, 3*cm])
+            ck_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (2, 0), (2, -1), "CENTER"),
+            ]))
+            elements.append(ck_table)
+            elements.append(Spacer(1, 8))
+
+        # --- DNS Audit ---
+        dns_audit = data.get("dns_audit", {}) or {}
+        if dns_audit:
+            elements.append(Paragraph("<b>DNS Audit</b>", styles["Heading3"]))
+            zt = dns_audit.get("zone_transfer", {}) or {}
+            if zt.get("vulnerable"):
+                elements.append(Paragraph(
+                    f"<font color='red'><b>AXFR Zone Transfer ALLOWED</b></font> — {len(zt.get('records', []))} records exposed.",
+                    styles["Normal"]
+                ))
+            else:
+                elements.append(Paragraph("AXFR Zone Transfer: Not vulnerable.", styles["Normal"]))
+
+            email_sec = dns_audit.get("email_security", {}) or {}
+            spf = email_sec.get("spf")
+            dmarc = email_sec.get("dmarc")
+            dkim = email_sec.get("dkim")
+            elements.append(Paragraph(
+                f"SPF: {'<font color=\"green\">Present</font>' if spf else '<font color=\"red\">Missing</font>'} | "
+                f"DMARC: {'<font color=\"green\">Present</font>' if dmarc else '<font color=\"red\">Missing</font>'} | "
+                f"DKIM: {'<font color=\"green\">Present</font>' if dkim else '<font color=\"orange\">Not detected</font>'}",
+                styles["Normal"]
+            ))
+            wc = dns_audit.get("wildcard", {}) or {}
+            if wc.get("has_wildcard"):
+                elements.append(Paragraph(
+                    f"<font color='orange'><b>Wildcard DNS detected</b></font> → {wc.get('wildcard_ip', '')}",
+                    styles["Normal"]
+                ))
+            elements.append(Spacer(1, 8))
+
+        # --- Subdomain Takeover ---
+        takeover = data.get("takeover", {}) or {}
+        if takeover.get("vulnerable") or takeover.get("vulnerable") == "potential":
+            elements.append(Paragraph("<b>Subdomain Takeover</b>", styles["Heading3"]))
+            vuln_val = takeover.get("vulnerable")
+            color_tk = "red" if vuln_val is True else "orange"
+            label_tk = "VULNERABLE" if vuln_val is True else "POTENTIAL"
+            elements.append(Paragraph(
+                f"<font color='{color_tk}'><b>{label_tk}</b></font> — Service: {takeover.get('service', 'Unknown')} | "
+                f"CNAME: {takeover.get('cname', '—')}",
+                styles["Normal"]
+            ))
+            if takeover.get("warning"):
+                elements.append(Paragraph(takeover["warning"], styles["Normal"]))
+            elements.append(Spacer(1, 8))
+
+        # --- Service-Specific Checks ---
+        svc_checks = data.get("service_checks", {}) or {}
+        if svc_checks:
+            findings = [(svc, res) for svc, res in svc_checks.items() if res.get("finding")]
+            if findings:
+                elements.append(Paragraph("<b>Service-Specific Findings</b>", styles["Heading3"]))
+                for svc, res in findings:
+                    sev_color = "red" if res.get("severity") == "HIGH" else "orange"
+                    elements.append(Paragraph(
+                        f"<b>{svc.upper()}</b>: <font color='{sev_color}'>{res.get('finding', '')}</font>",
+                        styles["Normal"]
+                    ))
+                    if res.get("details"):
+                        elements.append(Paragraph(str(res["details"])[:200], styles["Normal"]))
+                elements.append(Spacer(1, 8))
+
+        # --- CORS Findings ---
+        cors = data.get("cors_findings", []) or []
+        if cors:
+            elements.append(Paragraph("<b>CORS Misconfigurations</b>", styles["Heading3"]))
+            cors_table_data = [["URL", "Origin Reflected", "Credentials", "Severity"]]
+            for c in cors[:20]:
+                cors_table_data.append([
+                    c.get("url", "")[:50],
+                    c.get("reflected_origin", "")[:30],
+                    "Yes" if c.get("credentials_allowed") else "No",
+                    c.get("severity", "MEDIUM"),
+                ])
+            cors_table = Table(cors_table_data, colWidths=[6*cm, 4*cm, 2.5*cm, 2.5*cm])
+            cors_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 7),
+                ("ALIGN", (2, 0), (-1, -1), "CENTER"),
+            ]))
+            elements.append(cors_table)
+            elements.append(Spacer(1, 8))
+
+        # --- HTTP Dangerous Methods ---
+        http_methods_found = data.get("http_methods", []) or []
+        if http_methods_found:
+            elements.append(Paragraph("<b>Dangerous HTTP Methods</b>", styles["Heading3"]))
+            hm_table_data = [["URL", "Method", "Severity"]]
+            for hm in http_methods_found[:20]:
+                hm_table_data.append([hm.get("url", "")[:55], hm.get("method", ""), hm.get("severity", "MEDIUM")])
+            hm_table = Table(hm_table_data, colWidths=[9*cm, 3*cm, 3*cm])
+            hm_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+            ]))
+            elements.append(hm_table)
+            elements.append(Spacer(1, 8))
+
+        # --- Open Redirects ---
+        redirects = data.get("open_redirects", []) or []
+        if redirects:
+            elements.append(Paragraph("<b>Open Redirects</b>", styles["Heading3"]))
+            rd_table_data = [["URL", "Parameter", "Severity"]]
+            for rd in redirects[:20]:
+                rd_table_data.append([rd.get("url", "")[:55], rd.get("parameter", ""), rd.get("severity", "MEDIUM")])
+            rd_table = Table(rd_table_data, colWidths=[9*cm, 3*cm, 3*cm])
+            rd_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+            ]))
+            elements.append(rd_table)
+            elements.append(Spacer(1, 8))
+
+        # --- JS Secrets ---
+        js_secrets = data.get("js_secrets", []) or []
+        if js_secrets:
+            elements.append(Paragraph("<b>JavaScript Secrets / Sensitive Data</b>", styles["Heading3"]))
+            js_table_data = [["Type", "Source File", "Match (truncated)"]]
+            for secret in js_secrets[:30]:
+                js_table_data.append([
+                    secret.get("type", ""),
+                    secret.get("source", "")[-40:],
+                    secret.get("match", "")[:40],
+                ])
+            js_table = Table(js_table_data, colWidths=[4*cm, 5*cm, 6*cm])
+            js_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 7),
+            ]))
+            elements.append(js_table)
+            elements.append(Spacer(1, 8))
+
+        # --- Directory Bruteforce ---
+        dirbust = data.get("dir_bruteforce", []) or []
+        if dirbust:
+            elements.append(Paragraph("<b>Directory / File Bruteforce</b>", styles["Heading3"]))
+            db_table_data = [["Path", "Status Code", "Size"]]
+            for entry in dirbust[:40]:
+                db_table_data.append([entry.get("path", ""), str(entry.get("status", "")), str(entry.get("size", ""))])
+            db_table = Table(db_table_data, colWidths=[10*cm, 3*cm, 2*cm])
+            db_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+            ]))
+            elements.append(db_table)
+            elements.append(Spacer(1, 8))
+
+        # --- Screenshots ---
+        screenshots = data.get("screenshots", []) or []
+        if screenshots:
+            elements.append(Paragraph("<b>Web Screenshots</b>", styles["Heading3"]))
+            for shot in screenshots:
+                shot_path = shot.get("screenshot_path", "")
+                shot_url = shot.get("url", "")
+                if shot_path and os.path.isfile(shot_path):
+                    try:
+                        img = Image(shot_path, width=14*cm, height=8*cm)
+                        elements.append(Paragraph(f"<i>{shot_url}</i>", styles["Normal"]))
+                        elements.append(img)
+                        elements.append(Spacer(1, 6))
+                    except Exception:
+                        pass
+
+        # --- Remediation Roadmap ---
+        risk_reasons = (data.get("risk") or {}).get("reasons", [])
+        if risk_reasons:
+            elements.append(Paragraph("<b>Remediation Roadmap</b>", styles["Heading3"]))
+            priority_map = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "INFO": 4}
+            sorted_reasons = sorted(risk_reasons, key=lambda r: priority_map.get(r.get("severity", "INFO"), 4))
+            rm_table_data = [["Priority", "Category", "Finding"]]
+            for i, reason in enumerate(sorted_reasons[:25], 1):
+                rm_table_data.append([
+                    str(i),
+                    reason.get("category", ""),
+                    reason.get("detail", "")[:70],
+                ])
+            rm_table = Table(rm_table_data, colWidths=[1.5*cm, 4*cm, 9.5*cm])
+            rm_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (0, 0), (0, -1), "CENTER"),
+            ]))
+            elements.append(rm_table)
+            elements.append(Spacer(1, 8))
+
         if sub != list(subs.keys())[-1]:
             elements.append(PageBreak())
-
-    # ---------- SIGNATURE PAGE ----------
     logo_path, sign_path, name = _load_personalization()
 
     if name or sign_path or logo_path:
