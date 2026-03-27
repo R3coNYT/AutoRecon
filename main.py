@@ -21,6 +21,14 @@ def build_parser():
     p.add_argument("--no-service-checks", action="store_true", help="Disable service-specific checks (FTP, SSH, Redis...)")
     p.add_argument("--no-takeover", action="store_true", help="Disable subdomain takeover detection")
     p.add_argument("--no-screenshot", action="store_true", help="Disable web screenshots (gowitness)")
+    p.add_argument("--no-shodan", action="store_true", help="Disable Shodan IP lookup")
+    p.add_argument("--no-cloud-buckets", action="store_true", help="Disable cloud bucket detection (S3, GCS, Azure)")
+    p.add_argument("--no-param-discovery", action="store_true", help="Disable parameter discovery (arjun)")
+    p.add_argument("--no-theharvester", action="store_true", help="Disable subdomain OSINT (theHarvester)")
+    p.add_argument("--no-jwt", action="store_true", help="Disable JWT token analysis")
+    p.add_argument("--no-dom-xss", action="store_true", help="Disable DOM XSS scan (Playwright)")
+    p.add_argument("--shodan-key", default=None, metavar="KEY",
+                   help="Shodan API key (overrides SHODAN_API_KEY env var)")
     p.add_argument("--scan-rate-delay", type=float, default=0.0, metavar="SECONDS",
                    help="Delay in seconds between parallel scan submissions (default: 0.0)")
     p.add_argument("--pdf", action="store_true", help="Generate PDF report")
@@ -51,6 +59,13 @@ def main(cli_args=None):
         do_service_checks=(not args.no_service_checks),
         do_takeover=(not args.no_takeover),
         do_screenshot=(not args.no_screenshot),
+        do_shodan=(not args.no_shodan),
+        do_cloud_buckets=(not args.no_cloud_buckets),
+        do_param_discovery=(not args.no_param_discovery),
+        do_theharvester=(not args.no_theharvester),
+        do_jwt=(not args.no_jwt),
+        do_dom_xss=(not args.no_dom_xss),
+        shodan_api_key=args.shodan_key,
         scan_rate_delay=args.scan_rate_delay,
         generate_pdf=args.pdf,
         write_json=(args.json or True),

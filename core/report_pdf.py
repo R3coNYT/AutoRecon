@@ -994,6 +994,151 @@ def write_pdf(report: dict, pdf_path: Path):
                     except Exception:
                         pass
 
+        # --- Shodan Intelligence ---
+        shodan = data.get("shodan", {}) or {}
+        shodan_entries = [(ip, d) for ip, d in shodan.items() if isinstance(d, dict) and not d.get("error")]
+        if shodan_entries:
+            elements.append(Paragraph("<b>Shodan Intelligence</b>", styles["Heading3"]))
+            for ip, d in shodan_entries:
+                elements.append(Paragraph(
+                    f"<b>{ip}</b> — Org: {d.get('org','?')} | Country: {d.get('country','?')} | OS: {d.get('os','?') or '?'}",
+                    styles["Normal"]
+                ))
+                ports = d.get("open_ports", [])
+                vulns = d.get("vulns", [])
+                if ports:
+                    elements.append(Paragraph(f"Shodan open ports: {ports[:20]}", styles["Normal"]))
+                if vulns:
+                    elements.append(Paragraph(
+                        f"<font color='red'><b>Shodan CVEs:</b></font> {', '.join(vulns[:10])}",
+                        styles["Normal"]
+                    ))
+                if d.get("banners"):
+                    for b in d["banners"][:3]:
+                        elements.append(Paragraph(
+                            f"Port {b['port']}: <i>{b['banner'][:100]}</i>",
+                            styles["Normal"]
+                        ))
+            elements.append(Spacer(1, 8))
+
+        # --- Cloud Buckets ---
+        cloud_buckets = data.get("cloud_buckets", []) or []
+        if cloud_buckets:
+            elements.append(Paragraph("<b>Cloud Storage Buckets</b>", styles["Heading3"]))
+            cb_table_data = [["Bucket URL", "Provider", "Public", "Severity"]]
+            for b in cloud_buckets[:25]:
+                public_label = "YES" if b.get("public") else "No"
+                cb_table_data.append([
+                    b.get("url", "")[:55],
+                    b.get("provider", ""),
+                    public_label,
+                    b.get("severity", "MEDIUM"),
+                ])
+            cb_table = Table(cb_table_data, colWidths=[9*cm, 2.5*cm, 1.5*cm, 2*cm])
+            cb_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (2, 0), (-1, -1), "CENTER"),
+            ]))
+            elements.append(cb_table)
+            elements.append(Spacer(1, 8))
+
+        # --- Parameter Discovery ---
+        params = data.get("param_discovery", []) or []
+        if params:
+            elements.append(Paragraph("<b>Hidden Parameters Discovered (arjun)</b>", styles["Heading3"]))
+            pd_table_data = [["URL", "Method", "Parameters"]]
+            for entry in params[:20]:
+                pd_table_data.append([
+                    entry.get("url", "")[:50],
+                    entry.get("method", "GET"),
+                    ", ".join(entry.get("parameters", [])[:10]),
+                ])
+            pd_table = Table(pd_table_data, colWidths=[7*cm, 2*cm, 6*cm])
+            pd_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+            ]))
+            elements.append(pd_table)
+            elements.append(Spacer(1, 8))
+
+        # --- theHarvester OSINT ---
+        harvest = data.get("theharvester", {}) or {}
+        h_emails = harvest.get("emails", [])
+        h_subs = harvest.get("subdomains", [])
+        if h_emails or h_subs:
+            elements.append(Paragraph("<b>OSINT — theHarvester</b>", styles["Heading3"]))
+            if h_emails:
+                elements.append(Paragraph(
+                    "<b>Emails found:</b> " + ", ".join(h_emails[:20]),
+                    styles["Normal"]
+                ))
+            if h_subs:
+                elements.append(Paragraph(
+                    "<b>Subdomains found:</b> " + ", ".join(h_subs[:20]),
+                    styles["Normal"]
+                ))
+            elements.append(Spacer(1, 8))
+
+        # --- JWT Analysis ---
+        jwt_findings = data.get("jwt_findings", []) or []
+        if jwt_findings:
+            elements.append(Paragraph("<b>JWT Token Analysis</b>", styles["Heading3"]))
+            jwt_table_data = [["Token (truncated)", "Algorithm", "Issues", "Severity"]]
+            for jf in jwt_findings[:20]:
+                issues_str = "; ".join(jf.get("issues", []))[:60]
+                jwt_table_data.append([
+                    jf.get("token", "")[:35],
+                    jf.get("algorithm", "?"),
+                    issues_str or "—",
+                    jf.get("severity", "INFO"),
+                ])
+            jwt_table = Table(jwt_table_data, colWidths=[5*cm, 2*cm, 7*cm, 1.5*cm])
+            jwt_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 7),
+                ("ALIGN", (3, 0), (3, -1), "CENTER"),
+            ]))
+            elements.append(jwt_table)
+            elements.append(Spacer(1, 8))
+
+        # --- DOM XSS ---
+        dom_xss = data.get("dom_xss", []) or []
+        if dom_xss:
+            elements.append(Paragraph("<b>DOM XSS (Playwright)</b>", styles["Heading3"]))
+            dx_table_data = [["URL", "Payload", "Trigger", "Context"]]
+            for dx in dom_xss[:20]:
+                dx_table_data.append([
+                    dx.get("url", "")[:45],
+                    dx.get("payload", "")[:30],
+                    dx.get("trigger", ""),
+                    dx.get("context", ""),
+                ])
+            dx_table = Table(dx_table_data, colWidths=[6*cm, 4*cm, 2.5*cm, 2.5*cm])
+            dx_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#c0392b")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#fdecea")]),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (2, 0), (-1, -1), "CENTER"),
+            ]))
+            elements.append(dx_table)
+            elements.append(Spacer(1, 8))
+
         # --- Remediation Roadmap ---
         risk_reasons_raw = (data.get("risk") or {}).get("reasons", [])
         # Normalise: reasons may be plain strings or dicts with severity/category/detail

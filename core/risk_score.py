@@ -181,6 +181,50 @@ def compute_risk_score(sub_report: dict):
         reasons.append(f"{len(js_secs)} potential secret(s) found in JS files")
 
     # =========================
+    # 13) Shodan CVEs / exposed services
+    # =========================
+    shodan = sub_report.get("shodan", {}) or {}
+    for ip_data in shodan.values():
+        if isinstance(ip_data, dict):
+            vulns = ip_data.get("vulns", []) or []
+            if vulns:
+                score += min(30, len(vulns) * 5)
+                reasons.append(f"Shodan: {len(vulns)} CVE(s) for this IP: {vulns[:3]}")
+
+    # =========================
+    # 14) Cloud buckets
+    # =========================
+    buckets = sub_report.get("cloud_buckets", []) or []
+    public_buckets = [b for b in buckets if b.get("public")]
+    if public_buckets:
+        score += 25
+        reasons.append(f"{len(public_buckets)} publicly readable cloud storage bucket(s)")
+    elif buckets:
+        score += 8
+        reasons.append(f"{len(buckets)} cloud storage bucket(s) exposed (access denied, but exists)")
+
+    # =========================
+    # 15) JWT vulnerabilities
+    # =========================
+    jwt_findings = sub_report.get("jwt_findings", []) or []
+    high_jwt = [j for j in jwt_findings if j.get("severity") == "HIGH"]
+    if high_jwt:
+        score += 20
+        issues_summary = [i for j in high_jwt for i in j.get("issues", [])]
+        reasons.append(f"JWT vulnerability: {issues_summary[0] if issues_summary else 'weak/insecure token'}")
+    elif jwt_findings:
+        score += 5
+        reasons.append(f"{len(jwt_findings)} JWT token(s) found — review manually")
+
+    # =========================
+    # 16) DOM XSS
+    # =========================
+    dom_xss = sub_report.get("dom_xss", []) or []
+    if dom_xss:
+        score += 20
+        reasons.append(f"{len(dom_xss)} DOM XSS finding(s) confirmed via Playwright")
+
+    # =========================
     # Final score & classification
     # =========================
     score = max(0, min(100, score))
