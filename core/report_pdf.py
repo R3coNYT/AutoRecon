@@ -995,7 +995,14 @@ def write_pdf(report: dict, pdf_path: Path):
                         pass
 
         # --- Remediation Roadmap ---
-        risk_reasons = (data.get("risk") or {}).get("reasons", [])
+        risk_reasons_raw = (data.get("risk") or {}).get("reasons", [])
+        # Normalise: reasons may be plain strings or dicts with severity/category/detail
+        risk_reasons = []
+        for r in risk_reasons_raw:
+            if isinstance(r, dict):
+                risk_reasons.append(r)
+            else:
+                risk_reasons.append({"severity": "INFO", "category": "", "detail": str(r)})
         if risk_reasons:
             elements.append(Paragraph("<b>Remediation Roadmap</b>", styles["Heading3"]))
             priority_map = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "INFO": 4}
