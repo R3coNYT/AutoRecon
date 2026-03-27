@@ -31,6 +31,7 @@ from colorama import Fore, Style
 import logging
 import ipaddress
 import re
+from urllib.parse import urlparse
 
 log = logging.getLogger("recon-audit")
 
@@ -187,11 +188,27 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                 log.info("No HTTP targets to scan with Nuclei on %s", sub)
                 res["nuclei"] = []
 
-        # 2) HTTP probe (headers/html snippet)
-        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")        
+        # 2) HTTP probe (headers/html snippet) — all web ports detected by httpx
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        http_probes = []
         with step_timer(f"HTTP probe ({sub})"):
-            probe = probe_base(scheme, sub, timeout)
+            web_urls = [r.get("url") for r in httpx_results if r.get("url")]
+            if not web_urls:
+                # fallback: use scheme inferred from nmap on default port
+                web_urls = [f"{scheme}://{sub}/"]
+            for web_url in web_urls:
+                parsed_url = urlparse(web_url)
+                probe_scheme = parsed_url.scheme or scheme
+                probe_host = parsed_url.netloc or sub  # includes port if non-standard, e.g. host:8080
+                p = probe_base(probe_scheme, probe_host, timeout)
+                p["_url"] = web_url
+                http_probes.append(p)
+                log.info("HTTP probe on %s → status %s", web_url, p.get("status", p.get("error")))
+
+        # primary probe = first successful one (used for CMS/WAF/TLS detection)
+        probe = next((p for p in http_probes if not p.get("error")), http_probes[0] if http_probes else {"error": "no web services"})
         res["http_probe"] = probe
+        res["http_probes_all"] = http_probes
 
         headers = probe.get("headers", {})
         html_snip = probe.get("html_snippet", "")
@@ -225,13 +242,22 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                     sub,
                     res["tls"].get("protocol"))
 
-        # 6) Crawl pages
+        # 6) Crawl pages — on all web ports found by httpx
         pages = []
-        if do_crawl and not probe.get("error"):
-            base = probe.get("final_url") or f"{scheme}://{sub}/"
+        if do_crawl:
+            crawl_targets = [
+                p.get("final_url") or p.get("_url")
+                for p in http_probes
+                if not p.get("error") and (p.get("final_url") or p.get("_url"))
+            ]
+            if not crawl_targets and not probe.get("error"):
+                crawl_targets = [probe.get("final_url") or f"{scheme}://{sub}/"]
             log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             with step_timer(f"Crawling ({sub})"):
-                pages = crawl_site(base, depth=crawl_depth, max_pages=max_pages, timeout=timeout)
+                for crawl_url in crawl_targets:
+                    log.info("Crawling %s ...", crawl_url)
+                    sub_pages = crawl_site(crawl_url, depth=crawl_depth, max_pages=max_pages, timeout=timeout)
+                    pages.extend(sub_pages)
         res["pages"] = pages
 
         log.info("Crawl finished on %s - %d pages found",
