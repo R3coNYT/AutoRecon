@@ -36,6 +36,12 @@ from core.open_redirect import scan_open_redirects
 from core.js_secrets import scan_js_secrets
 from core.dir_bruteforce import run_dir_bruteforce
 from core.screenshot import run_screenshots
+from core.shodan_lookup import run_shodan_lookup
+from core.cloud_buckets import run_cloud_bucket_detection
+from core.param_discovery import run_param_discovery
+from core.theharvester import run_theharvester
+from core.jwt_analysis import scan_jwt_tokens
+from core.dom_xss import scan_dom_xss
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from tqdm import tqdm
@@ -60,7 +66,7 @@ def risk_badge(level, score):
     else:
         return f"[ {level} ] ({score})"
 
-def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True, do_dir_bruteforce=True, do_dns_audit=True, do_service_checks=True, do_takeover=True, do_screenshot=True):
+def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True, do_dir_bruteforce=True, do_dns_audit=True, do_service_checks=True, do_takeover=True, do_screenshot=True, do_shodan=True, do_cloud_buckets=True, do_param_discovery=True, do_theharvester=True, do_jwt=True, do_dom_xss=True, shodan_api_key=None):
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     with step_timer(f"Full analysis for {sub}"):
         res = {"subdomain": sub}
@@ -101,6 +107,18 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         if resolved_ips:
             log.info("Enriching IPs: %s", ", ".join(resolved_ips))
+
+        # theHarvester OSINT (emails, extra subdomains) — domain targets only
+        res["theharvester"] = {}
+        if do_theharvester and not is_ip(sub):
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"theHarvester OSINT ({sub})"):
+                res["theharvester"] = run_theharvester(sub)
+            h = res["theharvester"]
+            if h.get("emails"):
+                log.info("theHarvester emails on %s: %s", sub, h["emails"][:5])
+            if h.get("subdomains"):
+                log.info("theHarvester subdomains on %s: %d", sub, len(h["subdomains"]))
 
         # DNS audit (zone transfer, SPF/DMARC/DKIM, wildcard)
         res["dns_audit"] = {}
@@ -172,6 +190,13 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             warnings = [v.get("warning") for v in res["service_checks"].values() if isinstance(v, dict) and v.get("warning")]
             for w in warnings:
                 log.info("Service vuln on %s → %s", sub, w)
+
+        # Shodan IP lookup
+        res["shodan"] = {}
+        if do_shodan and resolved_ips:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"Shodan lookup ({sub})"):
+                res["shodan"] = run_shodan_lookup(resolved_ips, api_key=shodan_api_key)
 
         # HTTPX probe (fast web detection)
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -406,6 +431,24 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             if res["open_redirects"]:
                 log.info("Open redirects on %s → %d", sub, len(res["open_redirects"]))
 
+        # 7g-1) JWT token analysis
+        res["jwt_findings"] = []
+        if do_jwt and (pages or headers):
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"JWT analysis ({sub})"):
+                res["jwt_findings"] = scan_jwt_tokens(pages, headers=headers, timeout=timeout)
+            if res["jwt_findings"]:
+                log.info("JWT tokens found on %s → %d", sub, len(res["jwt_findings"]))
+
+        # 7g-2) DOM XSS via Playwright
+        res["dom_xss"] = []
+        if do_dom_xss and pages:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            with step_timer(f"DOM XSS ({sub})"):
+                res["dom_xss"] = scan_dom_xss(pages, timeout=timeout)
+            if res["dom_xss"]:
+                log.info("DOM XSS findings on %s → %d", sub, len(res["dom_xss"]))
+
         # 7g) JavaScript secrets extraction
         res["js_secrets"] = []
         if pages:
@@ -414,6 +457,26 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                 res["js_secrets"] = scan_js_secrets(pages, timeout=timeout)
             if res["js_secrets"]:
                 log.info("JS secrets found on %s → %d", sub, len(res["js_secrets"]))
+
+        # 7g-3) Parameter discovery via arjun
+        res["param_discovery"] = []
+        if do_param_discovery and httpx_results:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            param_urls = [r.get("url") for r in httpx_results[:5] if r.get("url")]
+            with step_timer(f"Param discovery ({sub})"):
+                res["param_discovery"] = run_param_discovery(param_urls, timeout=120)
+            if res["param_discovery"]:
+                log.info("Params discovered on %s → %d endpoints", sub, len(res["param_discovery"]))
+
+        # 7g-4) Cloud bucket detection
+        res["cloud_buckets"] = []
+        if do_cloud_buckets:
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            bucket_target = sub if not is_ip(sub) else (resolved_ips[0] if resolved_ips else sub)
+            with step_timer(f"Cloud bucket detection ({sub})"):
+                res["cloud_buckets"] = run_cloud_bucket_detection(bucket_target, pages=pages, timeout=timeout)
+            if res["cloud_buckets"]:
+                log.info("Cloud buckets found for %s → %d", sub, len(res["cloud_buckets"]))
 
         # 7h) Directory brute-force
         res["dir_bruteforce"] = []
@@ -562,7 +625,10 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
               use_nvd: bool, do_crawl: bool, generate_pdf: bool, write_json: bool,
               full_scan=False, do_xss=True, do_sqli=True, output_dir=None,
               scan_rate_delay=0.0, do_dir_bruteforce=True, do_dns_audit=True,
-              do_service_checks=True, do_takeover=True, do_screenshot=True):
+              do_service_checks=True, do_takeover=True, do_screenshot=True,
+              do_shodan=True, do_cloud_buckets=True, do_param_discovery=True,
+              do_theharvester=True, do_jwt=True, do_dom_xss=True,
+              shodan_api_key=None):
 
     if output_dir:
         base_dir = Path(output_dir)
@@ -668,6 +734,13 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
             do_service_checks=do_service_checks,
             do_takeover=do_takeover,
             do_screenshot=do_screenshot,
+            do_shodan=do_shodan,
+            do_cloud_buckets=do_cloud_buckets,
+            do_param_discovery=do_param_discovery,
+            do_theharvester=do_theharvester,
+            do_jwt=do_jwt,
+            do_dom_xss=do_dom_xss,
+            shodan_api_key=shodan_api_key,
         )
         if subs:
             futures = []
@@ -738,6 +811,12 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                         "js_secrets": data.get("js_secrets", []),
                         "dir_bruteforce": data.get("dir_bruteforce", []),
                         "screenshots": data.get("screenshots", []),
+                        "shodan": data.get("shodan", {}),
+                        "cloud_buckets": data.get("cloud_buckets", []),
+                        "param_discovery": data.get("param_discovery", []),
+                        "theharvester": data.get("theharvester", {}),
+                        "jwt_findings": data.get("jwt_findings", []),
+                        "dom_xss": data.get("dom_xss", []),
                     }
 
                     safe_sub = sub.replace("/", "_").replace(":", "_")
@@ -827,6 +906,12 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                         "js_secrets": data.get("js_secrets", []),
                         "dir_bruteforce": data.get("dir_bruteforce", []),
                         "screenshots": data.get("screenshots", []),
+                        "shodan": data.get("shodan", {}),
+                        "cloud_buckets": data.get("cloud_buckets", []),
+                        "param_discovery": data.get("param_discovery", []),
+                        "theharvester": data.get("theharvester", {}),
+                        "jwt_findings": data.get("jwt_findings", []),
+                        "dom_xss": data.get("dom_xss", []),
                     }
 
                     safe_sub = sub.replace("/", "_").replace(":", "_")
