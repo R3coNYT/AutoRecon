@@ -32,7 +32,7 @@ def run_param_discovery(urls: list[str], output_dir: Path | None = None,
     ]
     """
     if not _arjun_available():
-        log.warning("arjun not found — skipping parameter discovery (pip install arjun)")
+        log.debug("arjun not found — skipping parameter discovery")
         return []
 
     if not urls:

@@ -638,6 +638,34 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
 
     base_dir.mkdir(parents=True, exist_ok=True)
 
+    # ── Optional tool availability check (shown once at startup) ──────────
+    import shutil
+    _opt_tools = []
+    if do_shodan:
+        try:
+            import shodan as _s  # noqa: F401
+            import os as _os
+            if not (shodan_api_key or _os.environ.get("SHODAN_API_KEY")):
+                _opt_tools.append("Shodan (SHODAN_API_KEY not set — will be skipped)")
+        except ImportError:
+            _opt_tools.append("Shodan (package not installed: pip install shodan)")
+    if do_param_discovery and not shutil.which("arjun"):
+        _opt_tools.append("arjun (not found: pip install arjun)")
+    if do_dom_xss:
+        try:
+            from playwright.sync_api import sync_playwright  # noqa: F401
+        except ImportError:
+            _opt_tools.append("Playwright/DOM XSS (not installed: pip install playwright && playwright install chromium)")
+    if do_theharvester and not (shutil.which("theHarvester") or shutil.which("theharvester")):
+        _opt_tools.append("theHarvester (not found — install from https://github.com/laramies/theHarvester)")
+    if _opt_tools:
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        log.info("Optional tools not available (will be skipped):")
+        for t in _opt_tools:
+            log.info("  ✗ %s", t)
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    # ──────────────────────────────────────────────────────────────────────
+
     subs = []
     subsip = []
 

@@ -42,7 +42,7 @@ def run_theharvester(domain: str, output_dir: Path | None = None,
     empty = {"emails": [], "subdomains": [], "ips": [], "hosts": [], "error": None}
 
     if not _harvester_available():
-        log.warning("theHarvester not found — skipping OSINT (install theHarvester)")
+        log.debug("theHarvester not found — skipping OSINT")
         empty["error"] = "theHarvester not installed"
         return empty
 

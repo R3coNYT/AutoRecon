@@ -236,6 +236,36 @@ if (!(Test-Path "$InstallDir\autorecon_env")) {
 & "$InstallDir\autorecon_env\Scripts\python.exe" -m pip install --upgrade pip
 & "$InstallDir\autorecon_env\Scripts\pip.exe" install -r "$InstallDir\requirements.txt"
 
+# Install Playwright Chromium browser (required for DOM XSS scanning)
+Write-Info "Installing Playwright Chromium browser"
+& "$InstallDir\autorecon_env\Scripts\python.exe" -m playwright install chromium
+if ($LASTEXITCODE -ne 0) {
+    Write-Warn "playwright install chromium failed (DOM XSS scanning will be skipped)"
+} else {
+    Write-Ok "Playwright Chromium installed"
+}
+
+# Optional Go-based tools (Go was installed earlier in this script)
+$env:Path += ";$env:USERPROFILE\go\bin"
+
+foreach ($tool in @(
+    @{ Name = "gowitness"; Module = "github.com/sensepost/gowitness@latest" },
+    @{ Name = "subfinder"; Module = "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest" },
+    @{ Name = "gobuster"; Module = "github.com/OJ/gobuster/v3@latest" }
+)) {
+    if (Test-Cmd $tool.Name) {
+        Write-Ok "$($tool.Name) already installed"
+    } else {
+        Write-Info "Installing $($tool.Name)"
+        go install $tool.Module
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warn "$($tool.Name) install failed (optional — feature will be skipped)"
+        } else {
+            Write-Ok "$($tool.Name) installed"
+        }
+    }
+}
+
 $BatContent = @"
 @echo off
 call C:\Tools\AutoRecon\autorecon_env\Scripts\activate.bat

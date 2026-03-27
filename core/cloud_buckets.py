@@ -10,6 +10,7 @@ Strategy:
 """
 import re
 import logging
+import ipaddress
 import socket
 import urllib.request
 import urllib.error
@@ -54,6 +55,15 @@ _DENIED_INDICATORS = [
     b"NoSuchBucket",
     b"The specified container does not exist",
 ]
+
+
+def _is_ip(target: str) -> bool:
+    """Return True if target looks like an IP address (v4 or v6)."""
+    try:
+        ipaddress.ip_address(target)
+        return True
+    except ValueError:
+        return False
 
 
 def _candidate_names(domain: str) -> list[str]:
@@ -133,27 +143,28 @@ def run_cloud_bucket_detection(target: str, pages: list[dict] | None = None,
     findings = []
     checked = set()
 
-    # ── 1. Enumerate candidates ──────────────────────────────────────────────
-    candidates = _candidate_names(target)
-    for bucket_name in candidates:
-        for provider, url_tpl in _PROVIDERS.items():
-            url = url_tpl.format(bucket=bucket_name)
-            if url in checked:
-                continue
-            checked.add(url)
-            result = _probe_bucket(url, timeout)
-            if result:
-                severity = "HIGH" if result["public"] else "MEDIUM"
-                findings.append({
-                    "url": url,
-                    "provider": provider,
-                    "bucket_name": bucket_name,
-                    "public": result["public"],
-                    "status": result["status"],
-                    "source": "enumeration",
-                    "severity": severity,
-                })
-                log.info("Cloud bucket found: %s (public=%s)", url, result["public"])
+    # ── 1. Enumerate candidates — only for domain targets, not IPs ─────────
+    if not _is_ip(target):
+        candidates = _candidate_names(target)
+        for bucket_name in candidates:
+            for provider, url_tpl in _PROVIDERS.items():
+                url = url_tpl.format(bucket=bucket_name)
+                if url in checked:
+                    continue
+                checked.add(url)
+                result = _probe_bucket(url, timeout)
+                if result:
+                    severity = "HIGH" if result["public"] else "MEDIUM"
+                    findings.append({
+                        "url": url,
+                        "provider": provider,
+                        "bucket_name": bucket_name,
+                        "public": result["public"],
+                        "status": result["status"],
+                        "source": "enumeration",
+                        "severity": severity,
+                    })
+                    log.info("Cloud bucket found: %s (public=%s)", url, result["public"])
 
     # ── 2. Scan page content ─────────────────────────────────────────────────
     if pages:
