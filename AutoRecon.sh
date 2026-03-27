@@ -319,6 +319,15 @@ install_sublist3r() {
     fi
 }
 
+install_sqlmap() {
+    log "Installing sqlmap"
+    if [ ! -d "$INSTALL_DIR/sqlmap-dev" ]; then
+        retry 3 git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git "$INSTALL_DIR/sqlmap-dev"
+    else
+        ok "sqlmap already present"
+    fi
+}
+
 create_venv() {
     log "Creating Python virtual environment"
 
@@ -464,6 +473,7 @@ main() {
     download_and_install_nuclei
     update_nuclei_templates
     install_sublist3r
+    install_sqlmap
     create_venv
     install_optional_tools
 
