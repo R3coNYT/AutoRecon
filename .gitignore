@@ -1,0 +1,11 @@
+# Secrets — never commit
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Output directories
+output/
+results/

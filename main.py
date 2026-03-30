@@ -1,6 +1,15 @@
 import argparse
+import os
+from pathlib import Path
 from core.orchestrator import run_audit
 from core.logger import setup_logging
+
+# Load .env from the project root (if present) — populates os.environ
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent / ".env")
+except ImportError:
+    pass  # python-dotenv not installed; rely on environment variables only
 
 def build_parser():
     p = argparse.ArgumentParser(
