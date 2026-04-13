@@ -40,6 +40,12 @@ def build_parser():
                    help="Shodan API key (overrides SHODAN_API_KEY env var)")
     p.add_argument("--scan-rate-delay", type=float, default=0.0, metavar="SECONDS",
                    help="Delay in seconds between parallel scan submissions (default: 0.0)")
+    p.add_argument("--nmap-timeout", type=int, default=None, metavar="SECONDS",
+                   help="Nmap scan timeout in seconds (default: 300 standard, 600 full-scan). "
+                        "Increase this on slow/resource-constrained machines.")
+    p.add_argument("--nmap-concurrency", type=int, default=2, metavar="N",
+                   help="Max concurrent Nmap scans (default: 2). Lower this on VMs with few cores "
+                        "to prevent resource contention and timeouts.")
     p.add_argument("--pdf", action="store_true", help="Generate PDF report")
     p.add_argument("--json", action="store_true", help="Always write JSON report")
     p.add_argument("--full", action="store_true", help="Run full Nmap scan (all ports)")
@@ -76,6 +82,8 @@ def main(cli_args=None):
         do_dom_xss=(not args.no_dom_xss),
         shodan_api_key=args.shodan_key,
         scan_rate_delay=args.scan_rate_delay,
+        nmap_timeout=args.nmap_timeout,
+        nmap_concurrency=args.nmap_concurrency,
         generate_pdf=args.pdf,
         write_json=(args.json or True),
         full_scan=args.full,
