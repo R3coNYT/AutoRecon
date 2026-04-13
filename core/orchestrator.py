@@ -1,5 +1,6 @@
 import json
 import time
+import threading
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from core.subdomains import run_sublist3r
@@ -66,7 +67,7 @@ def risk_badge(level, score):
     else:
         return f"[ {level} ] ({score})"
 
-def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True, do_dir_bruteforce=True, do_dns_audit=True, do_service_checks=True, do_takeover=True, do_screenshot=True, do_shodan=True, do_cloud_buckets=True, do_param_discovery=True, do_theharvester=True, do_jwt=True, do_dom_xss=True, shodan_api_key=None):
+def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True, do_dir_bruteforce=True, do_dns_audit=True, do_service_checks=True, do_takeover=True, do_screenshot=True, do_shodan=True, do_cloud_buckets=True, do_param_discovery=True, do_theharvester=True, do_jwt=True, do_dom_xss=True, shodan_api_key=None, nmap_semaphore=None, nmap_timeout=None):
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     with step_timer(f"Full analysis for {sub}"):
         res = {"subdomain": sub}
@@ -156,15 +157,17 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
         # 2) Nmap service scan
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         with step_timer(f"Nmap scan {sub}"):
-            with yaspin(Spinners.dots, text=f"Nmap scanning {sub}...") as spinner:
+            _sem = nmap_semaphore if nmap_semaphore is not None else threading.Semaphore(999)
+            with _sem:
+                with yaspin(Spinners.dots, text=f"Nmap scanning {sub}...") as spinner:
 
-                if ports:
-                    port_str = ",".join(map(str, ports))
-                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=False, ports=port_str)
-                else:
-                    nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=True)
+                    if ports:
+                        port_str = ",".join(map(str, ports))
+                        nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=False, ports=port_str, timeout=nmap_timeout)
+                    else:
+                        nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=True, timeout=nmap_timeout)
 
-                spinner.ok("✔")
+                    spinner.ok("✔")
 
         res["nmap_raw"] = nmap_txt
         res["nmap_xml"] = xml_path
@@ -628,7 +631,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
               do_service_checks=True, do_takeover=True, do_screenshot=True,
               do_shodan=True, do_cloud_buckets=True, do_param_discovery=True,
               do_theharvester=True, do_jwt=True, do_dom_xss=True,
-              shodan_api_key=None):
+              shodan_api_key=None, nmap_timeout=None, nmap_concurrency=2):
 
     if output_dir:
         base_dir = Path(output_dir)
@@ -755,6 +758,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     start_time = datetime.now()
     total_cve_found = 0
 
+    _nmap_semaphore = threading.Semaphore(max(1, nmap_concurrency))
+
     with ThreadPoolExecutor(max_workers=max(2, threads)) as ex:
         _extra_kwargs = dict(
             do_dir_bruteforce=do_dir_bruteforce,
@@ -769,6 +774,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
             do_jwt=do_jwt,
             do_dom_xss=do_dom_xss,
             shodan_api_key=shodan_api_key,
+            nmap_semaphore=_nmap_semaphore,
+            nmap_timeout=nmap_timeout,
         )
         if subs:
             futures = []
