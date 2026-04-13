@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     AutoRecon - Update Script (Windows)
@@ -256,7 +256,7 @@ function Update-OptionalTools {
     $env:Path = "$env:Path;$env:USERPROFILE\go\bin;C:\Program Files\Go\bin"
 
     if (!(Get-Command go -ErrorAction SilentlyContinue)) {
-        Write-Warn "Go not found — skipping gowitness / subfinder / gobuster check"
+        Write-Warn "Go not found -- skipping gowitness / subfinder / gobuster check"
     } else {
         $goTools = @(
             @{ Name = "gowitness"; Module = "github.com/sensepost/gowitness@latest" },
