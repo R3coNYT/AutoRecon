@@ -253,8 +253,14 @@ function Update-Dependencies {
     }
 
     # Ensure Playwright browser is installed/updated
+    # Temporarily relax $ErrorActionPreference so that Node.js deprecation
+    # warnings written to stderr don't get promoted to terminating errors.
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = "SilentlyContinue"
     & $pyExe -m playwright install chromium 2>$null
-    if ($LASTEXITCODE -ne 0) {
+    $playwrightExit = $LASTEXITCODE
+    $ErrorActionPreference = $prevEAP
+    if ($playwrightExit -ne 0) {
         Write-Warn "playwright install chromium failed (DOM XSS scanning will be skipped)"
     }
 }
