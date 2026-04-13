@@ -67,7 +67,7 @@ def risk_badge(level, score):
     else:
         return f"[ {level} ] ({score})"
 
-def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True, do_dir_bruteforce=True, do_dns_audit=True, do_service_checks=True, do_takeover=True, do_screenshot=True, do_shodan=True, do_cloud_buckets=True, do_param_discovery=True, do_theharvester=True, do_jwt=True, do_dom_xss=True, shodan_api_key=None, nmap_semaphore=None, nmap_timeout=None):
+def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True, do_dir_bruteforce=True, do_dns_audit=True, do_service_checks=True, do_takeover=True, do_screenshot=True, do_shodan=True, do_cloud_buckets=True, do_param_discovery=True, do_theharvester=True, do_jwt=True, do_dom_xss=True, shodan_api_key=None, nmap_semaphore=None, nmap_timeout=None, nmap_timeout_full=None):
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     with step_timer(f"Full analysis for {sub}"):
         res = {"subdomain": sub}
@@ -165,7 +165,7 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                         port_str = ",".join(map(str, ports))
                         nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=False, ports=port_str, timeout=nmap_timeout)
                     else:
-                        nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=True, timeout=nmap_timeout)
+                        nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=True, timeout=nmap_timeout, timeout_full=nmap_timeout_full)
 
                     spinner.ok("✔")
 
@@ -631,7 +631,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
               do_service_checks=True, do_takeover=True, do_screenshot=True,
               do_shodan=True, do_cloud_buckets=True, do_param_discovery=True,
               do_theharvester=True, do_jwt=True, do_dom_xss=True,
-              shodan_api_key=None, nmap_timeout=None, nmap_concurrency=2):
+              shodan_api_key=None, nmap_timeout=None, nmap_concurrency=2, nmap_timeout_full=None):
 
     if output_dir:
         base_dir = Path(output_dir)
@@ -776,6 +776,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
             shodan_api_key=shodan_api_key,
             nmap_semaphore=_nmap_semaphore,
             nmap_timeout=nmap_timeout,
+            nmap_timeout_full=nmap_timeout_full,
         )
         if subs:
             futures = []

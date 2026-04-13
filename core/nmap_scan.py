@@ -10,7 +10,7 @@ NMAP_BIN = shutil.which("nmap") or r"C:\Program Files (x86)\Nmap\nmap.exe"
 _WINDOWS = sys.platform == "win32"
 
 
-def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None, timeout=None):
+def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None, timeout=None, timeout_full=None):
 
     safe_host = host.replace("/", "_").replace(":", "_")
     xml_path = ""
@@ -39,7 +39,10 @@ def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None, 
     cmd += ["-oX", xml_path, host]
 
     try:
-        _timeout = timeout if timeout is not None else (600 if full_scan else 300)
+        if full_scan:
+            _timeout = timeout_full if timeout_full is not None else (timeout if timeout is not None else 1200)
+        else:
+            _timeout = timeout if timeout is not None else 300
         result = subprocess.check_output(
             cmd,
             stderr=subprocess.STDOUT,
