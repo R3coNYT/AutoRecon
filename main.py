@@ -41,8 +41,10 @@ def build_parser():
     p.add_argument("--scan-rate-delay", type=float, default=0.0, metavar="SECONDS",
                    help="Delay in seconds between parallel scan submissions (default: 0.0)")
     p.add_argument("--nmap-timeout", type=int, default=None, metavar="SECONDS",
-                   help="Nmap scan timeout in seconds (default: 300 standard, 600 full-scan). "
-                        "Increase this on slow/resource-constrained machines.")
+                   help="Nmap timeout for standard/targeted scans in seconds (default: 300).")
+    p.add_argument("--nmap-timeout-full", type=int, default=None, metavar="SECONDS",
+                   help="Nmap timeout for full-port scans (-p-) in seconds (default: 1200). "
+                        "Increase this on slow machines or remote targets.")
     p.add_argument("--nmap-concurrency", type=int, default=2, metavar="N",
                    help="Max concurrent Nmap scans (default: 2). Lower this on VMs with few cores "
                         "to prevent resource contention and timeouts.")
@@ -84,6 +86,7 @@ def main(cli_args=None):
         scan_rate_delay=args.scan_rate_delay,
         nmap_timeout=args.nmap_timeout,
         nmap_concurrency=args.nmap_concurrency,
+        nmap_timeout_full=args.nmap_timeout_full,
         generate_pdf=args.pdf,
         write_json=(args.json or True),
         full_scan=args.full,
