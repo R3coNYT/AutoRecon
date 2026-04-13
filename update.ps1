@@ -211,30 +211,41 @@ function Update-Dependencies {
 
     Write-Log "Updating Python dependencies..."
 
-    # Look for pip in common locations
-    $pipCandidates = @(
-        (Join-Path $InstallDir "autorecon_env\Scripts\pip.exe"),
-        "C:\Tools\AutoRecon\autorecon_env\Scripts\pip.exe"
-    )
-
-    $pip = $null
-    foreach ($c in $pipCandidates) {
-        if (Test-Path $c) { $pip = $c; break }
+    # ── Locate a working Python executable ────────────────────────────────
+    # Prefer venv Python, fall back to the system Python in PATH.
+    function Find-WorkingPython {
+        param([string]$InstallDir)
+        $candidates = @(
+            (Join-Path $InstallDir "autorecon_env\Scripts\python.exe"),
+            "C:\Tools\AutoRecon\autorecon_env\Scripts\python.exe"
+        )
+        foreach ($c in $candidates) {
+            if (Test-Path $c) {
+                # Verify the shim actually resolves to a real Python
+                $ver = & $c --version 2>&1
+                if ($LASTEXITCODE -eq 0 -and $ver -match 'Python') { return $c }
+            }
+        }
+        # Fall back to system python
+        $sys = Get-Command python -ErrorAction SilentlyContinue
+        if ($sys) {
+            $ver = & $sys.Source --version 2>&1
+            if ($LASTEXITCODE -eq 0 -and $ver -match 'Python') { return $sys.Source }
+        }
+        return $null
     }
 
-    if (-not $pip) {
-        # Fall back to system pip
-        $sysPip = Get-Command pip -ErrorAction SilentlyContinue
-        if ($sysPip) { $pip = $sysPip.Source }
-    }
+    $pyExe = Find-WorkingPython -InstallDir $InstallDir
 
-    if (-not $pip) {
-        Write-Warn "No pip found - skipping dependency update."
-        Write-Warn "Run manually:  pip install -r requirements.txt --upgrade"
+    if (-not $pyExe) {
+        Write-Warn "No working Python found - skipping dependency update."
+        Write-Warn "Run manually:  python -m pip install -r requirements.txt --upgrade"
         return
     }
 
-    & $pip install -r (Join-Path $InstallDir "requirements.txt") --upgrade --quiet
+    Write-Info "Using Python: $pyExe"
+
+    & $pyExe -m pip install -r (Join-Path $InstallDir "requirements.txt") --upgrade --quiet
     if ($LASTEXITCODE -ne 0) {
         Write-Warn "pip install returned a non-zero exit code. Some packages may not have updated."
     } else {
@@ -242,12 +253,9 @@ function Update-Dependencies {
     }
 
     # Ensure Playwright browser is installed/updated
-    $pyExe = Join-Path $InstallDir "autorecon_env\Scripts\python.exe"
-    if (Test-Path $pyExe) {
-        & $pyExe -m playwright install chromium 2>$null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Warn "playwright install chromium failed (DOM XSS scanning will be skipped)"
-        }
+    & $pyExe -m playwright install chromium 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warn "playwright install chromium failed (DOM XSS scanning will be skipped)"
     }
 }
 
