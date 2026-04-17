@@ -27,3 +27,6 @@ playwright
 
 # Parameter discovery
 arjun
+
+# AI engine (optional — required only when ENABLE_AI=true)
+openai

@@ -61,6 +61,19 @@ def main(cli_args=None):
     log = setup_logging(args.target, args.output_dir)
     log.info("Starting audit for target: %s", args.target)
 
+    # ── AI configuration (from .env / environment) ────────────────────────
+    enable_ai_env = os.environ.get("ENABLE_AI", "false").strip().lower()
+    enable_ai = enable_ai_env in ("true", "1", "yes")
+    openai_api_key = os.environ.get("OPENAI_API_KEY", "").strip() or None
+    openai_model = os.environ.get("OPENAI_MODEL", "gpt-4o").strip()
+
+    if enable_ai and not openai_api_key:
+        log.warning(
+            "ENABLE_AI=true but OPENAI_API_KEY is not set — AI mode disabled. "
+            "Add your key to the .env file."
+        )
+        enable_ai = False
+
     result_paths = run_audit(
         target=args.target,
         threads=args.threads,
@@ -90,7 +103,10 @@ def main(cli_args=None):
         generate_pdf=args.pdf,
         write_json=(args.json or True),
         full_scan=args.full,
-        output_dir=args.output_dir
+        output_dir=args.output_dir,
+        enable_ai=enable_ai,
+        openai_api_key=openai_api_key,
+        openai_model=openai_model,
     )
 
     log.info("")
