@@ -297,17 +297,34 @@ update_optional_tools() {
         warn "Go not found — skipping gowitness / subfinder / gobuster check"
     fi
 
-    # theHarvester
+    # theHarvester — apt (Kali), then GitHub clone
     if ! command -v theHarvester &>/dev/null && ! command -v theharvester &>/dev/null; then
         log "Installing theHarvester"
         if [ "$PLATFORM" = "linux" ]; then
-            ${SUDO:-} apt-get install -y theharvester 2>/dev/null || \
-                (command -v pipx &>/dev/null && pipx install theharvester) || \
-                warn "theHarvester not installed — run: sudo apt install theharvester"
+            if ${SUDO:-} apt-get install -y theharvester 2>/dev/null; then
+                ok "theHarvester installed via apt"
+            else
+                local _th_dir="/opt/theHarvester"
+                ${SUDO:-} rm -rf "$_th_dir"
+                ${SUDO:-} git clone --depth 1 https://github.com/laramies/theHarvester.git "$_th_dir" && \
+                    ${SUDO:-} tee /usr/local/bin/theHarvester >/dev/null <<THEOF
+#!/bin/bash
+exec python3 /opt/theHarvester/theHarvester.py "\$@"
+THEOF
+                ${SUDO:-} chmod +x /usr/local/bin/theHarvester && ok "theHarvester installed from GitHub" || \
+                    warn "theHarvester not installed — clone manually: git clone https://github.com/laramies/theHarvester.git"
+            fi
         else
-            brew install theharvester 2>/dev/null || \
-                (command -v pipx &>/dev/null && pipx install theharvester) || \
-                warn "theHarvester not installed — run: brew install theharvester"
+            brew install theharvester 2>/dev/null || {
+                local _th_dir="$HOME/Tools/theHarvester"
+                git clone --depth 1 https://github.com/laramies/theHarvester.git "$_th_dir" && \
+                    tee "$HOME/.local/bin/theHarvester" >/dev/null <<THEOF
+#!/bin/bash
+exec python3 $_th_dir/theHarvester.py "\$@"
+THEOF
+                chmod +x "$HOME/.local/bin/theHarvester" && ok "theHarvester installed from GitHub" || \
+                    warn "theHarvester not installed — clone manually: git clone https://github.com/laramies/theHarvester.git"
+            }
         fi
     else
         ok "theHarvester already installed"
