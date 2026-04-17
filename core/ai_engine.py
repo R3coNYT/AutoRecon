@@ -269,6 +269,7 @@ class AIEngine:
         target: str,
         available_tools: Dict[str, str],
         base_dir: Path,
+        full_scan: bool = False,
     ) -> Dict:
         """
         Drive a full AI scan of *target*.
@@ -290,8 +291,16 @@ class AIEngine:
         final_report: Optional[str] = None
 
         # ── Initial prompt ────────────────────────────────────────────────
+        scope_note = (
+            "SCAN SCOPE: FULL — scan ALL 65535 TCP ports (use -p- with nmap). "
+            "Do not limit to top ports. Enumerate every open port thoroughly."
+            if full_scan else
+            "SCAN SCOPE: STANDARD — focus on the most common/interesting ports "
+            "(top 1000 TCP). Escalate only if warranted by findings."
+        )
         initial_prompt = (
             f"TARGET: {target}\n\n"
+            f"{scope_note}\n\n"
             f"TOOLS AVAILABLE ON THIS MACHINE:\n{tools_str}\n\n"
             "YOUR MISSION:\n"
             "Conduct a comprehensive security reconnaissance and vulnerability "
