@@ -7,7 +7,11 @@ from core.logger import setup_logging
 # Load .env from the project root (if present) — populates os.environ
 try:
     from dotenv import load_dotenv
-    load_dotenv(Path(__file__).parent / ".env")
+    # Try alongside this script first, then fall back to cwd
+    _env_file = Path(__file__).parent / ".env"
+    if not _env_file.exists():
+        _env_file = Path.cwd() / ".env"
+    load_dotenv(_env_file, override=True)
 except ImportError:
     pass  # python-dotenv not installed; rely on environment variables only
 
