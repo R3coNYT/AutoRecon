@@ -96,6 +96,100 @@ def _run_command(command: str, timeout: int = 180) -> Tuple[str, int]:
         return f"[ERROR] Could not execute command: {exc}", -1
 
 
+def _convert_md_to_pdf(md_path: Path, pdf_path: Path) -> None:
+    """
+    Convert a Markdown file to PDF.
+    Strategy (tries in order):
+      1. weasyprint  (pip install weasyprint markdown)
+      2. pandoc      (system binary)
+    Fails silently with a warning — the .md file is always preserved.
+    """
+    # ── Strategy 1: weasyprint ────────────────────────────────────────────
+    try:
+        import markdown as _md
+        from weasyprint import HTML as _HTML
+
+        css = """
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            font-size: 13px; line-height: 1.7;
+            color: #1a1a2e; background: #ffffff;
+            margin: 0; padding: 0;
+        }
+        .page { max-width: 860px; margin: 0 auto; padding: 48px 56px; }
+        h1 { font-size: 26px; font-weight: 700; color: #0d1b2a;
+             border-bottom: 3px solid #e63946; padding-bottom: 10px; margin-top: 0; }
+        h2 { font-size: 18px; font-weight: 700; color: #1d3557;
+             border-left: 4px solid #457b9d; padding-left: 10px; margin-top: 32px; }
+        h3 { font-size: 14px; font-weight: 700; color: #2c3e50; margin-top: 20px; }
+        h4 { font-size: 13px; font-weight: 600; color: #555; margin-top: 14px; }
+        p  { margin: 8px 0; }
+        code {
+            background: #f0f4f8; border-radius: 4px;
+            padding: 2px 6px; font-family: 'Courier New', monospace; font-size: 12px;
+        }
+        pre {
+            background: #1e2a38; color: #cdd9e5; border-radius: 6px;
+            padding: 14px 18px; overflow-x: auto; font-size: 11.5px;
+            border-left: 4px solid #457b9d;
+        }
+        pre code { background: transparent; color: inherit; padding: 0; }
+        blockquote {
+            border-left: 4px solid #e63946; background: #fff5f5;
+            margin: 12px 0; padding: 8px 16px; color: #555;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        th { background: #1d3557; color: #fff; padding: 8px 12px; text-align: left; font-size: 12px; }
+        td { padding: 7px 12px; border-bottom: 1px solid #dde3ea; font-size: 12px; }
+        tr:nth-child(even) td { background: #f7f9fc; }
+        ul, ol { padding-left: 24px; margin: 8px 0; }
+        li { margin: 4px 0; }
+        a  { color: #457b9d; text-decoration: none; }
+        hr { border: none; border-top: 1px solid #dde3ea; margin: 28px 0; }
+        /* severity badges */
+        strong { color: #1a1a2e; }
+        """
+        md_text = md_path.read_text(encoding="utf-8")
+        html_body = _md.markdown(
+            md_text,
+            extensions=["tables", "fenced_code", "toc", "nl2br"],
+        )
+        html_full = f"""<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8">
+<style>{css}</style>
+</head><body><div class="page">{html_body}</div></body></html>"""
+        _HTML(string=html_full).write_pdf(str(pdf_path))
+        return
+    except ImportError:
+        pass
+    except Exception as exc:
+        log.warning("[AI] weasyprint PDF conversion failed: %s", exc)
+
+    # ── Strategy 2: pandoc ────────────────────────────────────────────────
+    import shutil as _shutil
+    if _shutil.which("pandoc"):
+        try:
+            subprocess.run(
+                ["pandoc", str(md_path), "-o", str(pdf_path),
+                 "--pdf-engine=xelatex", "-V", "geometry:margin=2cm",
+                 "-V", "fontsize=11pt"],
+                capture_output=True,
+                timeout=60,
+                check=True,
+            )
+            return
+        except Exception as exc:
+            log.warning("[AI] pandoc PDF conversion failed: %s", exc)
+
+    log.warning(
+        "[AI] Could not convert ai_report.md to PDF. "
+        "Install weasyprint+markdown: pip install weasyprint markdown"
+    )
+
+
 class AIEngine:
     """
     Stateful engine that drives a full security scan via the OpenAI chat API.
@@ -312,6 +406,11 @@ class AIEngine:
             report_path = ai_dir / "ai_report.md"
             report_path.write_text(final_report, encoding="utf-8")
             log.info("[AI] Final report saved → %s", report_path)
+            # Convert to PDF
+            pdf_path = ai_dir / "ai_report.pdf"
+            _convert_md_to_pdf(report_path, pdf_path)
+            if pdf_path.exists():
+                log.info("[AI] PDF report saved  → %s", pdf_path)
 
         if self._suggested_tools:
             tools_path = ai_dir / "suggested_tools.json"

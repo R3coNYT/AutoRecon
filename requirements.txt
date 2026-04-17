@@ -30,3 +30,7 @@ arjun
 
 # AI engine (optional — required only when ENABLE_AI=true)
 openai
+
+# AI report PDF export
+weasyprint
+markdown
