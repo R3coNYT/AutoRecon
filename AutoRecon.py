@@ -4,6 +4,7 @@ import shutil
 import re
 import questionary
 import logging
+from datetime import datetime
 from pathlib import Path
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -143,10 +144,58 @@ def handle_recon():
     safe_target = re.sub(r"[^a-zA-Z0-9._-]", "_", target)
     output_dir = client_folder / safe_target
 
+    # ── Backup previous scan if it exists ────────────────────────────────
     if output_dir.exists():
-        shutil.rmtree(output_dir)
+        ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+        backup_root = output_dir / "backup"
+        backup_root.mkdir(parents=True, exist_ok=True)
+        backup_dest = backup_root / ts
+        backup_dest.mkdir(parents=True, exist_ok=True)
 
-    output_dir.mkdir(parents=True)
+        # Copy every item except backup/ and ai_scan/ into the dated backup
+        for item in output_dir.iterdir():
+            if item.name in ("backup", "ai_scan"):
+                continue
+            dest = backup_dest / item.name
+            if item.is_dir():
+                shutil.copytree(item, dest, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, dest)
+
+        # Also backup ai_scan/ content if present, into ai_scan/backup/<ts>
+        ai_scan_dir = output_dir / "ai_scan"
+        if ai_scan_dir.exists():
+            ai_backup_root = ai_scan_dir / "backup"
+            ai_backup_root.mkdir(parents=True, exist_ok=True)
+            ai_backup_dest = ai_backup_root / ts
+            ai_backup_dest.mkdir(parents=True, exist_ok=True)
+            for item in ai_scan_dir.iterdir():
+                if item.name == "backup":
+                    continue
+                dest = ai_backup_dest / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dest, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(item, dest)
+            # Remove old ai_scan content (keep backup folder)
+            for item in ai_scan_dir.iterdir():
+                if item.name == "backup":
+                    continue
+                if item.is_dir():
+                    shutil.rmtree(item)
+                else:
+                    item.unlink()
+
+        # Remove old scan content (keep backup/ and ai_scan/)
+        for item in output_dir.iterdir():
+            if item.name in ("backup", "ai_scan"):
+                continue
+            if item.is_dir():
+                shutil.rmtree(item)
+            else:
+                item.unlink()
+    else:
+        output_dir.mkdir(parents=True)
 
     try:
         (output_dir / "target.txt").write_text(target, encoding="utf-8")

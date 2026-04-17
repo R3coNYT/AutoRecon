@@ -666,6 +666,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                 target=target,
                 available_tools=available_tools,
                 base_dir=base_dir,
+                full_scan=full_scan,
             )
 
             log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")

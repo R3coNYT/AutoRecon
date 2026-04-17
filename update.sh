@@ -329,6 +329,169 @@ THEOF
     else
         ok "theHarvester already installed"
     fi
+
+    # ── nikto ─────────────────────────────────────────────────────────────
+    if ! command -v nikto &>/dev/null; then
+        log "Installing nikto"
+        if [ "$PLATFORM" = "linux" ]; then
+            ${SUDO:-} apt-get install -y nikto 2>/dev/null && ok "nikto installed" || warn "nikto install failed"
+        else
+            brew install nikto 2>/dev/null && ok "nikto installed" || warn "nikto install failed"
+        fi
+    else
+        ok "nikto already installed"
+    fi
+
+    # ── whatweb ───────────────────────────────────────────────────────────
+    if ! command -v whatweb &>/dev/null; then
+        log "Installing whatweb"
+        if [ "$PLATFORM" = "linux" ]; then
+            ${SUDO:-} apt-get install -y whatweb 2>/dev/null && ok "whatweb installed" || warn "whatweb install failed"
+        fi
+    else
+        ok "whatweb already installed"
+    fi
+
+    # ── wfuzz ─────────────────────────────────────────────────────────────
+    if ! command -v wfuzz &>/dev/null; then
+        log "Installing wfuzz"
+        if [ "$PLATFORM" = "linux" ]; then
+            ${SUDO:-} apt-get install -y wfuzz 2>/dev/null && ok "wfuzz installed" || warn "wfuzz install failed"
+        else
+            brew install wfuzz 2>/dev/null && ok "wfuzz installed" || warn "wfuzz install failed"
+        fi
+    else
+        ok "wfuzz already installed"
+    fi
+
+    # ── smbmap ────────────────────────────────────────────────────────────
+    if ! command -v smbmap &>/dev/null; then
+        log "Installing smbmap"
+        if [ "$PLATFORM" = "linux" ]; then
+            ${SUDO:-} apt-get install -y smbmap 2>/dev/null && ok "smbmap installed" || warn "smbmap install failed"
+        fi
+    else
+        ok "smbmap already installed"
+    fi
+
+    # ── onesixtyone ───────────────────────────────────────────────────────
+    if ! command -v onesixtyone &>/dev/null; then
+        log "Installing onesixtyone"
+        if [ "$PLATFORM" = "linux" ]; then
+            ${SUDO:-} apt-get install -y onesixtyone 2>/dev/null && ok "onesixtyone installed" || warn "onesixtyone install failed"
+        fi
+    else
+        ok "onesixtyone already installed"
+    fi
+
+    # ── amass ─────────────────────────────────────────────────────────────
+    if ! command -v amass &>/dev/null; then
+        log "Installing amass"
+        if [ "$PLATFORM" = "linux" ]; then
+            if ${SUDO:-} apt-get install -y amass 2>/dev/null; then
+                ok "amass installed via apt"
+            elif command -v go &>/dev/null; then
+                go install github.com/owasp-amass/amass/v4/...@master 2>/dev/null && \
+                    ok "amass installed via go" || warn "amass install failed"
+            else
+                warn "amass install failed — run: apt install amass"
+            fi
+        else
+            brew install amass 2>/dev/null && ok "amass installed" || warn "amass install failed"
+        fi
+    else
+        ok "amass already installed"
+    fi
+
+    # ── enum4linux-ng ─────────────────────────────────────────────────────
+    if ! command -v enum4linux-ng &>/dev/null; then
+        log "Installing enum4linux-ng"
+        if [ "$PLATFORM" = "linux" ]; then
+            if ${SUDO:-} apt-get install -y enum4linux-ng 2>/dev/null; then
+                ok "enum4linux-ng installed via apt"
+            else
+                local _e4l_dir="/opt/enum4linux-ng"
+                ${SUDO:-} rm -rf "$_e4l_dir"
+                ${SUDO:-} git clone --depth 1 https://github.com/cddmp/enum4linux-ng.git "$_e4l_dir" && \
+                    ${SUDO:-} tee /usr/local/bin/enum4linux-ng >/dev/null <<E4LEOF
+#!/bin/bash
+exec python3 /opt/enum4linux-ng/enum4linux-ng.py "\$@"
+E4LEOF
+                ${SUDO:-} chmod +x /usr/local/bin/enum4linux-ng && ok "enum4linux-ng installed from GitHub" || \
+                    warn "enum4linux-ng install failed"
+            fi
+        fi
+    else
+        ok "enum4linux-ng already installed"
+    fi
+
+    # ── ldapdomaindump ────────────────────────────────────────────────────
+    if ! command -v ldapdomaindump &>/dev/null; then
+        log "Installing ldapdomaindump"
+        if [ "$PLATFORM" = "linux" ]; then
+            ${SUDO:-} apt-get install -y python3-ldap3 python3-dnspython 2>/dev/null
+            local _ldd_dir="/opt/ldapdomaindump"
+            ${SUDO:-} rm -rf "$_ldd_dir"
+            ${SUDO:-} git clone --depth 1 https://github.com/dirkjanm/ldapdomaindump.git "$_ldd_dir" && \
+                ${SUDO:-} tee /usr/local/bin/ldapdomaindump >/dev/null <<LDDEOF
+#!/bin/bash
+exec python3 /opt/ldapdomaindump/ldapdomaindump/__main__.py "\$@"
+LDDEOF
+            ${SUDO:-} chmod +x /usr/local/bin/ldapdomaindump && ok "ldapdomaindump installed" || \
+                warn "ldapdomaindump install failed"
+        fi
+    else
+        ok "ldapdomaindump already installed"
+    fi
+
+    # ── feroxbuster ───────────────────────────────────────────────────────
+    if ! command -v feroxbuster &>/dev/null; then
+        log "Installing feroxbuster"
+        if [ "$PLATFORM" = "linux" ]; then
+            if ${SUDO:-} apt-get install -y feroxbuster 2>/dev/null; then
+                ok "feroxbuster installed via apt"
+            else
+                local _fb_url
+                _fb_url=$(curl -s https://api.github.com/repos/epi052/feroxbuster/releases/latest \
+                    | grep "browser_download_url" | grep "linux-x86_64.zip" | cut -d '"' -f 4)
+                if [ -n "$_fb_url" ]; then
+                    curl -sL "$_fb_url" -o /tmp/feroxbuster.zip && \
+                        ${SUDO:-} unzip -o /tmp/feroxbuster.zip feroxbuster -d /usr/local/bin/ && \
+                        ${SUDO:-} chmod +x /usr/local/bin/feroxbuster && \
+                        ok "feroxbuster installed from GitHub releases" || \
+                        warn "feroxbuster install failed"
+                    rm -f /tmp/feroxbuster.zip
+                else
+                    warn "feroxbuster: could not fetch release URL"
+                fi
+            fi
+        else
+            brew install feroxbuster 2>/dev/null && ok "feroxbuster installed" || warn "feroxbuster install failed"
+        fi
+    else
+        ok "feroxbuster already installed"
+    fi
+
+    # ── testssl.sh ────────────────────────────────────────────────────────
+    if ! command -v testssl.sh &>/dev/null && ! command -v testssl &>/dev/null; then
+        log "Installing testssl.sh"
+        if [ "$PLATFORM" = "linux" ]; then
+            if ${SUDO:-} apt-get install -y testssl.sh 2>/dev/null; then
+                ok "testssl.sh installed via apt"
+            else
+                local _ts_dir="/opt/testssl.sh"
+                ${SUDO:-} rm -rf "$_ts_dir"
+                ${SUDO:-} git clone --depth 1 https://github.com/drwetter/testssl.sh.git "$_ts_dir" && \
+                    ${SUDO:-} ln -sf "$_ts_dir/testssl.sh" /usr/local/bin/testssl.sh && \
+                    ok "testssl.sh installed from GitHub" || \
+                    warn "testssl.sh install failed"
+            fi
+        else
+            brew install testssl 2>/dev/null && ok "testssl installed" || warn "testssl install failed"
+        fi
+    else
+        ok "testssl.sh already installed"
+    fi
 }
 
 # ── Summary banner ─────────────────────────────────────────────────────────────
