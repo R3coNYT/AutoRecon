@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 import re
+import zipfile
 import questionary
 import logging
 from datetime import datetime
@@ -144,56 +145,31 @@ def handle_recon():
     safe_target = re.sub(r"[^a-zA-Z0-9._-]", "_", target)
     output_dir = client_folder / safe_target
 
-    # ── Backup previous scan if it exists ────────────────────────────────
+    # ── Backup previous scan results as a ZIP ─────────────────────────────
     if output_dir.exists():
-        ts = datetime.now().strftime("%Y%m%d-%H%M%S")
-        backup_root = output_dir / "backup"
-        backup_root.mkdir(parents=True, exist_ok=True)
-        backup_dest = backup_root / ts
-        backup_dest.mkdir(parents=True, exist_ok=True)
-
-        # Copy every item except backup/ and ai_scan/ into the dated backup
-        for item in output_dir.iterdir():
-            if item.name in ("backup", "ai_scan"):
-                continue
-            dest = backup_dest / item.name
-            if item.is_dir():
-                shutil.copytree(item, dest, dirs_exist_ok=True)
-            else:
-                shutil.copy2(item, dest)
-
-        # Also backup ai_scan/ content if present, into ai_scan/backup/<ts>
-        ai_scan_dir = output_dir / "ai_scan"
-        if ai_scan_dir.exists():
-            ai_backup_root = ai_scan_dir / "backup"
-            ai_backup_root.mkdir(parents=True, exist_ok=True)
-            ai_backup_dest = ai_backup_root / ts
-            ai_backup_dest.mkdir(parents=True, exist_ok=True)
-            for item in ai_scan_dir.iterdir():
-                if item.name == "backup":
-                    continue
-                dest = ai_backup_dest / item.name
-                if item.is_dir():
-                    shutil.copytree(item, dest, dirs_exist_ok=True)
-                else:
-                    shutil.copy2(item, dest)
-            # Remove old ai_scan content (keep backup folder)
-            for item in ai_scan_dir.iterdir():
-                if item.name == "backup":
-                    continue
+        # Collect items to archive (everything except backup/)
+        items_to_backup = [p for p in output_dir.iterdir() if p.name != "backup"]
+        if items_to_backup:
+            ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+            was_ai = (output_dir / "ai_scan").exists()
+            prefix = "ai_" if was_ai else ""
+            zip_name = f"{prefix}{safe_target}_{ts}.zip"
+            backup_dir = output_dir / "backup"
+            backup_dir.mkdir(parents=True, exist_ok=True)
+            zip_path = backup_dir / zip_name
+            with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+                for item in items_to_backup:
+                    if item.is_dir():
+                        for file in item.rglob("*"):
+                            zf.write(file, file.relative_to(output_dir))
+                    else:
+                        zf.write(item, item.relative_to(output_dir))
+            # Remove backed-up content (keep backup/ intact)
+            for item in items_to_backup:
                 if item.is_dir():
                     shutil.rmtree(item)
                 else:
                     item.unlink()
-
-        # Remove old scan content (keep backup/ and ai_scan/)
-        for item in output_dir.iterdir():
-            if item.name in ("backup", "ai_scan"):
-                continue
-            if item.is_dir():
-                shutil.rmtree(item)
-            else:
-                item.unlink()
     else:
         output_dir.mkdir(parents=True)
 
