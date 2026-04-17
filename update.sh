@@ -429,7 +429,7 @@ E4LEOF
     if ! command -v ldapdomaindump &>/dev/null; then
         log "Installing ldapdomaindump"
         if [ "$PLATFORM" = "linux" ]; then
-            ${SUDO:-} apt-get install -y python3-ldap3 python3-dnspython 2>/dev/null
+            ${SUDO:-} apt-get install -y python3-ldap3 python3-dnspython 2>/dev/null || true
             local _ldd_dir="/opt/ldapdomaindump"
             ${SUDO:-} rm -rf "$_ldd_dir"
             ${SUDO:-} git clone --depth 1 https://github.com/dirkjanm/ldapdomaindump.git "$_ldd_dir" && \
