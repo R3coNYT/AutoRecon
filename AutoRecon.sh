@@ -524,19 +524,16 @@ E4LEOF
     if ! command -v ldapdomaindump &>/dev/null; then
         log "Installing ldapdomaindump (LDAP/AD dump)"
         if [ "$PLATFORM" = "linux" ]; then
-            if $SUDO apt-get install -y python3-ldap3 python3-dnspython 2>/dev/null; then
-                local _ldd_dir="/opt/ldapdomaindump"
-                $SUDO rm -rf "$_ldd_dir"
-                $SUDO git clone --depth 1 https://github.com/dirkjanm/ldapdomaindump.git "$_ldd_dir" && \
-                    $SUDO tee /usr/local/bin/ldapdomaindump >/dev/null <<LDDEOF
+            $SUDO apt-get install -y python3-ldap3 python3-dnspython 2>/dev/null || true
+            local _ldd_dir="/opt/ldapdomaindump"
+            $SUDO rm -rf "$_ldd_dir"
+            $SUDO git clone --depth 1 https://github.com/dirkjanm/ldapdomaindump.git "$_ldd_dir" && \
+                $SUDO tee /usr/local/bin/ldapdomaindump >/dev/null <<LDDEOF
 #!/bin/bash
 exec python3 /opt/ldapdomaindump/ldapdomaindump/__main__.py "\$@"
 LDDEOF
-                $SUDO chmod +x /usr/local/bin/ldapdomaindump && ok "ldapdomaindump installed from GitHub" || \
-                    warn "ldapdomaindump install failed — clone manually"
-            else
-                warn "ldapdomaindump: python3-ldap3 not available"
-            fi
+            $SUDO chmod +x /usr/local/bin/ldapdomaindump && ok "ldapdomaindump installed from GitHub" || \
+                warn "ldapdomaindump install failed — clone manually"
         else
             warn "ldapdomaindump: Linux only"
         fi
