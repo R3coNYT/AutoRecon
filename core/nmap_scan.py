@@ -18,7 +18,7 @@ def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None, 
         output_dir.mkdir(parents=True, exist_ok=True)
         xml_path = output_dir / f"nmap_{safe_host}.xml"
 
-    cmd = [NMAP_BIN, "-sV", "-T4"]
+    cmd = [NMAP_BIN, "-sV", "-T4", "-Pn"]
 
     # On Windows use TCP connect scan to avoid raw-socket privilege errors
     if _WINDOWS:
