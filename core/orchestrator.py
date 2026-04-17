@@ -631,7 +631,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
               do_service_checks=True, do_takeover=True, do_screenshot=True,
               do_shodan=True, do_cloud_buckets=True, do_param_discovery=True,
               do_theharvester=True, do_jwt=True, do_dom_xss=True,
-              shodan_api_key=None, nmap_timeout=None, nmap_concurrency=2, nmap_timeout_full=None):
+              shodan_api_key=None, nmap_timeout=None, nmap_concurrency=2, nmap_timeout_full=None,
+              enable_ai=False, openai_api_key=None, openai_model="gpt-4o"):
 
     if output_dir:
         base_dir = Path(output_dir)
@@ -1017,4 +1018,40 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     log.info(f"📁 Output directory: {base_dir}")
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
-    return {"base_dir": base_dir, "json": json_path, "pdf": pdf_path if generate_pdf else None}
+    # ── AI engine ─────────────────────────────────────────────────────────
+    ai_result = None
+    if enable_ai and openai_api_key:
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        log.info("🤖 AI mode enabled — launching ChatGPT-driven deep analysis…")
+        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        try:
+            from core.tool_discovery import discover_available_tools
+            from core.ai_engine import AIEngine
+
+            available_tools = discover_available_tools()
+            log.info("[AI] %d tools detected on this machine.", len(available_tools))
+
+            engine = AIEngine(
+                api_key=openai_api_key,
+                model=openai_model,
+                max_iterations=40,
+                command_timeout=180,
+            )
+            ai_result = engine.run(
+                target=target,
+                available_tools=available_tools,
+                base_dir=base_dir,
+            )
+
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            log.info("🤖 AI scan complete — %d iteration(s)", ai_result.get("iterations", 0))
+            log.info("📄 AI report  → %s/ai_scan/ai_report.md", base_dir)
+            if ai_result.get("suggested_tools"):
+                log.info("🔧 Suggested tools to install (%d):", len(ai_result["suggested_tools"]))
+                for t in ai_result["suggested_tools"]:
+                    log.info("   ✗ %-20s — %s", t.get("name", "?"), t.get("reason", ""))
+            log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        except Exception as exc:
+            log.error("[AI] AI engine failed: %s", exc)
+
+    return {"base_dir": base_dir, "json": json_path, "pdf": pdf_path if generate_pdf else None, "ai": ai_result}
