@@ -44,6 +44,18 @@ authorized, scoped security audit. Your goals are:
    - A list of additional tools NOT currently installed that would allow \
      deeper analysis, with the reason for each.
 
+NETWORK / CIDR TARGETS — MANDATORY PROCEDURE:
+When the target is a CIDR range (e.g. 192.168.1.0/24) or an IP range \
+(e.g. 192.168.1.1-254), you MUST follow this exact order:
+  Step 1 — Host discovery first: use nmap -sn (ping scan) or a similar \
+passive/fast technique to identify ALL alive hosts in the range. Do NOT \
+skip this step or jump straight to port scanning.
+  Step 2 — Port scan each alive host individually. Do not port-scan the \
+entire range at once; iterate over each host found in Step 1.
+  Step 3 — Service enumeration and vulnerability assessment per host, \
+exactly as you would for a single-IP target.
+This ensures thorough coverage and avoids wasting iterations on dead hosts.
+
 STRICT RESPONSE FORMAT — respond ONLY with a valid JSON object, no markdown \
 fences, no extra text outside the JSON:
 
@@ -300,9 +312,21 @@ class AIEngine:
             "(top 1000 TCP). Escalate only if warranted by findings."
         )
         lang = (report_language or "english").strip()
+
+        # Detect network/CIDR target to prepend a mandatory host-discovery note
+        import re as _re
+        _is_network = bool(_re.search(r"/\d{1,2}$|[\d.]+\s*-\s*[\d.]+", target.strip()))
+        network_note = (
+            "\nNETWORK TARGET DETECTED: You MUST start with a host discovery step "
+            "(e.g. nmap -sn) to find alive hosts BEFORE doing any port scans. "
+            "Then port-scan each alive host individually.\n"
+            if _is_network else ""
+        )
+
         initial_prompt = (
             f"TARGET: {target}\n\n"
-            f"{scope_note}\n\n"
+            f"{scope_note}\n"
+            f"{network_note}\n"
             f"TOOLS AVAILABLE ON THIS MACHINE:\n{tools_str}\n\n"
             f"REPORT LANGUAGE: {lang}\n"
             f"The final_report field MUST be written entirely in {lang}. "

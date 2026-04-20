@@ -586,10 +586,12 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
                     filtered = []
 
                     for cve in cve_results:
-                        summary = cve.get("summary", "")
-                        
+                        # 'description' is the full text; 'summary' is a 240-char
+                        # truncated alias kept for backward compatibility.
+                        description = cve.get("description") or cve.get("summary", "")
+
                         if version:
-                            if is_version_affected(version, summary):
+                            if is_version_affected(version, description):
                                 cve["confirmed"] = True
                                 filtered.append(cve)
                             else:
