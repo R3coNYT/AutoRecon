@@ -632,7 +632,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
               do_shodan=True, do_cloud_buckets=True, do_param_discovery=True,
               do_theharvester=True, do_jwt=True, do_dom_xss=True,
               shodan_api_key=None, nmap_timeout=None, nmap_concurrency=2, nmap_timeout_full=None,
-              enable_ai=False, openai_api_key=None, openai_model="gpt-4o"):
+              enable_ai=False, openai_api_key=None, openai_model="gpt-4o",
+              ai_report_language="english"):
 
     if output_dir:
         base_dir = Path(output_dir)
@@ -667,6 +668,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
                 available_tools=available_tools,
                 base_dir=base_dir,
                 full_scan=full_scan,
+                report_language=ai_report_language,
             )
 
             log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
