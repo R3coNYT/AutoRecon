@@ -602,9 +602,16 @@ LDDEOF
                 local _ss_dir
                 _ss_dir="$(mktemp -d)"
                 if git clone --depth 1 https://github.com/rbsec/sslscan.git "$_ss_dir" 2>/dev/null && \
-                   make -C "$_ss_dir" static 2>/dev/null && \
-                   $SUDO install -m 755 "$_ss_dir/sslscan" /usr/local/bin/sslscan; then
-                    ok "sslscan built and installed from GitHub"
+                   make -C "$_ss_dir" static 2>/dev/null; then
+                    # Try system-wide install; fall back to ~/.local/bin
+                    if $SUDO install -m 755 "$_ss_dir/sslscan" /usr/local/bin/sslscan 2>/dev/null; then
+                        ok "sslscan built and installed to /usr/local/bin"
+                    else
+                        mkdir -p "$HOME/.local/bin"
+                        install -m 755 "$_ss_dir/sslscan" "$HOME/.local/bin/sslscan"
+                        export PATH="$HOME/.local/bin:$PATH"
+                        ok "sslscan built and installed to ~/.local/bin (no sudo available)"
+                    fi
                 else
                     warn "sslscan build failed — install manually: https://github.com/rbsec/sslscan"
                 fi
