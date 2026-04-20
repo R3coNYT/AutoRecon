@@ -270,6 +270,7 @@ class AIEngine:
         available_tools: Dict[str, str],
         base_dir: Path,
         full_scan: bool = False,
+        report_language: str = "english",
     ) -> Dict:
         """
         Drive a full AI scan of *target*.
@@ -298,10 +299,15 @@ class AIEngine:
             "SCAN SCOPE: STANDARD — focus on the most common/interesting ports "
             "(top 1000 TCP). Escalate only if warranted by findings."
         )
+        lang = (report_language or "english").strip()
         initial_prompt = (
             f"TARGET: {target}\n\n"
             f"{scope_note}\n\n"
             f"TOOLS AVAILABLE ON THIS MACHINE:\n{tools_str}\n\n"
+            f"REPORT LANGUAGE: {lang}\n"
+            f"The final_report field MUST be written entirely in {lang}. "
+            "All section headings, findings, interpretations, and recommendations "
+            f"must be in {lang}. Do not mix languages.\n\n"
             "YOUR MISSION:\n"
             "Conduct a comprehensive security reconnaissance and vulnerability "
             "assessment of the target above.\n"

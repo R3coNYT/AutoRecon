@@ -70,6 +70,7 @@ def main(cli_args=None):
     enable_ai = enable_ai_env in ("true", "1", "yes")
     openai_api_key = os.environ.get("OPENAI_API_KEY", "").strip() or None
     openai_model = os.environ.get("OPENAI_MODEL", "gpt-4o").strip()
+    ai_report_language = os.environ.get("AI_REPORT_LANGUAGE", "english").strip() or "english"
 
     if enable_ai and not openai_api_key:
         log.warning(
@@ -111,6 +112,7 @@ def main(cli_args=None):
         enable_ai=enable_ai,
         openai_api_key=openai_api_key,
         openai_model=openai_model,
+        ai_report_language=ai_report_language,
     )
 
     log.info("")
