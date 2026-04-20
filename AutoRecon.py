@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 import re
+import subprocess
 import zipfile
 import questionary
 import logging
@@ -77,6 +78,7 @@ def main_menu():
                 "Recon on a target",
                 "Recon Results",
                 "Plugins",
+                "Config",
                 "Exit"
             ],
             pointer="➤"
@@ -90,6 +92,9 @@ def main_menu():
 
         elif choice == "Plugins":
             handle_plugins()
+
+        elif choice == "Config":
+            handle_config()
 
         elif choice == "Exit":
             console.print("\n[bold red]Exiting...[/bold red]")
@@ -202,6 +207,54 @@ def handle_recon():
     recon_main(args)
 
     console.print("\n[bold green]Scan completed.[/bold green]")
+    questionary.press_any_key_to_continue().ask()
+
+
+# =========================
+# CONFIG EDITOR
+# =========================
+def handle_config():
+    # Locate .env — same logic as main.py
+    env_file = BASE_DIR / ".env"
+    if not env_file.exists():
+        env_example = BASE_DIR / ".env.example"
+        if env_example.exists():
+            shutil.copy(env_example, env_file)
+            console.print(f"[bold yellow].env created from .env.example[/bold yellow]")
+        else:
+            env_file.touch()
+            console.print(f"[bold yellow].env created (empty)[/bold yellow]")
+
+    console.print(f"\n[bold cyan]Editing:[/bold cyan] {env_file}")
+    console.print("[dim]Save and close the editor to return to the menu.[/dim]\n")
+
+    # Pick editor: honour $EDITOR, fall back to platform default
+    editor = os.environ.get("EDITOR", "")
+    if not editor:
+        if sys.platform.startswith("win"):
+            editor = "notepad"
+        elif shutil.which("nano"):
+            editor = "nano"
+        elif shutil.which("vi"):
+            editor = "vi"
+        else:
+            editor = "vi"
+
+    try:
+        subprocess.call([editor, str(env_file)])
+    except FileNotFoundError:
+        console.print(f"[bold red]Editor '{editor}' not found.[/bold red] Set the EDITOR env var.")
+        questionary.press_any_key_to_continue().ask()
+        return
+
+    # Reload .env into os.environ so the new config takes effect immediately
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(env_file, override=True)
+        console.print("\n[bold green].env reloaded successfully.[/bold green]")
+    except ImportError:
+        console.print("\n[bold yellow].env saved but python-dotenv not installed — restart to apply changes.[/bold yellow]")
+
     questionary.press_any_key_to_continue().ask()
 
 
