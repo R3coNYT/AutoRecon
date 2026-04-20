@@ -71,6 +71,19 @@ function Save-UserData {
         $script:SavedNameContent = Get-Content $namePath -Raw -Encoding UTF8
         Write-Info "Saved personalize_pdf/name.txt"
     }
+
+    # Snapshot keys from current .env.example BEFORE the update so we can
+    # detect additions/removals when merging into .env afterwards.
+    $script:OldEnvExampleKeys = @{}
+    $exPath = Join-Path $InstallDir ".env.example"
+    if (Test-Path $exPath) {
+        foreach ($line in (Get-Content $exPath -Encoding UTF8)) {
+            if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=') {
+                $script:OldEnvExampleKeys[$Matches[1]] = $true
+            }
+        }
+        Write-Info "Saved .env.example key list ($($script:OldEnvExampleKeys.Count) keys)"
+    }
 }
 
 function Restore-UserData {
@@ -142,7 +155,8 @@ function Update-Code {
         "AutoRecon.py", "main.py",
         "requirements.txt", "README.md",
         "AutoRecon.sh", "install.ps1",
-        "update.ps1", "update.sh"
+        "update.ps1", "update.sh",
+        ".env.example"
     )
     foreach ($f in $rootFiles) {
         if (Invoke-Git @("cat-file", "-e", "origin/main:$f")) {
@@ -385,6 +399,87 @@ function Show-Summary {
     Write-Host ""
 }
 
+# --- Merge .env.example changes into .env ------------------------------------
+
+function Merge-EnvFile {
+    param([string]$InstallDir)
+
+    $envPath     = Join-Path $InstallDir ".env"
+    $examplePath = Join-Path $InstallDir ".env.example"
+
+    if (-not (Test-Path $envPath))     { return }
+    if (-not (Test-Path $examplePath)) { return }
+
+    # Build section map: key -> [preceding comment/blank lines + key=value line]
+    # Ordered dict preserves .env.example order when appending new keys.
+    $exampleSections = [ordered]@{}
+    $buf = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in (Get-Content $examplePath -Encoding UTF8)) {
+        if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=') {
+            $exampleSections[$Matches[1]] = [string[]](@($buf.ToArray()) + @($line))
+            $buf = [System.Collections.Generic.List[string]]::new()
+        } else {
+            $buf.Add($line)
+        }
+    }
+
+    # Diff vs the snapshot taken before the update
+    $addedSet   = [System.Collections.Generic.HashSet[string]]::new()
+    $removedSet = [System.Collections.Generic.HashSet[string]]::new()
+    foreach ($key in $exampleSections.Keys) {
+        if (-not $script:OldEnvExampleKeys.ContainsKey($key)) {
+            $addedSet.Add($key)   | Out-Null
+        }
+    }
+    foreach ($key in $script:OldEnvExampleKeys.Keys) {
+        if (-not $exampleSections.Contains($key)) {
+            $removedSet.Add($key) | Out-Null
+        }
+    }
+
+    if ($addedSet.Count -eq 0 -and $removedSet.Count -eq 0) {
+        Write-Info ".env is already in sync with .env.example"
+        return
+    }
+
+    Write-Log "Merging .env.example changes into .env..."
+
+    # Read .env and drop keys that were removed from .env.example
+    $result = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in (Get-Content $envPath -Encoding UTF8)) {
+        if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=' -and $removedSet.Contains($Matches[1])) {
+            Write-Info "  Removed key: $($Matches[1])"
+            continue
+        }
+        $result.Add($line)
+    }
+
+    # Collect keys already present in .env (after potential removals)
+    $existingKeys = [System.Collections.Generic.HashSet[string]]::new()
+    foreach ($line in $result) {
+        if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=') {
+            $existingKeys.Add($Matches[1]) | Out-Null
+        }
+    }
+
+    # Append new keys (in .env.example order) not yet in .env
+    $anyAdded = $false
+    foreach ($key in $exampleSections.Keys) {
+        if (-not $addedSet.Contains($key))  { continue }
+        if ($existingKeys.Contains($key))   { continue }
+        foreach ($sLine in $exampleSections[$key]) { $result.Add($sLine) }
+        Write-Ok "  Added key: $key"
+        $anyAdded = $true
+    }
+
+    if ($removedSet.Count -gt 0 -or $anyAdded) {
+        [System.IO.File]::WriteAllLines($envPath, $result, [System.Text.Encoding]::UTF8)
+        Write-Ok ".env updated"
+    } else {
+        Write-Info ".env is already in sync with .env.example"
+    }
+}
+
 # --- Main --------------------------------------------------------------------
 
 Write-Host ""
@@ -406,6 +501,7 @@ Invoke-SelfUpdate -InstallDir $installDir   # Re-execs with new script if update
 Save-UserData    -InstallDir $installDir
 $updated = Update-Code -InstallDir $installDir
 Restore-UserData -InstallDir $installDir
+Merge-EnvFile    -InstallDir $installDir
 
 Show-UserPlugins -InstallDir $installDir
 
