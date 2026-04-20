@@ -463,11 +463,25 @@ function Merge-EnvFile {
     }
 
     # Append new keys (in .env.example order) not yet in .env
+    # Dedup set: skip comment/blank lines already present in .env to avoid
+    # re-adding e.g. the '# OPENAI_MODEL=gpt-4o' block that a user may have
+    # already uncommented and customised.
+    $existingLineSet = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($l in $result) { $existingLineSet.Add($l) | Out-Null }
+
     $anyAdded = $false
     foreach ($key in $exampleSections.Keys) {
         if (-not $addedSet.Contains($key))  { continue }
         if ($existingKeys.Contains($key))   { continue }
-        foreach ($sLine in $exampleSections[$key]) { $result.Add($sLine) }
+        $secLines = $exampleSections[$key]
+        # Comment/blank lines preceding the key= line — skip if already in .env
+        for ($i = 0; $i -lt ($secLines.Length - 1); $i++) {
+            if (-not $existingLineSet.Contains($secLines[$i])) {
+                $result.Add($secLines[$i])
+            }
+        }
+        # Always append the key=value line itself
+        $result.Add($secLines[-1])
         Write-Ok "  Added key: $key"
         $anyAdded = $true
     }
