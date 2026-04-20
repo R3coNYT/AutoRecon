@@ -260,7 +260,8 @@ $env:Path += ";$env:USERPROFILE\go\bin"
 foreach ($tool in @(
     @{ Name = "gowitness"; Module = "github.com/sensepost/gowitness@latest" },
     @{ Name = "subfinder"; Module = "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest" },
-    @{ Name = "gobuster"; Module = "github.com/OJ/gobuster/v3@latest" }
+    @{ Name = "gobuster"; Module = "github.com/OJ/gobuster/v3@latest" },
+    @{ Name = "amass";    Module = "github.com/owasp-amass/amass/v4/...@master" }
 )) {
     if (Test-Cmd $tool.Name) {
         Write-Ok "$($tool.Name) already installed"
@@ -273,6 +274,38 @@ foreach ($tool in @(
             Write-Ok "$($tool.Name) installed"
         }
     }
+}
+
+# --- sslscan (binary download from GitHub releases) ---------------------------
+if (!(Test-Cmd "sslscan")) {
+    Write-Info "Installing sslscan"
+    try {
+        $rel   = Invoke-RestMethod -Uri "https://api.github.com/repos/rbsec/sslscan/releases/latest" -UseBasicParsing
+        $asset = $rel.assets | Where-Object { $_.name -match "win64\.zip$" } | Select-Object -First 1
+        if ($asset) {
+            $TmpZip = "$env:TEMP\sslscan.zip"
+            $TmpDir = "$env:TEMP\sslscan-extract"
+            if (Test-Path $TmpDir) { Remove-Item $TmpDir -Recurse -Force }
+            Invoke-Retry -Attempts 3 -Script { Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $TmpZip }
+            Expand-Archive -Path $TmpZip -DestinationPath $TmpDir -Force
+            $exe = Get-ChildItem $TmpDir -Recurse -Filter "sslscan.exe" | Select-Object -First 1
+            if ($exe) {
+                New-Directory "C:\Tools\bin"
+                Copy-Item $exe.FullName "C:\Tools\bin\sslscan.exe" -Force
+                Write-Ok "sslscan installed"
+            } else {
+                Write-Warn "sslscan: sslscan.exe not found in archive"
+            }
+            Remove-Item $TmpZip -Force -ErrorAction SilentlyContinue
+            Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
+        } else {
+            Write-Warn "sslscan: no Windows 64-bit release found on GitHub"
+        }
+    } catch {
+        Write-Warn "sslscan install failed (optional): $_"
+    }
+} else {
+    Write-Ok "sslscan already installed"
 }
 
 $BatContent = @"

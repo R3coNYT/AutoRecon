@@ -275,7 +275,8 @@ function Update-OptionalTools {
         $goTools = @(
             @{ Name = "gowitness"; Module = "github.com/sensepost/gowitness@latest" },
             @{ Name = "subfinder"; Module = "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest" },
-            @{ Name = "gobuster"; Module = "github.com/OJ/gobuster/v3@latest" }
+            @{ Name = "gobuster"; Module = "github.com/OJ/gobuster/v3@latest" },
+            @{ Name = "amass";    Module = "github.com/owasp-amass/amass/v4/...@master" }
         )
         foreach ($tool in $goTools) {
             if (Get-Command $tool.Name -ErrorAction SilentlyContinue) {
@@ -291,6 +292,70 @@ function Update-OptionalTools {
             }
         }
     }
+
+    # ── sslscan (binary download from GitHub releases) ─────────────────────────
+    if (Get-Command sslscan -ErrorAction SilentlyContinue) {
+        Write-Ok "sslscan already installed"
+    } else {
+        Write-Info "Installing sslscan"
+        try {
+            $rel   = Invoke-RestMethod -Uri "https://api.github.com/repos/rbsec/sslscan/releases/latest" -UseBasicParsing
+            $asset = $rel.assets | Where-Object { $_.name -match "win64\.zip$" } | Select-Object -First 1
+            if ($asset) {
+                $TmpZip = "$env:TEMP\sslscan.zip"
+                $TmpDir = "$env:TEMP\sslscan-extract"
+                if (Test-Path $TmpDir) { Remove-Item $TmpDir -Recurse -Force }
+                Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $TmpZip
+                Expand-Archive -Path $TmpZip -DestinationPath $TmpDir -Force
+                $exe = Get-ChildItem $TmpDir -Recurse -Filter "sslscan.exe" | Select-Object -First 1
+                if ($exe) {
+                    $null = New-Item -ItemType Directory -Path "C:\Tools\bin" -Force
+                    Copy-Item $exe.FullName "C:\Tools\bin\sslscan.exe" -Force
+                    Write-Ok "sslscan installed"
+                } else {
+                    Write-Warn "sslscan: sslscan.exe not found in archive"
+                }
+                Remove-Item $TmpZip -Force -ErrorAction SilentlyContinue
+                Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
+            } else {
+                Write-Warn "sslscan: no Windows 64-bit release found on GitHub"
+            }
+        } catch {
+            Write-Warn "sslscan install failed (optional): $_"
+        }
+    }
+}
+
+# --- Self-update (re-exec if update.ps1 itself changed on GitHub) ------------
+
+function Invoke-SelfUpdate {
+    param([string]$InstallDir)
+
+    # $PSCommandPath is the full path of the running script (PS 3+)
+    $thisScript = $PSCommandPath
+    if (-not $thisScript -or -not (Test-Path $thisScript)) { return }
+
+    Set-Location $InstallDir
+
+    # Remote blob hash from origin/main
+    $lsLine = Get-GitOutput @("ls-tree", "origin/main", "--", "update.ps1") | Select-Object -First 1
+    if (-not $lsLine) { return }
+    $remoteBlob = ($lsLine -split '\s+')[2].Trim()
+
+    # Local blob hash (git-computed SHA-1 of the working-tree file)
+    $localBlob = (Get-GitOutput @("hash-object", $thisScript) | Select-Object -First 1).Trim()
+
+    if (-not $remoteBlob -or -not $localBlob -or $remoteBlob -eq $localBlob) { return }
+
+    Write-Log "update.ps1 has changed on GitHub — applying self-update and restarting..."
+    Invoke-Git @("checkout", "origin/main", "--", "update.ps1") | Out-Null
+    Write-Ok "New update.ps1 applied"
+    Write-Host ""
+
+    # Re-execute the freshly downloaded script in a new PS process, then exit.
+    $newScript = Join-Path $InstallDir "update.ps1"
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $newScript
+    exit $LASTEXITCODE
 }
 
 # --- Summary banner -----------------------------------------------------------
@@ -332,6 +397,11 @@ Assert-Git
 $installDir = Find-InstallDir
 Write-Info "Install dir: $installDir"
 Write-Host ""
+
+# Early fetch so we can detect whether update.ps1 itself has changed.
+Set-Location $installDir
+Invoke-Git @("fetch", "origin", "main") | Out-Null
+Invoke-SelfUpdate -InstallDir $installDir   # Re-execs with new script if update.ps1 changed
 
 Save-UserData    -InstallDir $installDir
 $updated = Update-Code -InstallDir $installDir

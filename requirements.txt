@@ -34,3 +34,6 @@ openai
 # AI report PDF export
 weasyprint
 markdown
+
+# Infrastructure exploitation / deeper assessment (impacket-based modules)
+impacket

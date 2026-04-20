@@ -492,6 +492,48 @@ LDDEOF
     else
         ok "testssl.sh already installed"
     fi
+
+    # ── sslscan ───────────────────────────────────────────────────────────────
+    if ! command -v sslscan &>/dev/null; then
+        log "Installing sslscan"
+        if [ "$PLATFORM" = "linux" ]; then
+            ${SUDO:-} apt-get install -y sslscan 2>/dev/null && ok "sslscan installed" || warn "sslscan install failed"
+        else
+            brew install sslscan 2>/dev/null && ok "sslscan installed" || warn "sslscan install failed"
+        fi
+    else
+        ok "sslscan already installed"
+    fi
+}
+
+# ── Self-update (re-exec if update.sh itself changed on GitHub) ────────────────────
+
+self_update() {
+    cd "$INSTALL_DIR"
+
+    # Quick fetch to get the current remote state (idempotent after the main fetch)
+    git fetch origin main --quiet 2>/dev/null || return 0
+
+    local script_name="update.sh"
+    local this_script
+    this_script="$(realpath "${BASH_SOURCE[0]:-$0}")"
+
+    # git ls-tree format: "100755 blob <blob-sha>\tupdate.sh"
+    local remote_blob local_blob
+    remote_blob="$(git ls-tree origin/main -- "$script_name" 2>/dev/null | awk '{print $3}')"
+    local_blob="$(git hash-object "$this_script" 2>/dev/null)"
+
+    if [ -z "$remote_blob" ] || [ -z "$local_blob" ] || [ "$remote_blob" = "$local_blob" ]; then
+        return 0  # already up to date or cannot compare
+    fi
+
+    log "update.sh has changed on GitHub — applying self-update and restarting..."
+    git checkout origin/main -- "$script_name" 2>/dev/null
+    chmod +x "$this_script"
+    ok "New update.sh applied"
+    echo
+    # Replace the current process with the new script, forwarding all arguments
+    exec bash "$this_script" "$@"
 }
 
 # ── Summary banner ─────────────────────────────────────────────────────────────
@@ -534,6 +576,9 @@ find_install_dir
 info "Install dir: $INSTALL_DIR"
 info "Platform   : $PLATFORM"
 echo
+
+# Check if update.sh itself was updated on GitHub and re-exec if so.
+self_update "$@"
 
 save_user_data
 

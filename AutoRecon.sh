@@ -589,6 +589,22 @@ LDDEOF
     else
         ok "testssl.sh already installed"
     fi
+
+    # ── sslscan ───────────────────────────────────────────────────────────
+    if ! command -v sslscan &>/dev/null; then
+        log "Installing sslscan (TLS cipher/protocol scanner)"
+        if [ "$PLATFORM" = "linux" ]; then
+            if $SUDO apt-get install -y sslscan 2>/dev/null; then
+                ok "sslscan installed via apt"
+            else
+                warn "sslscan install failed — run: apt install sslscan"
+            fi
+        else
+            brew install sslscan 2>/dev/null && ok "sslscan installed" || warn "sslscan install failed"
+        fi
+    else
+        ok "sslscan already installed"
+    fi
 }
 
 create_global_command_linux() {
