@@ -639,13 +639,23 @@ for line in env_lines:
 existing = {KEY_RE.match(l).group(1) for l in result if KEY_RE.match(l)}
 
 # Append new keys (in .env.example order) not yet in .env
+# Dedup set: skip comment/blank lines already present in .env to avoid
+# re-adding e.g. the '# OPENAI_MODEL=gpt-4o' block that a user may have
+# already uncommented and customised.
+existing_lines = set(result)
+
 any_added = False
 for key, sec_lines in sections.items():
     if key not in added_keys:
         continue
     if key in existing:
         continue
-    result.extend(sec_lines)
+    # Comment/blank lines preceding the key= line — skip if already in .env
+    for sec_line in sec_lines[:-1]:
+        if sec_line not in existing_lines:
+            result.append(sec_line)
+    # Always append the key=value line itself
+    result.append(sec_lines[-1])
     print("[+]   Added key: %s" % key)
     any_added = True
 
