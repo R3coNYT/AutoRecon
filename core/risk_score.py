@@ -49,17 +49,22 @@ def compute_risk_score(sub_report: dict):
     high = 0
 
     for v in cves:
-        cvss = (v.get("cvss") or {})
-        s = cvss.get("score")
+        # New flat format (cvss_score) — fall back to old nested format for
+        # any results that were cached before the cve_nvd rewrite.
+        s = v.get("cvss_score")
+        if s is None:
+            s = (v.get("cvss") or {}).get("score")
+        # Prefer the explicit severity label when present
+        sev = (v.get("severity") or "").upper()
         try:
             s = float(s)
             if s > max_cvss:
                 max_cvss = s
-            if s >= 9.0:
+            if sev == "CRITICAL" or s >= 9.0:
                 critical += 1
-            elif s >= 7.0:
+            elif sev == "HIGH" or s >= 7.0:
                 high += 1
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     if critical:
