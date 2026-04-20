@@ -108,12 +108,22 @@ assert_git() {
 SAVED_NAME_CONTENT=""
 NAME_PATH=""
 APPLIED_COMMIT=""
+OLD_ENV_KEYS_FILE=""
 
 save_user_data() {
     NAME_PATH="$INSTALL_DIR/personalize_pdf/name.txt"
     if [ -f "$NAME_PATH" ]; then
         SAVED_NAME_CONTENT="$(cat "$NAME_PATH")"
         info "Saved personalize_pdf/name.txt"
+    fi
+
+    # Snapshot keys from current .env.example BEFORE the update so we can
+    # detect additions/removals when merging into .env afterwards.
+    if [ -f "$INSTALL_DIR/.env.example" ]; then
+        OLD_ENV_KEYS_FILE="$(mktemp)"
+        grep -E '^\s*[A-Za-z_][A-Za-z0-9_]*\s*=' "$INSTALL_DIR/.env.example" \
+            | sed 's/^\s*\([A-Za-z_][A-Za-z0-9_]*\)\s*=.*/\1/' > "$OLD_ENV_KEYS_FILE"
+        info "Saved .env.example key list"
     fi
 }
 
@@ -157,7 +167,8 @@ update_code() {
 
     # ── Root-level code files ─────────────────────────────────────────────────
     local root_files=("AutoRecon.py" "main.py" "requirements.txt" "README.md"
-                      "AutoRecon.sh" "install.ps1" "update.ps1" "update.sh")
+                      "AutoRecon.sh" "install.ps1" "update.ps1" "update.sh"
+                      ".env.example")
     for f in "${root_files[@]}"; do
         if git cat-file -e "origin/main:$f" 2>/dev/null; then
             git checkout origin/main -- "$f" 2>/dev/null || true
@@ -558,6 +569,98 @@ self_update() {
     exec bash "$this_script" "$@"
 }
 
+# ── Merge .env.example changes into .env ──────────────────────────────────────
+
+merge_env_file() {
+    local env_path="$INSTALL_DIR/.env"
+    local example_path="$INSTALL_DIR/.env.example"
+
+    [ -f "$env_path" ]     || return 0
+    [ -f "$example_path" ] || return 0
+
+    if ! command -v python3 &>/dev/null; then
+        warn ".env merge skipped — python3 not found"
+        return 0
+    fi
+
+    log "Merging .env.example changes into .env..."
+
+    python3 - "$env_path" "$example_path" "${OLD_ENV_KEYS_FILE:-}" <<'PYEOF'
+import sys, os, re
+
+env_path      = sys.argv[1]
+example_path  = sys.argv[2]
+old_keys_file = sys.argv[3] if len(sys.argv) > 3 else ""
+
+KEY_RE = re.compile(r'^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=')
+
+# Load old official keys (snapshot taken before the update)
+old_official = set()
+if old_keys_file and os.path.isfile(old_keys_file):
+    with open(old_keys_file) as f:
+        old_official = {line.strip() for line in f if line.strip()}
+
+# Parse .env.example into ordered sections: key -> [preceding lines + key line]
+# dict preserves insertion order in Python 3.7+
+sections = {}
+buf = []
+with open(example_path) as f:
+    for raw in f:
+        line = raw.rstrip('\n')
+        m = KEY_RE.match(line)
+        if m:
+            sections[m.group(1)] = buf + [line]
+            buf = []
+        else:
+            buf.append(line)
+
+new_official = set(sections.keys())
+# Only remove keys that were in the OLD official set and are now gone
+removed_keys = (old_official - new_official) if old_official else set()
+added_keys   = new_official - old_official
+
+if not added_keys and not removed_keys:
+    print("[i] .env is already in sync with .env.example")
+    sys.exit(0)
+
+# Read .env and drop keys that were removed from .env.example
+with open(env_path) as f:
+    env_lines = f.read().splitlines()
+
+result = []
+for line in env_lines:
+    m = KEY_RE.match(line)
+    if m and m.group(1) in removed_keys:
+        print("[i]   Removed key: %s" % m.group(1))
+        continue
+    result.append(line)
+
+# Keys already present in .env (after removal)
+existing = {KEY_RE.match(l).group(1) for l in result if KEY_RE.match(l)}
+
+# Append new keys (in .env.example order) not yet in .env
+any_added = False
+for key, sec_lines in sections.items():
+    if key not in added_keys:
+        continue
+    if key in existing:
+        continue
+    result.extend(sec_lines)
+    print("[+]   Added key: %s" % key)
+    any_added = True
+
+if removed_keys or any_added:
+    content = '\n'.join(result)
+    if content and not content.endswith('\n'):
+        content += '\n'
+    with open(env_path, 'w') as f:
+        f.write(content)
+    print("[+] .env updated")
+else:
+    print("[i] .env is already in sync with .env.example")
+PYEOF
+}
+
 # ── Summary banner ─────────────────────────────────────────────────────────────
 
 print_summary() {
@@ -614,8 +717,10 @@ if update_code; then
 fi
 
 restore_user_data
+merge_env_file
 show_user_plugins
 update_deps
 update_optional_tools
 chmod +x "$INSTALL_DIR/update.sh"
 print_summary "$UPDATED"
+[ -n "$OLD_ENV_KEYS_FILE" ] && rm -f "$OLD_ENV_KEYS_FILE"
