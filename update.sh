@@ -497,7 +497,22 @@ LDDEOF
     if ! command -v sslscan &>/dev/null; then
         log "Installing sslscan"
         if [ "$PLATFORM" = "linux" ]; then
-            ${SUDO:-} apt-get install -y sslscan 2>/dev/null && ok "sslscan installed" || warn "sslscan install failed"
+            if ${SUDO:-} apt-get install -y sslscan 2>/dev/null; then
+                ok "sslscan installed via apt"
+            else
+                warn "apt install failed — building sslscan from source (github.com/rbsec/sslscan)"
+                ${SUDO:-} apt-get install -y git gcc make libssl-dev 2>/dev/null || true
+                local _ss_dir
+                _ss_dir="$(mktemp -d)"
+                if git clone --depth 1 https://github.com/rbsec/sslscan.git "$_ss_dir" 2>/dev/null && \
+                   make -C "$_ss_dir" static 2>/dev/null && \
+                   ${SUDO:-} install -m 755 "$_ss_dir/sslscan" /usr/local/bin/sslscan; then
+                    ok "sslscan built and installed from GitHub"
+                else
+                    warn "sslscan build failed — install manually: https://github.com/rbsec/sslscan"
+                fi
+                rm -rf "$_ss_dir"
+            fi
         else
             brew install sslscan 2>/dev/null && ok "sslscan installed" || warn "sslscan install failed"
         fi
