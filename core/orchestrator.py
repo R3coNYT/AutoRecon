@@ -67,7 +67,7 @@ def risk_badge(level, score):
     else:
         return f"[ {level} ] ({score})"
 
-def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True, do_dir_bruteforce=True, do_dns_audit=True, do_service_checks=True, do_takeover=True, do_screenshot=True, do_shodan=True, do_cloud_buckets=True, do_param_discovery=True, do_theharvester=True, do_jwt=True, do_dom_xss=True, shodan_api_key=None, nmap_semaphore=None, nmap_timeout=None, nmap_timeout_full=None):
+def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int, do_crawl: bool, use_nvd: bool, base_dir: Path, full_scan=False, do_xss=True, do_sqli=True, do_dir_bruteforce=True, do_dns_audit=True, do_service_checks=True, do_takeover=True, do_screenshot=True, do_shodan=True, do_cloud_buckets=True, do_param_discovery=True, do_theharvester=True, do_jwt=True, do_dom_xss=True, shodan_api_key=None, nmap_semaphore=None, nmap_timeout=None, nmap_timeout_full=None, nmap_mode="auto", nmap_custom_args=None):
     log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     with step_timer(f"Full analysis for {sub}"):
         res = {"subdomain": sub}
@@ -161,7 +161,10 @@ def _analyze_subdomain(sub: str, timeout: int, crawl_depth: int, max_pages: int,
             with _sem:
                 with yaspin(Spinners.dots, text=f"Nmap scanning {sub}...") as spinner:
 
-                    if ports:
+                    if nmap_mode in ("full", "top200", "custom"):
+                        # Explicit mode from .env (Config) overrides masscan-driven targeting
+                        nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", mode=nmap_mode, custom_args=nmap_custom_args, timeout=nmap_timeout, timeout_full=nmap_timeout_full)
+                    elif ports:
                         port_str = ",".join(map(str, ports))
                         nmap_txt, xml_path = nmap_service_scan(sub, base_dir / "nmap", full_scan=False, ports=port_str, timeout=nmap_timeout)
                     else:
@@ -634,6 +637,7 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
               do_shodan=True, do_cloud_buckets=True, do_param_discovery=True,
               do_theharvester=True, do_jwt=True, do_dom_xss=True,
               shodan_api_key=None, nmap_timeout=None, nmap_concurrency=2, nmap_timeout_full=None,
+              nmap_mode="auto", nmap_custom_args=None,
               enable_ai=False, openai_api_key=None, openai_model="gpt-4o",
               ai_report_language="english"):
 
@@ -808,6 +812,10 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
     total_cve_found = 0
 
     _nmap_semaphore = threading.Semaphore(max(1, nmap_concurrency))
+    if nmap_mode == "custom":
+        log.info("Nmap mode: custom → nmap %s", nmap_custom_args)
+    else:
+        log.info("Nmap mode: %s", nmap_mode)
 
     with ThreadPoolExecutor(max_workers=max(2, threads)) as ex:
         _extra_kwargs = dict(
@@ -826,6 +834,8 @@ def run_audit(target: str, threads: int, crawl_depth: int, max_pages: int, timeo
             nmap_semaphore=_nmap_semaphore,
             nmap_timeout=nmap_timeout,
             nmap_timeout_full=nmap_timeout_full,
+            nmap_mode=nmap_mode,
+            nmap_custom_args=nmap_custom_args,
         )
         if subs:
             futures = []
