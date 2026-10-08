@@ -39,7 +39,8 @@ def resolve_nmap_mode_from_env():
     Priority: CUSTOM_NMAP_SCAN > FULL_NMAP_SCAN > TOP_200_NMAP_SCAN > auto.
     """
     custom_args = _env_get("CUSTOM_NMAP_ARGS").strip()
-    if _env_bool("CUSTOM_NMAP_SCAN") and custom_args:
+    # Empty CUSTOM_NMAP_ARGS is valid: runs plain "nmap <target>"
+    if _env_bool("CUSTOM_NMAP_SCAN"):
         return "custom", custom_args
     if _env_bool("FULL_NMAP_SCAN"):
         return "full", custom_args
@@ -128,8 +129,6 @@ def nmap_service_scan(host: str, output_dir: Path, full_scan=False, ports=None, 
     # Legacy callers pass full_scan/ports instead of an explicit mode
     if mode is None or mode == "auto":
         mode = "ports" if ports else ("full" if full_scan else "top200")
-    if mode == "custom" and not (custom_args or "").strip():
-        mode = "top200"
 
     safe_host = host.replace("/", "_").replace(":", "_")
     xml_path = ""

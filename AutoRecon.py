@@ -230,7 +230,7 @@ _NMAP_MODE_LABELS = {
 
 def _describe_nmap_mode(mode, custom_args=""):
     if mode == "custom":
-        return f"Custom → nmap {custom_args} <target>"
+        return f"Custom → nmap {custom_args + ' ' if custom_args else ''}<target>"
     return _NMAP_MODE_LABELS.get(mode, mode)
 
 
@@ -313,10 +313,9 @@ def handle_nmap_config():
     if mode == "custom":
         console.print("[dim]Any nmap options. The target and -oX <file> are appended automatically.[/dim]")
         console.print("[dim]Example: -sV -sC -p 1-10000 -T4 --script vuln[/dim]")
+        console.print("[dim]Leave empty to run plain: nmap <target>[/dim]")
 
         def _validate(text):
-            if not text.strip():
-                return "Arguments cannot be empty"
             try:
                 split_custom_args(text)
             except ValueError as e:
@@ -325,7 +324,7 @@ def handle_nmap_config():
 
         custom_args = questionary.text(
             "Custom nmap arguments:",
-            default=current_args or "-sV -T4 --top-ports 1000",
+            default=current_args or "",
             validate=_validate
         ).ask()
         if custom_args is None:
