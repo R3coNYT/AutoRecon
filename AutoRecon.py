@@ -15,6 +15,7 @@ from core.banner import print_banner
 from core.plugin_loader import load_plugins
 from core.result_browser import browse_results
 from core.client_folder_select import select_or_create_client_folder
+from core.nmap_scan import resolve_nmap_mode_from_env, split_custom_args
 
 BASE_DIR = Path(__file__).resolve().parent
 RESULTS_DIR = BASE_DIR / "results"
@@ -183,10 +184,16 @@ def handle_recon():
     except Exception:
         pass
 
-    full_scan = questionary.confirm(
-        "Run FULL Nmap scan (all ports)?",
-        default=False
-    ).ask()
+    # Nmap mode set in Config (.env) is used as-is; otherwise ask as before
+    nmap_mode, nmap_custom_args = resolve_nmap_mode_from_env()
+    if nmap_mode == "auto":
+        full_scan = questionary.confirm(
+            "Run FULL Nmap scan (all ports)?",
+            default=False
+        ).ask()
+    else:
+        full_scan = False
+        console.print(f"[bold cyan]Nmap mode (from Config):[/bold cyan] {_describe_nmap_mode(nmap_mode, nmap_custom_args)}")
 
     args = [
         "-t", target,
@@ -213,7 +220,21 @@ def handle_recon():
 # =========================
 # CONFIG EDITOR
 # =========================
-def handle_config():
+_NMAP_MODE_LABELS = {
+    "auto":   "Auto — masscan ports, else full scan (default)",
+    "full":   "Full scan — all 65535 ports (-p-)",
+    "top200": "Top 200 — 200 most common ports",
+    "custom": "Custom — your own nmap arguments",
+}
+
+
+def _describe_nmap_mode(mode, custom_args=""):
+    if mode == "custom":
+        return f"Custom → nmap {custom_args} <target>"
+    return _NMAP_MODE_LABELS.get(mode, mode)
+
+
+def _ensure_env_file():
     # Locate .env — same logic as main.py
     env_file = BASE_DIR / ".env"
     if not env_file.exists():
@@ -224,6 +245,106 @@ def handle_config():
         else:
             env_file.touch()
             console.print(f"[bold yellow].env created (empty)[/bold yellow]")
+    return env_file
+
+
+def _set_env_values(env_file, values):
+    """Update KEY=value lines in .env (case-insensitive key match), appending missing keys."""
+    lines = env_file.read_text(encoding="utf-8").splitlines()
+    remaining = dict(values)
+    for i, line in enumerate(lines):
+        m = re.match(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=", line)
+        if not m:
+            continue
+        for key in list(remaining):
+            if m.group(1).upper() == key:
+                lines[i] = f"{key}={remaining.pop(key)}"
+                break
+    if remaining:
+        if lines and lines[-1].strip():
+            lines.append("")
+        if not any("Nmap" in l and l.lstrip().startswith("#") for l in lines):
+            lines.append("# ── Nmap ────────────────────────────────────────────────────────────────")
+        lines += [f"{k}={v}" for k, v in remaining.items()]
+    env_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _reload_env(env_file):
+    # Reload .env into os.environ so the new config takes effect immediately
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(env_file, override=True)
+        console.print("\n[bold green].env reloaded successfully.[/bold green]")
+    except ImportError:
+        console.print("\n[bold yellow].env saved but python-dotenv not installed — restart to apply changes.[/bold yellow]")
+
+
+def handle_config():
+    choice = questionary.select(
+        "Config:",
+        choices=["Nmap scan settings", "Edit .env file", "⬅ Back"],
+        pointer="➤"
+    ).ask()
+
+    if choice == "Nmap scan settings":
+        handle_nmap_config()
+    elif choice == "Edit .env file":
+        handle_env_editor()
+
+
+def handle_nmap_config():
+    env_file = _ensure_env_file()
+    current_mode, current_args = resolve_nmap_mode_from_env()
+
+    console.print(f"\n[bold cyan]Current Nmap mode:[/bold cyan] {_describe_nmap_mode(current_mode, current_args)}\n")
+
+    labels = list(_NMAP_MODE_LABELS.values())
+    choice = questionary.select(
+        "Select the Nmap scan mode:",
+        choices=labels + ["⬅ Back"],
+        default=_NMAP_MODE_LABELS[current_mode],
+        pointer="➤"
+    ).ask()
+    if not choice or choice == "⬅ Back":
+        return
+    mode = next(k for k, v in _NMAP_MODE_LABELS.items() if v == choice)
+
+    custom_args = current_args
+    if mode == "custom":
+        console.print("[dim]Any nmap options. The target and -oX <file> are appended automatically.[/dim]")
+        console.print("[dim]Example: -sV -sC -p 1-10000 -T4 --script vuln[/dim]")
+
+        def _validate(text):
+            if not text.strip():
+                return "Arguments cannot be empty"
+            try:
+                split_custom_args(text)
+            except ValueError as e:
+                return f"Invalid arguments: {e}"
+            return True
+
+        custom_args = questionary.text(
+            "Custom nmap arguments:",
+            default=current_args or "-sV -T4 --top-ports 1000",
+            validate=_validate
+        ).ask()
+        if custom_args is None:
+            return
+        custom_args = custom_args.strip()
+
+    _set_env_values(env_file, {
+        "FULL_NMAP_SCAN":    "true" if mode == "full" else "false",
+        "TOP_200_NMAP_SCAN": "true" if mode == "top200" else "false",
+        "CUSTOM_NMAP_SCAN":  "true" if mode == "custom" else "false",
+        "CUSTOM_NMAP_ARGS":  custom_args or "",
+    })
+    console.print(f"\n[bold green]Nmap mode saved:[/bold green] {_describe_nmap_mode(mode, custom_args)}")
+    _reload_env(env_file)
+    questionary.press_any_key_to_continue().ask()
+
+
+def handle_env_editor():
+    env_file = _ensure_env_file()
 
     console.print(f"\n[bold cyan]Editing:[/bold cyan] {env_file}")
     console.print("[dim]Save and close the editor to return to the menu.[/dim]\n")
@@ -247,14 +368,7 @@ def handle_config():
         questionary.press_any_key_to_continue().ask()
         return
 
-    # Reload .env into os.environ so the new config takes effect immediately
-    try:
-        from dotenv import load_dotenv
-        load_dotenv(env_file, override=True)
-        console.print("\n[bold green].env reloaded successfully.[/bold green]")
-    except ImportError:
-        console.print("\n[bold yellow].env saved but python-dotenv not installed — restart to apply changes.[/bold yellow]")
-
+    _reload_env(env_file)
     questionary.press_any_key_to_continue().ask()
 
 

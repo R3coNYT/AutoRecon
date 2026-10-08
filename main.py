@@ -2,6 +2,7 @@ import argparse
 import os
 from pathlib import Path
 from core.orchestrator import run_audit
+from core.nmap_scan import resolve_nmap_mode_from_env
 from core.logger import setup_logging
 
 # Load .env from the project root (if present) — populates os.environ
@@ -72,6 +73,11 @@ def main(cli_args=None):
     openai_model = os.environ.get("OPENAI_MODEL", "gpt-4o").strip()
     ai_report_language = os.environ.get("AI_REPORT_LANGUAGE", "english").strip() or "english"
 
+    # ── Nmap configuration (from .env, --full flag overrides) ─────────────
+    nmap_mode, nmap_custom_args = resolve_nmap_mode_from_env()
+    if args.full:
+        nmap_mode = "full"
+
     if enable_ai and not openai_api_key:
         log.warning(
             "ENABLE_AI=true but OPENAI_API_KEY is not set — AI mode disabled. "
@@ -107,7 +113,9 @@ def main(cli_args=None):
         nmap_timeout_full=args.nmap_timeout_full,
         generate_pdf=args.pdf,
         write_json=(args.json or True),
-        full_scan=args.full,
+        full_scan=(nmap_mode == "full"),
+        nmap_mode=nmap_mode,
+        nmap_custom_args=nmap_custom_args,
         output_dir=args.output_dir,
         enable_ai=enable_ai,
         openai_api_key=openai_api_key,
